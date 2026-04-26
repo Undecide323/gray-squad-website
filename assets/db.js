@@ -277,6 +277,26 @@ async function finishEvent(eventId, presentIds) {
     await b.commit();
   }
 
+  /** Отправить уведомление конкретному пользователю */
+  async function sendNotification(userId, { type, title, message, link }) {
+    await fs().collection('notifications').add({
+      userId, type: type || 'announcement', title, message,
+      link: link || null,
+      createdAt: FV().serverTimestamp(),
+      readAt: null,
+    });
+  }
+
+  /** Отправить анонс всем (userId = 'all') */
+  async function sendAnnouncement({ type, title, message, link }) {
+    await fs().collection('notifications').add({
+      userId: 'all', type: type || 'announcement', title, message,
+      link: link || null,
+      createdAt: FV().serverTimestamp(),
+      readAt: null,
+    });
+  }
+
   // ════════════════════════════════════════════
   //  CONFIG
   // ════════════════════════════════════════════
@@ -372,6 +392,7 @@ async function finishEvent(eventId, presentIds) {
     reactTopic, deleteTopic, reportContent,
     getShopItems, createPurchase, getPurchaseHistory,
     listenNotifications, markNotifRead, markAllNotifsRead,
+    sendNotification, sendAnnouncement,
     getConfig, setConfig,
     writeLog, listenLogs,
     addWarn, listenReports, closeReport,

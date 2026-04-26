@@ -24,10 +24,9 @@ const GS_AUTH = (() => {
     });
 
     const authUrl = `https://discord.com/oauth2/authorize?${params}`;
-
     const width = 500, height = 700;
     const left = (screen.width - width) / 2;
-    const top = (screen.height - height) / 2;
+    const top  = (screen.height - height) / 2;
     const features = `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`;
     window.open(authUrl, 'discordAuth', features);
   }
@@ -37,23 +36,14 @@ const GS_AUTH = (() => {
     const savedState = sessionStorage.getItem('gs_state');
     sessionStorage.removeItem('gs_state');
 
-    if (!code) {
-      console.error('No code received');
-      return { ok: false, error: 'Нет кода авторизации' };
-    }
-    if (state !== savedState) {
-      console.error('State mismatch', state, savedState);
-      return { ok: false, error: 'Ошибка безопасности' };
-    }
+    if (!code)          return { ok: false, error: 'Нет кода авторизации' };
+    if (state !== savedState) return { ok: false, error: 'Ошибка безопасности' };
 
     try {
       const response = await fetch(`${GS.botUrl}/auth/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code: code,
-          redirect_uri: GS.discord.redirectUri,
-        }),
+        body: JSON.stringify({ code, redirect_uri: GS.discord.redirectUri }),
       });
 
       if (!response.ok) {
@@ -64,8 +54,12 @@ const GS_AUTH = (() => {
       const data = await response.json();
       if (data.error) throw new Error(data.error);
 
-      setUser(data.user);
-      return { ok: true, user: data.user };
+      // ── FIX: бот может вернуть data.user ИЛИ data.gsUser ────
+      const user = data.user || data.gsUser;
+      if (!user) throw new Error('Данные пользователя не получены');
+
+      setUser(user);
+      return { ok: true, user };
     } catch (err) {
       console.error('Token exchange error:', err);
       return { ok: false, error: err.message };
@@ -81,14 +75,12 @@ const GS_AUTH = (() => {
       const result = await handleAuthCode(msg.code, msg.state);
 
       if (result.ok) {
-        // ✅ Автоматически обновить навигацию, если она существует
         if (typeof GS_NAV !== 'undefined' && GS_NAV.inject) {
           GS_NAV.inject();
         } else if (typeof updateUIAfterLogin === 'function') {
-          // старый запасной вариант (можно удалить, если не нужен)
           updateUIAfterLogin(result.user);
         }
-        console.log('Login success');
+        console.log('Login success, role:', result.user?.role);
       } else {
         alert('Ошибка авторизации: ' + result.error);
       }
@@ -103,9 +95,7 @@ const GS_AUTH = (() => {
 
   // ─── ИНИЦИАЛИЗАЦИЯ ───
   async function init() {
-    if (window.location.pathname.includes('callback.html')) {
-      return null;
-    }
+    if (window.location.pathname.includes('callback.html')) return null;
     return getUser();
   }
 
@@ -113,7 +103,6 @@ const GS_AUTH = (() => {
   function hasRole(role) {
     const user = getUser();
     if (!user) return false;
-    // creator считается выше admin
     if (role === 'admin') return user.role === 'admin' || user.role === 'creator';
     return user.role === role;
   }
@@ -128,7 +117,6 @@ const GS_AUTH = (() => {
   return { getUser, setUser, clearUser, isLoggedIn, login, logout, init, avatarEl, hasRole };
 })();
 
-// Инициализация на обычных страницах
 if (!window.location.pathname.includes('callback.html')) {
   document.addEventListener('DOMContentLoaded', () => GS_AUTH.init());
 }
