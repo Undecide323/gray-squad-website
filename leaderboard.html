@@ -132,7 +132,7 @@ let sortField = 'elo';
 const myUser = GS_AUTH.getUser();
 
 DB.listenUsers('elo', 200, users => {
-  const activeUsers = users.filter(u => (u.totalVoiceMinutes || 0) > 0);
+  const activeUsers = users.filter(u => (u.totalVoiceMinutes || 0) >= 0);
   allUsers = activeUsers;
   renderRankTable(); // Отрисовываем таблицу рангов ПЕРЕД подсветкой
   renderPodium();
