@@ -74,6 +74,12 @@
 .rank-row:last-child{border-bottom:none;}.rank-row.cur{background:rgba(255,193,7,.05);}
 .rank-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .rank-name-c{flex:1;font-size:.82rem;font-weight:600;}.rank-range{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);}
+/* Pagination */
+.pager { display: flex; align-items: center; justify-content: center; gap: .4rem; padding: .75rem; }
+.pg-btn { padding: .3rem .65rem; font-family: var(--font-mono); font-size: .72rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-dim); cursor: pointer; transition: all .15s; }
+.pg-btn:hover { border-color: rgba(255,255,255,.15); color: var(--text); }
+.pg-btn.active { background: rgba(220,53,69,.1); border-color: rgba(220,53,69,.3); color: var(--text); }
+.pg-btn:disabled { opacity: 0.4; cursor: default; }
 @media(max-width:1100px){.lb-col-head,.lb-row{grid-template-columns:44px 1fr 80px 80px 90px;}.lb-col-head span:nth-child(6),.lb-row>*:nth-child(6){display:none;}}
 @media(max-width:900px){.lb-layout{grid-template-columns:1fr;}.lb-right{order:-1;}}
 @media(max-width:600px){.lb-col-head,.lb-row{grid-template-columns:36px 1fr 75px 75px;}.lb-col-head span:nth-child(n+4):not(:nth-child(4)):not(:nth-child(5)),.lb-row>*:nth-child(n+4):not(:nth-child(4)):not(:nth-child(5)){display:none;}.podium{grid-template-columns:1fr 1.1fr 1fr;}}
@@ -105,6 +111,7 @@
           <span id="head-rank">Ранг</span>
         </div>
         <div id="lbBody"><div class="spinner"></div></div>
+        <div class="pager" id="pagination"></div>
       </div>
     </div>
     <div class="lb-right">
@@ -112,7 +119,8 @@
       <div class="card">
         <div class="card-head"><div class="card-title">Таблица рангов</div></div>
         <div id="ranks-list">
-           </div>
+           <!-- ранги будут выведены после инициализации -->
+        </div>
       </div>
     </div>
   </div>
@@ -130,13 +138,18 @@
 let allUsers = [];
 let sortField = 'elo';
 const myUser = GS_AUTH.getUser();
+const PAGE_SIZE = 10;
+let currentPage = 0;
 
 DB.listenUsers('elo', 200, users => {
-  allUsers = users; 
+  allUsers = users;
   renderPodium();
+  // сбросить страницу на первую при изменении данных
+  currentPage = 0;
   renderTable();
   renderMyCard();
   highlightMyRank();
+  renderRankTable();
 });
 
 function renderRankTable() {
@@ -152,11 +165,10 @@ function renderRankTable() {
 }
 
 function renderPodium() {
-  const activeUsers = allUsers.filter(u => (u.gamesPlayed || 0) > -1);
-  const top3 = activeUsers.slice(0, 3);
+  const top3 = allUsers.slice(0, 3);
   
   if (top3.length < 1) {
-    document.getElementById('podium').innerHTML = '<div class="empty-state" style="grid-column:1/-1">Нет активных игроков</div>';
+    document.getElementById('podium').innerHTML = '<div class="empty-state" style="grid-column:1/-1">Нет игроков</div>';
     return;
   }
   
@@ -185,35 +197,41 @@ function renderTable() {
   const q = document.getElementById('searchInp').value.toLowerCase().trim();
   let users = [...allUsers];
 
-  // Убрали требование "только с играми", теперь показываем всех
-  // Фильтрация по поисковой строке (если введена)
   if (q) users = users.filter(u => (u.displayName || u.username || '').toLowerCase().includes(q));
 
-  // Сортировка по выбранному полю
   users.sort((a, b) => (b[sortField] || 0) - (a[sortField] || 0));
 
+  const totalPages = Math.ceil(users.length / PAGE_SIZE);
+  if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
+
+  const start = currentPage * PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  const pageUsers = users.slice(start, end);
+
   const el = document.getElementById('lbBody');
-  if (!users.length) {
+  if (!pageUsers.length) {
     el.innerHTML = '<div class="empty-state">Нет игроков</div>';
+    document.getElementById('pagination').innerHTML = '';
     return;
   }
 
   const medals = ['🥇', '🥈', '🥉'];
   const myId = myUser?.discordId || myUser?.id;
 
-  el.innerHTML = users.map((u, i) => {
+  el.innerHTML = pageUsers.map((u, i) => {
+    const globalIndex = start + i; // позиция в общем массиве
     const rank = gsRank(u.elo || 500);
     const isMe = u.discordId === myId || u.id === myId;
-    const posLabel = i < 3 ? medals[i] : i + 1;
+    const posLabel = globalIndex < 3 ? medals[globalIndex] : globalIndex + 1;
     const av = u.avatarUrl
       ? `<div class="lb-av"><img src="${u.avatarUrl}" alt="${u.displayName || u.username}"></div>`
       : `<div class="lb-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0]}</div>`;
-    return `<a href="profile.html?id=${u.discordId || u.id}" class="lb-row${isMe ? ' me' : ''}${i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : ''}">
-      <div class="lb-pos" style="${i < 3 ? 'color:var(--gold)' : ''}">${posLabel}</div>
+    return `<a href="profile.html?id=${u.discordId || u.id}" class="lb-row${isMe ? ' me' : ''}${globalIndex === 0 ? ' top1' : globalIndex === 1 ? ' top2' : globalIndex === 2 ? ' top3' : ''}">
+      <div class="lb-pos" style="${globalIndex < 3 ? 'color:var(--gold)' : ''}">${posLabel}</div>
       <div class="lb-player">
         ${av}
         <div>
-          <div class="lb-name${isMe ? ' me' : ''}">${u.displayName || u.username}${isMe ? ' <span style="font-size:.65rem;color:var(--text-dim)">(вы)</span>' : ''}</div>
+          <div class="lb-name${isMe ? ' me' : ''}">${u.displayName || u.username}${isMe ? ' <span style="font-size:.65rem;color:var(--text-dim)">✨</span>' : ''}</div>
           ${u.title ? `<div class="lb-title-tag">${u.title}</div>` : ''}
         </div>
       </div>
@@ -223,6 +241,42 @@ function renderTable() {
       <div><div class="lb-rank" style="background:${rank.color}15;color:${rank.color};border:1px solid ${rank.color}40">${rank.name}</div></div>
     </a>`;
   }).join('');
+
+  renderPagination(users.length);
+}
+
+function renderPagination(totalItems) {
+  const paginationDiv = document.getElementById('pagination');
+  if (!paginationDiv) return;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+  if (totalPages <= 1) {
+    paginationDiv.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+  html += `<button class="pg-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>‹</button>`;
+
+  let startPage = Math.max(0, currentPage - 2);
+  let endPage = Math.min(totalPages - 1, currentPage + 2);
+  if (endPage - startPage < 4) {
+    if (startPage === 0) endPage = Math.min(totalPages - 1, startPage + 4);
+    else if (endPage === totalPages - 1) startPage = Math.max(0, endPage - 4);
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    html += `<button class="pg-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i + 1}</button>`;
+  }
+
+  html += `<button class="pg-btn" onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>›</button>`;
+  paginationDiv.innerHTML = html;
+}
+
+function changePage(page) {
+  const totalPages = Math.ceil(allUsers.length / PAGE_SIZE);
+  if (page < 0 || page >= totalPages) return;
+  currentPage = page;
+  renderTable();
 }
 
 function setSort(field, btn) {
@@ -231,6 +285,7 @@ function setSort(field, btn) {
   document.querySelectorAll('.lb-col-head span').forEach(s=>s.classList.remove('sa'));
   if (btn) btn.classList.add('active');
   document.getElementById('head-'+field)?.classList.add('sa');
+  currentPage = 0;
   renderTable();
 }
 
@@ -274,10 +329,10 @@ function highlightMyRank() {
   if (!me) return;
   const rank = gsRank(me.elo||1000);
   const row = document.getElementById('rr-'+rank.id);
-  if (row) { 
-    row.classList.add('cur'); 
+  if (row) {
+    row.classList.add('cur');
     if (!row.innerHTML.includes('← вы')) {
-      row.innerHTML += ' <span style="font-family:var(--font-mono);font-size:.6rem;color:var(--gold)">← вы</span>'; 
+      row.innerHTML += ' <span style="font-family:var(--font-mono);font-size:.6rem;color:var(--gold)">← вы</span>';
     }
   }
 }
