@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gray Squad — 404 Страница не найдена</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.err-wrap{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;text-align:center;padding:2rem;}
+
+.err-code{font-family:var(--font-title);font-size:clamp(8rem,20vw,18rem);font-weight:700;line-height:1;letter-spacing:-.02em;background:linear-gradient(135deg,var(--red-dim),var(--red),var(--red-dim));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:0 0 60px var(--red-glow);animation:fadeUp .6s .1s ease both;}
+
+.err-title{font-family:var(--font-title);font-size:clamp(1.5rem,5vw,2.8rem);font-weight:700;letter-spacing:.02em;animation:fadeUp .6s .2s ease both;}
+
+.err-subtitle{font-family:var(--font-body);font-size:clamp(1rem,3vw,1.3rem);color:var(--text-dim);max-width:500px;line-height:1.6;animation:fadeUp .6s .3s ease both;}
+
+.err-bottom{display:flex;flex-direction:column;align-items:center;gap:1.5rem;animation:fadeUp .6s .4s ease both;}
+
+.err-icon{font-size:4rem;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+
+.err-nav{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;justify-content:center;}
+
+.err-btn{display:inline-flex;align-items:center;gap:6px;padding:.52rem 1.35rem;font-family:var(--font-title);font-size:.95rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:8px;text-decoration:none;cursor:pointer;transition:all .25s;border:none;}
+
+.err-btn-primary{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(220,53,69,.35);}
+.err-btn-primary:hover{background:#e8404f;box-shadow:0 6px 24px rgba(220,53,69,.45);transform:translateY(-2px);}
+
+.err-btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.err-btn-secondary:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+
+.err-code-small{font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.15em;margin-top:1rem;}
+
+/* Animated grid background */
+.err-wrap::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(220,53,69,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(220,53,69,.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:-1;animation:gridShift 8s linear infinite;}
+@keyframes gridShift{0%{background-position:0 0}100%{background-position:60px 60px}}
+
+/* Floating hexagons */
+.hex{position:fixed;pointer-events:none;opacity:.05;z-index:-1;}
+.hex-1{top:10%;left:5%;width:200px;height:200px;animation:hexFloat1 8s ease-in-out infinite;}
+.hex-2{top:60%;right:8%;width:300px;height:300px;animation:hexFloat2 10s ease-in-out infinite;}
+.hex-3{top:30%;left:50%;width:150px;height:150px;animation:hexFloat3 12s ease-in-out infinite;}
+@keyframes hexFloat1{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-40px) rotate(10deg)}}
+@keyframes hexFloat2{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(40px) rotate(-8deg)}}
+@keyframes hexFloat3{0%,100%{transform:translateX(0)}50%{transform:translateX(30px)}}
+
+/* Easter egg */
+.err-easter{font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);margin-top:2rem;letter-spacing:.12em;text-transform:uppercase;opacity:.4;cursor:pointer;transition:opacity .3s;}
+.err-easter:hover{opacity:.8;}
+
+@media(max-width:600px){
+  .err-wrap{gap:1.25rem;}
+  .err-code{font-size:clamp(6rem,18vw,14rem);}
+  .err-nav{gap:.75rem;}
+  .err-btn{padding:.42rem 1rem;font-size:.85rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="err-wrap">
+  <!-- Floating hexagons -->
+  <svg class="hex hex-1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="100,10 190,50 190,150 100,190 10,150 10,50" fill="none" stroke="currentColor" stroke-width="2" color="var(--red)"/>
+  </svg>
+  <svg class="hex hex-2" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="150,20 270,80 270,200 150,260 30,200 30,80" fill="none" stroke="currentColor" stroke-width="2" color="var(--red)"/>
+  </svg>
+  <svg class="hex hex-3" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="75,10 135,40 135,110 75,140 15,110 15,40" fill="none" stroke="currentColor" stroke-width="1.5" color="var(--red)"/>
+  </svg>
+
+  <!-- Content -->
+  <div class="err-code">404</div>
+  
+  <div style="max-width:600px">
+    <h1 class="err-title">Миссия не выполнена</h1>
+    <p class="err-subtitle">
+      Эта страница потеряна где-то на карте Gray Squad. Может быть, она была удалена, 
+      переименована или никогда не существовала.
+    </p>
+  </div>
+
+  <div class="err-bottom">
+    <div class="err-icon">🗺️</div>
+    
+    <div class="err-nav">
+      <a href="index.html" class="err-btn err-btn-primary">🏠 На главную</a>
+    </div>
+
+    <div class="err-code-small">// error 404 · page not found</div>
+  </div>
+
+
+  <!-- Easter egg -->
+<footer style="margin-top:3rem;font-size:.75rem;color:var(--text-dim);">
+    <div class="err-easter" onclick="easterEgg()" title="Кликни сюда">
+    ┌─────────────────┐<br>
+    │ чит-код активирован │<br>
+    └─────────────────┘
+</footer>
+
+<script>
+function easterEgg() {
+  const style = document.createElement('style');
+  style.textContent = `
+    html { filter: invert(1) hue-rotate(180deg); }
+    .err-wrap { filter: invert(1) hue-rotate(180deg); }
+  `;
+  document.head.appendChild(style);
+  document.querySelector('.err-easter').textContent = '✨ Баг найден! ✨';
+  setTimeout(() => { 
+    document.head.removeChild(style);
+document.querySelector('.err-easter').innerHTML =
+  '┌─────────────────┐<br>│ чит-код активирован │<br>└─────────────────┘';  }, 2000);
+}
+</script>
+
+</body>
+</html>

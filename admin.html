@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gray Squad — Админ-панель</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ── ADMIN LAYOUT ── */
+.admin-wrap{display:grid;grid-template-columns:220px 1fr;gap:1.5rem;align-items:start;}
+.admin-sidebar{display:flex;flex-direction:column;gap:.35rem;position:sticky;top:80px;}
+.adm-nav-section{font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.15em;padding:.6rem .75rem .25rem;margin-top:.5rem;}
+.adm-nav-section:first-child{margin-top:0;}
+.adm-btn{display:flex;align-items:center;gap:.6rem;padding:.52rem .75rem;border-radius:8px;border:none;background:transparent;color:var(--text-dim);font-family:var(--font-body);font-size:.88rem;cursor:pointer;transition:all .18s;text-align:left;width:100%;}
+.adm-btn:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.adm-btn.active{background:rgba(220,53,69,.1);color:var(--text);border:1px solid rgba(220,53,69,.2);}
+.adm-btn .adm-ico{font-size:1rem;flex-shrink:0;width:20px;text-align:center;}
+.adm-btn .adm-badge{margin-left:auto;font-family:var(--font-mono);font-size:.58rem;background:var(--red);color:#fff;padding:1px 6px;border-radius:10px;}
+
+.admin-content{display:flex;flex-direction:column;gap:1.5rem;min-height:60vh;}
+.adm-section{display:none;flex-direction:column;gap:1.25rem;}
+.adm-section.active{display:flex;}
+
+/* ── SHARED ADMIN CARDS ── */
+.adm-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.adm-card-head{padding:.8rem 1.1rem;border-bottom:1px solid var(--border);font-family:var(--font-title);font-size:.92rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;gap:.75rem;}
+.adm-card-head-left{display:flex;align-items:center;gap:8px;}
+.adm-card-head-left::before{content:'';display:block;width:3px;height:1em;background:var(--red);border-radius:2px;}
+.adm-card-body{padding:1.1rem;}
+
+/* ── STAT ROW ── */
+.adm-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);}
+.adm-stat{padding:.9rem 1.1rem;border-right:1px solid var(--border);}
+.adm-stat:last-child{border-right:none;}
+.adm-stat-lbl{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.adm-stat-val{font-family:var(--font-title);font-size:1.6rem;font-weight:700;margin-top:2px;line-height:1;}
+.adm-stat-sub{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);margin-top:2px;}
+
+/* ── SEARCH BAR ── */
+.adm-search-row{display:flex;gap:.6rem;align-items:center;}
+.adm-s-wrap{flex:1;position:relative;}
+.adm-s-ico{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--text-dim);pointer-events:none;}
+.adm-s-inp{width:100%;padding:.52rem .8rem .52rem 2.3rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body);font-size:.87rem;outline:none;transition:border-color .2s;box-sizing:border-box;}
+.adm-s-inp:focus{border-color:rgba(220,53,69,.4);}
+.adm-s-inp::placeholder{color:var(--text-dim);}
+
+/* ── TABLE ── */
+.adm-table{width:100%;border-collapse:collapse;}
+.adm-table th{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;padding:.6rem 1rem;border-bottom:1px solid var(--border);text-align:left;font-weight:400;}
+.adm-table td{padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.86rem;vertical-align:middle;}
+.adm-table tr:last-child td{border-bottom:none;}
+.adm-table tr:hover td{background:rgba(255,255,255,.02);}
+.adm-table .av-cell{display:flex;align-items:center;gap:.6rem;}
+.adm-table .av-mini{width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+.adm-table .av-mini-div{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0;background:linear-gradient(135deg,var(--red-dim),var(--red));}
+.adm-table .name-stack{display:flex;flex-direction:column;}
+.adm-table .name-main{font-weight:600;font-size:.87rem;}
+.adm-table .name-sub{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);}
+
+/* Role badges */
+.rb{font-family:var(--font-mono);font-size:.6rem;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.06em;border:1px solid;}
+.rb-creator{background:rgba(220,53,69,.15);color:var(--red);border-color:rgba(220,53,69,.3);}
+.rb-admin{background:rgba(255,193,7,.1);color:var(--gold);border-color:rgba(255,193,7,.25);}
+.rb-member{background:rgba(40,167,69,.1);color:var(--green);border-color:rgba(40,167,69,.25);}
+.rb-user{background:rgba(255,255,255,.07);color:var(--text-dim);border-color:var(--border);}
+
+/* ── INLINE ACTION BUTTONS ── */
+.ia-row{display:flex;gap:.4rem;flex-wrap:wrap;}
+.ia-btn{padding:.28rem .6rem;font-family:var(--font-mono);font-size:.65rem;border-radius:5px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text-dim);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ia-btn:hover{background:rgba(255,255,255,.08);color:var(--text);}
+.ia-btn.red:hover{background:rgba(220,53,69,.12);color:var(--red);border-color:rgba(220,53,69,.3);}
+.ia-btn.gold:hover{background:rgba(255,193,7,.1);color:var(--gold);border-color:rgba(255,193,7,.3);}
+.ia-btn.green:hover{background:rgba(40,167,69,.1);color:var(--green);border-color:rgba(40,167,69,.3);}
+
+/* ── FORM ELEMENTS ── */
+.f-group{display:flex;flex-direction:column;gap:.35rem;flex:1;}
+.f-label{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.f-input,.inp{padding:.52rem .85rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body);font-size:.88rem;outline:none;transition:border-color .2s;width:100%;box-sizing:border-box;}
+.f-input:focus,.inp:focus{border-color:rgba(220,53,69,.4);}
+.f-input::placeholder,.inp::placeholder{color:var(--text-dim);}
+.sel{padding:.5rem .75rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body);font-size:.87rem;outline:none;cursor:pointer;}
+.f-row{display:flex;gap:.85rem;}
+.f-row .f-group{min-width:0;}
+
+/* ── TOGGLE ── */
+.toggle{width:38px;height:20px;border-radius:99px;background:rgba(255,255,255,.1);border:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--red);border-color:var(--red);}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle.on::after{transform:translateX(18px);}
+
+/* ── LOG ITEM ── */
+.log-item{display:flex;align-items:flex-start;gap:.8rem;padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;}
+.log-item:last-child{border-bottom:none;}
+.log-item:hover{background:rgba(255,255,255,.02);}
+.log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.log-dot.xp{background:var(--green);}
+.log-dot.currency{background:var(--gold);}
+.log-dot.elo{background:#B9F2FF;}
+.log-dot.role{background:#A335EE;}
+.log-dot.warn{background:var(--red);}
+.log-dot.achievement{background:var(--gold);}
+.log-dot.purchase{background:var(--green);}
+.log-dot.event_finish,.log-dot.daily_bonus{background:var(--text-dim);}
+.log-body{flex:1;min-width:0;}
+.log-main{font-size:.84rem;font-weight:500;}
+.log-meta{font-family:var(--font-mono);font-size:.61rem;color:var(--text-dim);margin-top:2px;}
+.log-change{font-family:var(--font-mono);font-size:.78rem;margin-left:auto;flex-shrink:0;font-weight:600;}
+
+/* ── REPORT CARD ── */
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;position:relative;overflow:hidden;transition:border-color .2s;}
+.report-card:hover{border-color:rgba(255,255,255,.1);}
+.report-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.report-card.new::before{background:var(--red);}
+.report-card.closed::before{background:var(--text-dim);}
+.report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.5rem;}
+.report-tag{font-family:var(--font-mono);font-size:.6rem;padding:2px 7px;border-radius:4px;text-transform:uppercase;background:rgba(220,53,69,.1);color:var(--red);border:1px solid rgba(220,53,69,.25);}
+.report-tag.closed{background:rgba(255,255,255,.05);color:var(--text-dim);border-color:var(--border);}
+.report-text{font-size:.84rem;color:var(--text-dim);line-height:1.5;margin-bottom:.6rem;}
+.report-meta{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);}
+
+/* ── SHOP ITEM ROW ── */
+.shop-row{display:flex;align-items:center;gap:.85rem;padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);}
+.shop-row:last-child{border-bottom:none;}
+.shop-row:hover{background:rgba(255,255,255,.02);}
+.shop-ico{font-size:1.5rem;width:36px;text-align:center;flex-shrink:0;}
+.shop-info{flex:1;min-width:0;}
+.shop-name{font-weight:600;font-size:.87rem;}
+.shop-meta{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);}
+.shop-price{font-family:var(--font-title);font-size:1rem;font-weight:700;color:var(--gold);flex-shrink:0;}
+
+/* ── GLOBAL XP BOOST ── */
+.boost-global-card{background:rgba(40,167,69,.06);border:1px solid rgba(40,167,69,.2);border-radius:12px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:1rem;}
+.boost-global-mult{font-family:var(--font-title);font-size:2.5rem;font-weight:700;color:var(--green);text-shadow:0 0 20px rgba(40,167,69,.4);flex-shrink:0;}
+.boost-global-info{flex:1;}
+.boost-global-label{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px;}
+.boost-global-val{font-size:.88rem;font-weight:600;}
+.boost-global-inactive{background:rgba(255,255,255,.03);border:1px dashed var(--border);border-radius:12px;padding:1.1rem;text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);}
+
+/* ── WARN CARD ── */
+.warn-row{display:flex;align-items:center;gap:.85rem;padding:.65rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.04);}
+.warn-row:last-child{border-bottom:none;}
+.warn-num{font-family:var(--font-mono);font-size:.65rem;background:rgba(220,53,69,.1);color:var(--red);border:1px solid rgba(220,53,69,.25);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.warn-info{flex:1;min-width:0;}
+.warn-user{font-weight:600;font-size:.87rem;}
+.warn-reason{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.warn-by{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);}
+
+/* ── NOTIF COMPOSE ── */
+.notif-compose{display:flex;flex-direction:column;gap:.85rem;}
+
+/* ── VOICE LEADERBOARD ── */
+.voice-row{display:flex;align-items:center;gap:.85rem;padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);}
+.voice-row:last-child{border-bottom:none;}
+.voice-pos{font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);width:22px;text-align:center;flex-shrink:0;}
+.voice-mins{font-family:var(--font-title);font-size:.95rem;font-weight:700;color:var(--green);flex-shrink:0;}
+
+/* ── TABS IN SECTION ── */
+.adm-tabs{display:flex;gap:.35rem;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:-.5rem;margin-bottom:-.5rem;}
+.adm-tab{padding:.42rem .9rem;font-family:var(--font-title);font-size:.82rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:transparent;border:1px solid transparent;border-bottom:none;border-radius:7px 7px 0 0;cursor:pointer;color:var(--text-dim);transition:all .2s;position:relative;bottom:-1px;}
+.adm-tab:hover{color:var(--text);}
+.adm-tab.active{background:var(--surface);border-color:var(--border);border-bottom-color:var(--surface);color:var(--text);}
+
+/* ── EMPTY STATE ── */
+.adm-empty{padding:2.5rem;text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);}
+
+/* ── MODAL SHARED ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;animation:fadeIn .15s ease;}
+.modal-overlay.open{display:flex;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg);border:1px solid var(--border);border-radius:14px;width:480px;max-width:94vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.modal-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-family:var(--font-title);font-size:1.05rem;font-weight:700;letter-spacing:.04em;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:2px;transition:color .15s;}.modal-close:hover{color:var(--text);}
+.modal-body{padding:1.25rem;display:flex;flex-direction:column;gap:.9rem;}
+.modal-foot{padding:.9rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.6rem;}
+.btn-cancel{padding:.45rem 1.1rem;background:transparent;border:1px solid var(--border);border-radius:7px;color:var(--text-dim);font-family:var(--font-body);font-size:.87rem;cursor:pointer;transition:all .18s;}.btn-cancel:hover{border-color:rgba(255,255,255,.2);color:var(--text);}
+.btn-confirm{padding:.45rem 1.3rem;background:var(--red);border:none;border-radius:7px;color:#fff;font-family:var(--font-title);font-size:.9rem;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .18s;}.btn-confirm:hover{background:#e8404f;}
+.btn-confirm.green{background:rgba(40,167,69,.15);color:var(--green);border:1px solid rgba(40,167,69,.3);}.btn-confirm.green:hover{background:rgba(40,167,69,.25);}
+.btn-confirm.gold{background:rgba(255,193,7,.12);color:var(--gold);border:1px solid rgba(255,193,7,.3);}.btn-confirm.gold:hover{background:rgba(255,193,7,.22);}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1.1rem;display:flex;align-items:center;gap:.75rem;min-width:260px;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:slideUp .25s ease;transition:opacity .3s;}
+.toast.hidden{opacity:0;pointer-events:none;}
+.toast.err{border-color:rgba(220,53,69,.3);}
+@keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast-icon{font-size:1.3rem;flex-shrink:0;}
+.toast-title{font-weight:600;font-size:.88rem;}
+.toast-sub{font-size:.75rem;color:var(--text-dim);}
+
+/* ── ACTIVE ROW HIGHLIGHT ── */
+.active-row td{background:rgba(220,53,69,.04);}
+
+/* ── PAGINATION ── */
+.pager{display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem;}
+.pg-btn{padding:.3rem .65rem;font-family:var(--font-mono);font-size:.72rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);cursor:pointer;transition:all .15s;}
+.pg-btn:hover{border-color:rgba(255,255,255,.15);color:var(--text);}
+.pg-btn.active{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.3);color:var(--text);}
+
+/* ── ECONOMY GRID ── */
+.eco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;}
+.eco-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.85rem;}
+.eco-lbl{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.45rem;}
+.eco-inp{width:100%;padding:.42rem .7rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-mono);font-size:.9rem;outline:none;transition:border-color .2s;box-sizing:border-box;}
+.eco-inp:focus{border-color:rgba(220,53,69,.4);}
+
+@media(max-width:960px){.admin-wrap{grid-template-columns:1fr;}.admin-sidebar{position:static;flex-direction:row;flex-wrap:wrap;gap:.25rem;}.adm-nav-section{display:none;}.eco-grid{grid-template-columns:repeat(2,1fr);}.adm-stat-grid{grid-template-columns:repeat(2,1fr);}.adm-stat:nth-child(2){border-right:none;}.adm-stat:nth-child(1),.adm-stat:nth-child(2){border-bottom:1px solid var(--border);}}
+@media(max-width:600px){.eco-grid{grid-template-columns:1fr;}.adm-stat-grid{grid-template-columns:1fr;}.adm-stat{border-right:none!important;border-bottom:1px solid var(--border)!important;}.adm-stat:last-child{border-bottom:none!important;}.f-row{flex-direction:column;gap:.6rem;}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+
+<div class="page" data-role="creator">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">// restricted access</div>
+      <div class="page-title">Админ-панель</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)">Последнее обновление: <span id="lastUpdated">—</span></div>
+      <button class="btn btn-red btn-sm" onclick="ADM.refreshAll()">↺ Обновить</button>
+    </div>
+  </div>
+
+  <!-- OVERALL STATS BAR -->
+  <div class="adm-card" style="margin-bottom:.25rem">
+    <div class="adm-stat-grid">
+      <div class="adm-stat">
+        <div class="adm-stat-lbl">Пользователей</div>
+        <div class="adm-stat-val" id="statsUsers" style="color:var(--text)">—</div>
+        <div class="adm-stat-sub" id="statsNewToday">—</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-lbl">Активных жалоб</div>
+        <div class="adm-stat-val" id="statsReports" style="color:var(--red)">—</div>
+        <div class="adm-stat-sub">ждут ответа</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-lbl">Покупок сегодня</div>
+        <div class="adm-stat-val" id="statsPurchases" style="color:var(--gold)">—</div>
+        <div class="adm-stat-sub">всего транзакций</div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-lbl">Глобальный XP</div>
+        <div class="adm-stat-val" id="statsXpMult" style="color:var(--green)">×1</div>
+        <div class="adm-stat-sub" id="statsXpUntil">неактивен</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+
+    <!-- SIDEBAR -->
+    <div class="admin-sidebar" id="adminSidebar">
+      <div class="adm-nav-section">Управление</div>
+      <button class="adm-btn active" onclick="ADM.setSection('users',this)"><span class="adm-ico">👥</span>Пользователи</button>
+      <button class="adm-btn" onclick="ADM.setSection('events',this)"><span class="adm-ico">📅</span>Ивенты</button>
+      <button class="adm-btn" onclick="ADM.setSection('forum',this)"><span class="adm-ico">💬</span>Форум</button>
+      <button class="adm-btn" onclick="ADM.setSection('shop',this)"><span class="adm-ico">🛒</span>Магазин</button>
+
+      <div class="adm-nav-section">Модерация</div>
+      <button class="adm-btn" onclick="ADM.setSection('reports',this)"><span class="adm-ico">🚨</span>Жалобы <span class="adm-badge" id="navReportsBadge" style="display:none">0</span></button>
+      <button class="adm-btn" onclick="ADM.setSection('warns',this)"><span class="adm-ico">⚠️</span>Варны</button>
+      <button class="adm-btn" onclick="ADM.setSection('notifications',this)"><span class="adm-ico">📢</span>Уведомления</button>
+
+      <div class="adm-nav-section">Аналитика</div>
+      <button class="adm-btn" onclick="ADM.setSection('statistics',this)"><span class="adm-ico">📊</span>Статистика</button>
+      <button class="adm-btn" onclick="ADM.setSection('logs',this)"><span class="adm-ico">📋</span>Логи</button>
+
+      <div class="adm-nav-section">Настройки</div>
+      <button class="adm-btn" onclick="ADM.setSection('settings',this)"><span class="adm-ico">⚙️</span>Бот и XP</button>
+      <button class="adm-btn" onclick="ADM.setSection('economy',this)"><span class="adm-ico">💰</span>Экономика</button>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="admin-content">
+
+      <!-- ══════ USERS ══════ -->
+      <div class="adm-section active" id="sec-users">
+        <div class="adm-search-row">
+          <div class="adm-s-wrap">
+            <span class="adm-s-ico">🔍</span>
+            <input class="adm-s-inp" id="userSearch" type="text" placeholder="Поиск по имени или Discord ID..." oninput="ADM.searchUsers(this.value)">
+          </div>
+          <select class="sel" id="userRoleFilter" onchange="ADM.searchUsers(document.getElementById('userSearch').value)">
+            <option value="">Все роли</option>
+            <option value="creator">Creator</option>
+            <option value="admin">Admin</option>
+            <option value="member">Member</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">Список пользователей</div>
+            <span id="userCountLabel" style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)">Загрузка...</span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="adm-table" id="usersTable">
+              <thead><tr>
+                <th>Пользователь</th>
+                <th>Роль</th>
+                <th>ELO</th>
+                <th>Уровень</th>
+                <th>Монеты</th>
+                <th>Варны</th>
+                <th>Действия</th>
+              </tr></thead>
+              <tbody id="usersTbody"><tr><td colspan="7" class="adm-empty">Загрузка...</td></tr></tbody>
+            </table>
+          </div>
+          <div class="pager" id="userPager"></div>
+        </div>
+      </div>
+
+      <!-- ══════ EVENTS ══════ -->
+      <div class="adm-section" id="sec-events">
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">Управление ивентами</div>
+            <button class="btn btn-red btn-sm" onclick="ADM.openCreateEvent()">+ Создать</button>
+          </div>
+          <div id="adminEventsLoading" class="adm-empty">Загрузка...</div>
+          <table class="adm-table" id="adminEventsTable" style="display:none">
+            <thead><tr>
+              <th>Ивент</th>
+              <th>Игра</th>
+              <th>Дата</th>
+              <th>Участники</th>
+              <th>Статус</th>
+              <th>Действия</th>
+            </tr></thead>
+            <tbody id="eventsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════ FORUM ══════ -->
+      <div class="adm-section" id="sec-forum">
+        <div class="adm-search-row">
+          <div class="adm-s-wrap">
+            <span class="adm-s-ico">🔍</span>
+            <input class="adm-s-inp" id="forumSearch" type="text" placeholder="Поиск тем..." oninput="ADM.searchForum(this.value)">
+          </div>
+          <select class="sel" id="forumFilter" onchange="ADM.searchForum(document.getElementById('forumSearch').value)">
+            <option value="">Все категории</option>
+            <option value="guide">Гайды</option>
+            <option value="discuss">Обсуждения</option>
+            <option value="suggest">Предложения</option>
+            <option value="news">Новости</option>
+          </select>
+        </div>
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">Темы форума</div>
+            <button class="btn btn-red btn-sm" onclick="ADM.openCreateForumTopic()">+ Создать от имени GS</button>
+          </div>
+          <table class="adm-table" id="forumTable">
+            <thead><tr>
+              <th>Тема</th>
+              <th>Автор</th>
+              <th>Категория</th>
+              <th>Комм.</th>
+              <th>Создана</th>
+              <th>Действия</th>
+            </tr></thead>
+            <tbody id="forumTbody"><tr><td colspan="6" class="adm-empty">Загрузка...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════ SHOP ══════ -->
+      <div class="adm-section" id="sec-shop">
+        <div style="display:flex;gap:1.25rem;flex-wrap:wrap">
+          <!-- Items management -->
+          <div class="adm-card" style="flex:1;min-width:300px">
+            <div class="adm-card-head">
+              <div class="adm-card-head-left">Товары</div>
+              <button class="btn btn-red btn-sm" onclick="ADM.openCreateShopItem()">+ Добавить</button>
+            </div>
+            <div id="shopItemsList"><div class="adm-empty">Загрузка...</div></div>
+          </div>
+
+          <!-- Purchase history -->
+          <div class="adm-card" style="flex:1;min-width:280px">
+            <div class="adm-card-head">
+              <div class="adm-card-head-left">История покупок</div>
+              <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim)" id="purchasesCount">—</div>
+            </div>
+            <div id="purchaseHistoryList"><div class="adm-empty">Загрузка...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ REPORTS ══════ -->
+      <div class="adm-section" id="sec-reports">
+        <div style="display:flex;gap:.5rem;margin-bottom:.5rem">
+          <button class="adm-tab active" onclick="ADM.setReportFilter('new',this)" id="rTab-new">🔴 Новые</button>
+          <button class="adm-tab" onclick="ADM.setReportFilter('closed',this)" id="rTab-closed">✅ Закрытые</button>
+          <button class="adm-tab" onclick="ADM.setReportFilter('all',this)" id="rTab-all">Все</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem" id="reportsList">
+          <div class="adm-empty">Загрузка...</div>
+        </div>
+      </div>
+
+      <!-- ══════ WARNS ══════ -->
+      <div class="adm-section" id="sec-warns">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start">
+          <!-- Issue warn -->
+          <div class="adm-card">
+            <div class="adm-card-head"><div class="adm-card-head-left">Выдать варн</div></div>
+            <div class="adm-card-body" style="display:flex;flex-direction:column;gap:.75rem">
+              <div class="f-group">
+                <div class="f-label">Discord ID пользователя</div>
+                <input class="f-input" id="warnUserId" type="text" placeholder="123456789...">
+              </div>
+              <div class="f-group">
+                <div class="f-label">Причина</div>
+                <input class="f-input" id="warnReason" type="text" placeholder="Нарушение правил...">
+              </div>
+              <div class="f-group">
+                <div class="f-label">Истекает (опционально)</div>
+                <input class="f-input" id="warnExpires" type="datetime-local">
+              </div>
+              <button class="btn btn-red" onclick="ADM.issueWarn()">⚠️ Выдать варн</button>
+            </div>
+          </div>
+
+          <!-- Warn log -->
+          <div class="adm-card">
+            <div class="adm-card-head"><div class="adm-card-head-left">Активные варны</div></div>
+            <div id="warnsList"><div class="adm-empty">Загрузка...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ NOTIFICATIONS ══════ -->
+      <div class="adm-section" id="sec-notifications">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;align-items:start">
+          <div class="adm-card">
+            <div class="adm-card-head"><div class="adm-card-head-left">Создать анонс</div></div>
+            <div class="adm-card-body notif-compose">
+              <div class="f-group">
+                <div class="f-label">Тип</div>
+                <select class="sel" id="notifType">
+                  <option value="announcement">📢 Анонс</option>
+                  <option value="event">📅 Ивент</option>
+                  <option value="update">🔧 Обновление</option>
+                  <option value="warning">⚠️ Предупреждение</option>
+                </select>
+              </div>
+              <div class="f-group">
+                <div class="f-label">Заголовок</div>
+                <input class="f-input" id="notifTitle" type="text" placeholder="Заголовок уведомления..." maxlength="80">
+              </div>
+              <div class="f-group">
+                <div class="f-label">Сообщение</div>
+                <textarea class="f-input" id="notifMessage" rows="3" placeholder="Текст анонса для всех участников..."></textarea>
+              </div>
+              <div class="f-group">
+                <div class="f-label">Ссылка (опционально)</div>
+                <input class="f-input" id="notifLink" type="text" placeholder="https://...">
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem">
+                <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)">Будет отправлено <strong style="color:var(--text)" id="notifTargetCount">всем</strong></div>
+                <button class="btn btn-red" onclick="ADM.sendAnnouncement()">📢 Отправить всем</button>
+              </div>
+            </div>
+          </div>
+          <div class="adm-card">
+            <div class="adm-card-head"><div class="adm-card-head-left">Последние анонсы</div></div>
+            <div id="recentNotifsList"><div class="adm-empty">Загрузка...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ STATISTICS ══════ -->
+      <div class="adm-section" id="sec-statistics">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+          <!-- Voice leaderboard -->
+          <div class="adm-card">
+            <div class="adm-card-head">
+              <div class="adm-card-head-left">🎙️ Топ по голосовым</div>
+              <button class="btn btn-sm" style="background:rgba(40,167,69,.1);border:1px solid rgba(40,167,69,.25);color:var(--green)" onclick="ADM.givePrizesToVoiceTop()">🏆 Выдать призы топ-10</button>
+            </div>
+            <div id="voiceLeaderboard"><div class="adm-empty">Загрузка...</div></div>
+          </div>
+
+          <!-- XP leaderboard -->
+          <div class="adm-card">
+            <div class="adm-card-head"><div class="adm-card-head-left">⚡ Топ по XP</div></div>
+            <div id="xpLeaderboard"><div class="adm-empty">Загрузка...</div></div>
+          </div>
+        </div>
+
+        <div class="adm-card">
+          <div class="adm-card-head"><div class="adm-card-head-left">📈 Общая статистика</div></div>
+          <div class="adm-stat-grid" id="extendedStats">
+            <div class="adm-stat"><div class="adm-stat-lbl">Всего XP выдано</div><div class="adm-stat-val" id="totalXpStat">—</div></div>
+            <div class="adm-stat"><div class="adm-stat-lbl">Монет в обороте</div><div class="adm-stat-val" id="totalCurrencyStat" style="color:var(--gold)">—</div></div>
+            <div class="adm-stat"><div class="adm-stat-lbl">Всего голос. минут</div><div class="adm-stat-val" id="totalVoiceStat" style="color:var(--green)">—</div></div>
+            <div class="adm-stat"><div class="adm-stat-lbl">Ивентов завершено</div><div class="adm-stat-val" id="totalEventsStat">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ LOGS ══════ -->
+      <div class="adm-section" id="sec-logs">
+        <div class="adm-search-row">
+          <select class="sel" id="logTypeFilter" onchange="ADM.filterLogs()">
+            <option value="">Все типы</option>
+            <option value="xp">XP</option>
+            <option value="currency">Монеты</option>
+            <option value="elo">ELO</option>
+            <option value="role">Роли</option>
+            <option value="warn">Варны</option>
+            <option value="achievement">Ачивки</option>
+            <option value="purchase">Покупки</option>
+            <option value="event_finish">Ивенты</option>
+          </select>
+          <div class="adm-s-wrap">
+            <span class="adm-s-ico">🔍</span>
+            <input class="adm-s-inp" id="logSearch" type="text" placeholder="Поиск по пользователю..." oninput="ADM.filterLogs()">
+          </div>
+        </div>
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">Лог действий</div>
+            <span style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim)" id="logCountLabel"></span>
+          </div>
+          <div id="logsList"><div class="adm-empty">Загрузка...</div></div>
+          <div class="pager" id="logPager"></div>
+        </div>
+      </div>
+
+      <!-- ══════ SETTINGS ══════ -->
+      <div class="adm-section" id="sec-settings">
+        <!-- Global XP Multiplier -->
+        <div class="adm-card">
+          <div class="adm-card-head"><div class="adm-card-head-left">⚡ Глобальный множитель XP</div></div>
+          <div class="adm-card-body" style="display:flex;flex-direction:column;gap:1rem">
+            <div id="globalBoostDisplay" class="boost-global-inactive">Нет активного буста</div>
+            <div class="f-row">
+              <div class="f-group">
+                <div class="f-label">Множитель</div>
+                <select class="sel" id="boostMultiplier">
+                  <option value="1">×1 (выкл)</option>
+                  <option value="1.5">×1.5</option>
+                  <option value="2">×2</option>
+                  <option value="3">×3</option>
+                  <option value="5">×5</option>
+                </select>
+              </div>
+              <div class="f-group">
+                <div class="f-label">Истекает</div>
+                <input class="f-input" id="boostExpires" type="datetime-local">
+              </div>
+            </div>
+            <div style="display:flex;gap:.6rem">
+              <button class="btn btn-red" onclick="ADM.setGlobalBoost()">⚡ Применить буст</button>
+              <button class="btn" style="background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:.45rem 1rem;cursor:pointer;font-family:var(--font-body);font-size:.87rem" onclick="ADM.clearGlobalBoost()">✕ Сбросить</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- XP Settings -->
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">🎮 Настройки XP</div>
+            <button class="btn btn-red btn-sm" onclick="ADM.saveXpSettings()">💾 Сохранить</button>
+          </div>
+          <div class="adm-card-body" style="display:flex;flex-direction:column;gap:.85rem">
+            <div class="f-row">
+              <div class="f-group">
+                <div class="f-label">XP за сообщение</div>
+                <input class="f-input" id="cfgXpMsg" type="number" min="0" placeholder="1">
+              </div>
+              <div class="f-group">
+                <div class="f-label">XP за 10 мин голоса</div>
+                <input class="f-input" id="cfgXpVoice" type="number" min="0" placeholder="5">
+              </div>
+            </div>
+            <div class="f-row">
+              <div class="f-group">
+                <div class="f-label">Монет за сообщение</div>
+                <input class="f-input" id="cfgCurrMsg" type="number" min="0" placeholder="1">
+              </div>
+              <div class="f-group">
+                <div class="f-label">Монет за 10 мин голоса</div>
+                <input class="f-input" id="cfgCurrVoice" type="number" min="0" placeholder="5">
+              </div>
+            </div>
+            <div class="f-row">
+              <div class="f-group">
+                <div class="f-label">Мин. участников в войсе</div>
+                <input class="f-input" id="cfgMinVoice" type="number" min="1" placeholder="2">
+              </div>
+              <div class="f-group" style="display:flex;flex-direction:row;align-items:center;gap:.75rem;padding-top:1.3rem">
+                <div class="toggle" id="cfgMicToggle" onclick="this.classList.toggle('on')"></div>
+                <div>
+                  <div style="font-size:.87rem;font-weight:600">Требовать микрофон</div>
+                  <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim)">XP только с вкл. микрофоном</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Forbidden Words -->
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">🚫 Запрещённые слова для ролей</div>
+            <button class="btn btn-red btn-sm" onclick="ADM.saveForbiddenWords()">💾 Сохранить</button>
+          </div>
+          <div class="adm-card-body">
+            <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);margin-bottom:.6rem">Через запятую. Кастомные роли с этими словами будут отклоняться.</div>
+            <textarea class="f-input" id="cfgForbiddenWords" rows="3" placeholder="admin, moderator, owner, creator, system"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ ECONOMY ══════ -->
+      <div class="adm-section" id="sec-economy">
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">💰 Коэффициенты экономики</div>
+            <button class="btn btn-red btn-sm" onclick="ADM.saveEconomy()">💾 Сохранить всё</button>
+          </div>
+          <div class="adm-card-body">
+            <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.1em">Бонусы и награды</div>
+            <div class="eco-grid">
+              <div class="eco-item">
+                <div class="eco-lbl">Ежедневный бонус</div>
+                <input class="eco-inp" id="ecoDailyBonus" type="number" min="0" placeholder="25">
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Бонус за ачивку</div>
+                <input class="eco-inp" id="ecoAchievBonus" type="number" min="0" placeholder="50">
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Множитель за уровень</div>
+                <input class="eco-inp" id="ecoLvlMult" type="number" min="0" placeholder="10">
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Бонус участия в ивенте</div>
+                <input class="eco-inp" id="ecoEventPart" type="number" min="0" placeholder="100">
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Бонус победы в ивенте</div>
+                <input class="eco-inp" id="ecoEventWin" type="number" min="0" placeholder="50">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-wrap -->
+</div><!-- /page -->
+
+<!-- ══════════════ MODALS ══════════════ -->
+
+<!-- Give Resource Modal -->
+<div class="modal-overlay" id="giveModal">
+  <div class="modal">
+    <div class="modal-head">🎁 Выдать ресурс — <span id="giveUserName" style="color:var(--red)"></span>
+      <button class="modal-close" onclick="ADM.closeModal('giveModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="f-group">
+        <div class="f-label">Тип ресурса</div>
+        <select class="sel" id="giveType" style="width:100%">
+          <option value="xp">⚡ XP</option>
+          <option value="coins">💰 Монеты</option>
+          <option value="elo">🏆 ELO</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <div class="f-label">Количество (отрицательное = снять)</div>
+        <input class="f-input" id="giveAmount" type="number" placeholder="100">
+      </div>
+      <div class="f-group">
+        <div class="f-label">Причина (для лога)</div>
+        <input class="f-input" id="giveReason" type="text" placeholder="Победа в турнире...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="ADM.closeModal('giveModal')">Отмена</button>
+      <button class="btn-confirm gold" onclick="ADM.confirmGive()">✅ Применить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Role Modal -->
+<div class="modal-overlay" id="roleModal">
+  <div class="modal">
+    <div class="modal-head">👑 Сменить роль — <span id="roleUserName" style="color:var(--red)"></span>
+      <button class="modal-close" onclick="ADM.closeModal('roleModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="f-group">
+        <div class="f-label">Новая роль</div>
+        <select class="sel" id="newRole" style="width:100%">
+          <option value="user">USER — Обычный пользователь</option>
+          <option value="member">MEMBER — Участник сервера</option>
+          <option value="admin">ADMIN — Администратор</option>
+          <option value="creator">CREATOR — Создатель</option>
+        </select>
+      </div>
+      <div style="background:rgba(220,53,69,.06);border:1px solid rgba(220,53,69,.15);border-radius:8px;padding:.75rem;font-size:.82rem;color:var(--text-dim)">
+        ⚠️ Смена роли немедленно меняет права доступа пользователя на сайте.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="ADM.closeModal('roleModal')">Отмена</button>
+      <button class="btn-confirm" onclick="ADM.confirmRoleChange()">✅ Сменить роль</button>
+    </div>
+  </div>
+</div>
+
+<!-- Give Achievement Modal -->
+<div class="modal-overlay" id="achModal">
+  <div class="modal">
+    <div class="modal-head">🏅 Выдать ачивку — <span id="achUserName" style="color:var(--red)"></span>
+      <button class="modal-close" onclick="ADM.closeModal('achModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="f-group">
+        <div class="f-label">ID ачивки</div>
+        <input class="f-input" id="achId" type="text" placeholder="first_message, level10...">
+      </div>
+      <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim)">
+        Доступные ID: first_message, chatter, big_mouth, first_step, level5, level10, level25, level50, voice_30, voice_marathon, first_purchase, joined, week, month, veteran, year, first_event, event5, event_winner
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="ADM.closeModal('achModal')">Отмена</button>
+      <button class="btn-confirm gold" onclick="ADM.confirmGiveAch()">🏅 Выдать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Report Response Modal -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal">
+    <div class="modal-head">🚨 Ответ на жалобу <button class="modal-close" onclick="ADM.closeModal('reportModal')">✕</button></div>
+    <div class="modal-body">
+      <div id="reportModalContent" style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.85rem;font-size:.84rem;color:var(--text-dim);line-height:1.5;margin-bottom:.5rem"></div>
+      <div class="f-group">
+        <div class="f-label">Действие</div>
+        <select class="sel" id="reportAction" style="width:100%">
+          <option value="warning">⚠️ Предупреждение</option>
+          <option value="forum_ban">🔇 Бан форума</option>
+          <option value="none">ℹ️ Принято к сведению</option>
+          <option value="rejected">❌ Отклонено</option>
+        </select>
+      </div>
+      <div class="f-group" id="forumBanDaysGroup" style="display:none">
+        <div class="f-label">Бан на (дней)</div>
+        <input class="f-input" id="forumBanDays" type="number" min="1" max="365" placeholder="7">
+      </div>
+      <div class="f-group">
+        <div class="f-label">Ответ администратора</div>
+        <textarea class="f-input" id="reportResponse" rows="3" placeholder="Комментарий для пользователя..."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="ADM.closeModal('reportModal')">Отмена</button>
+      <button class="btn-confirm" onclick="ADM.confirmReportClose()">✅ Закрыть жалобу</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shop Item Modal -->
+<div class="modal-overlay" id="shopItemModal">
+  <div class="modal" style="width:520px">
+    <div class="modal-head">🛒 <span id="shopItemModalTitle">Добавить товар</span>
+      <button class="modal-close" onclick="ADM.closeModal('shopItemModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-group">
+          <div class="f-label">Тип товара</div>
+          <select class="sel" id="siType" style="width:100%" onchange="ADM.onShopTypeChange()">
+            <option value="discord_role">🎭 Discord-роль</option>
+            <option value="custom_role">👑 Кастомная роль</option>
+            <option value="custom_color">🎨 Цвет ника</option>
+            <option value="title">🏷️ Звание</option>
+            <option value="nick_change">✏️ Смена ника</option>
+            <option value="create_event">📅 Право создавать ивент</option>
+            <option value="double_xp">⚡ Double XP (7д)</option>
+            <option value="triple_xp">🔥 Triple XP (7д)</option>
+            <option value="lootbox">📦 Лутбокс обычный</option>
+            <option value="lootbox_rare">🎁 Лутбокс редкий</option>
+          </select>
+        </div>
+        <div class="f-group">
+          <div class="f-label">Иконка (emoji)</div>
+          <input class="f-input" id="siIcon" type="text" placeholder="🎭" maxlength="4">
+        </div>
+      </div>
+      <div class="f-group">
+        <div class="f-label">Название</div>
+        <input class="f-input" id="siName" type="text" placeholder="Название товара" maxlength="60">
+      </div>
+      <div class="f-group">
+        <div class="f-label">Описание</div>
+        <textarea class="f-input" id="siDesc" rows="2" placeholder="Описание товара..."></textarea>
+      </div>
+      <div class="f-row">
+        <div class="f-group">
+          <div class="f-label">Цена (монеты)</div>
+          <input class="f-input" id="siPrice" type="number" min="0" placeholder="500">
+        </div>
+        <div class="f-group" id="siRoleIdGroup" style="display:none">
+          <div class="f-label">Discord Role ID</div>
+          <input class="f-input" id="siRoleId" type="text" placeholder="1234567890">
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="f-group" style="flex-direction:row;align-items:center;gap:.75rem;padding-top:1rem">
+          <div class="toggle on" id="siActive" onclick="this.classList.toggle('on')"></div>
+          <div style="font-size:.87rem">Активен (виден в магазине)</div>
+        </div>
+        <div class="f-group" style="flex-direction:row;align-items:center;gap:.75rem;padding-top:1rem">
+          <div class="toggle" id="siFeatured" onclick="this.classList.toggle('on')"></div>
+          <div style="font-size:.87rem">Рекомендуемый</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="ADM.closeModal('shopItemModal')">Отмена</button>
+      <button class="btn-confirm" onclick="ADM.saveShopItem()">💾 Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Forum Topic Modal -->
+<div class="modal-overlay" id="forumTopicModal">
+  <div class="modal">
+    <div class="modal-head">📝 Создать тему от GS <button class="modal-close" onclick="ADM.closeModal('forumTopicModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="f-group">
+        <div class="f-label">Заголовок</div>
+        <input class="f-input" id="ftTitle" type="text" placeholder="Заголовок темы" maxlength="80">
+      </div>
+      <div class="f-group">
+        <div class="f-label">Категория</div>
+        <select class="sel" id="ftCategory" style="width:100%">
+          <option value="news">📡 Новости</option>
+          <option value="guide">📖 Гайд</option>
+          <option value="discuss">💬 Обсуждение</option>
+          <option value="suggest">💡 Предложение</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <div class="f-label">Содержимое</div>
+        <textarea class="f-input" id="ftBody" rows="5" placeholder="Текст темы..."></textarea>
+      </div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <div class="toggle on" id="ftPinned" onclick="this.classList.toggle('on')"></div>
+        <div style="font-size:.87rem">Закрепить тему</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="ADM.closeModal('forumTopicModal')">Отмена</button>
+      <button class="btn-confirm" onclick="ADM.confirmCreateForumTopic()">📝 Опубликовать</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast">
+  <div class="toast-icon" id="toastIcon">✅</div>
+  <div><div class="toast-title" id="toastTitle"></div><div class="toast-sub" id="toastSub"></div></div>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="assets/config.js"></script>
+<script>firebase.initializeApp(GS.firebase);</script>
+<script src="assets/auth.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/nav.js"></script>
+
+<script>
+// ══════════════════════════════════════════════
+//  GRAY SQUAD — admin.js (inline)
+// ══════════════════════════════════════════════
+
+const ADM = (() => {
+  // ─── State ──────────────────────────────────
+  let _allUsers    = [];
+  let _allEvents   = [];
+  let _allTopics   = [];
+  let _allLogs     = [];
+  let _allReports  = [];
+  let _config      = {};
+  let _currentSection = 'users';
+
+  let _giveTargetId  = null;
+  let _roleTargetId  = null;
+  let _achTargetId   = null;
+  let _reportTargetId = null;
+  let _editingShopItemId = null;
+  let _reportFilter  = 'new';
+
+  let _userPage = 0;
+  const USER_PAGE_SIZE = 20;
+
+  // ─── Access guard ────────────────────────────
+  function guardAccess() {
+    const user = GS_AUTH.getUser();
+    if (!user || (user.role !== 'creator' && user.role !== 'admin')) {
+      document.querySelector('.page').innerHTML =
+        '<div style="text-align:center;padding:4rem 2rem"><div style="font-size:3rem;margin-bottom:1rem">🔒</div><div style="font-family:var(--font-title);font-size:1.5rem;font-weight:700">Нет доступа</div><div style="color:var(--text-dim);margin-top:.5rem">Эта страница доступна только администраторам.</div><a href="index.html" style="display:inline-block;margin-top:1.5rem;padding:.5rem 1.5rem;background:var(--red);color:#fff;border-radius:8px;text-decoration:none;font-family:var(--font-title)">На главную</a></div>';
+      return false;
+    }
+    return true;
+  }
+
+  // ─── Init ────────────────────────────────────
+  async function init() {
+    if (!guardAccess()) return;
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString('ru-RU');
+
+    // Load all data
+    await Promise.all([
+      loadUsers(),
+      loadConfig(),
+      loadStats(),
+    ]);
+
+    // Start listeners
+    startListeners();
+  }
+
+  async function refreshAll() {
+    showToast('↺', 'Обновление...', 'Перезагружаем данные');
+    await init();
+  }
+
+  // ─── Listeners ──────────────────────────────
+  function startListeners() {
+    DB.listenLogs(logs => {
+      _allLogs = logs;
+      if (_currentSection === 'logs') renderLogs();
+    }, 200);
+
+    DB.listenReports(reports => {
+      _allReports = reports;
+      const newCount = reports.filter(r => r.status === 'new').length;
+      const badge = document.getElementById('navReportsBadge');
+      if (badge) {
+        badge.textContent = newCount;
+        badge.style.display = newCount > 0 ? '' : 'none';
+      }
+      document.getElementById('statsReports').textContent = newCount;
+      if (_currentSection === 'reports') renderReports();
+    });
+
+    DB.listenEvents(events => {
+      _allEvents = events;
+      if (_currentSection === 'events') renderEvents();
+    });
+
+    DB.listenTopics(null, topics => {
+      _allTopics = topics;
+      if (_currentSection === 'forum') renderForum();
+    });
+  }
+
+  // ─── Load data ───────────────────────────────
+  async function loadUsers() {
+    return new Promise(resolve => {
+      DB.listenUsers('createdAt', 500, users => {
+        _allUsers = users;
+        document.getElementById('statsUsers').textContent = fmtNum(users.length);
+        document.getElementById('statsNewToday').textContent =
+          users.filter(u => {
+            const d = u.createdAt?.toDate?.() || new Date(u.createdAt);
+            return Date.now() - d < 86400000;
+          }).length + ' новых сегодня';
+        renderUsers(users);
+        resolve();
+      });
+    });
+  }
+
+  async function loadConfig() {
+    _config = await DB.getConfig();
+    applyConfigToForm();
+  }
+
+  async function loadStats() {
+    try {
+      const purchases = await firebase.firestore()
+        .collection('purchases').orderBy('createdAt','desc').limit(100).get();
+      const today = purchases.docs.filter(d => {
+        const t = d.data().createdAt?.toDate?.();
+        return t && Date.now() - t < 86400000;
+      });
+      document.getElementById('statsPurchases').textContent = today.length;
+
+      // Extended stats
+      let totalXp = 0, totalCurrency = 0, totalVoice = 0;
+      _allUsers.forEach(u => {
+        totalXp += u.xp || 0;
+        totalCurrency += u.currency || 0;
+        totalVoice += u.totalVoiceMinutes || 0;
+      });
+      safeSet('totalXpStat', fmtNum(totalXp));
+      safeSet('totalCurrencyStat', fmtNum(totalCurrency));
+      safeSet('totalVoiceStat', fmtNum(totalVoice) + ' мин');
+
+      const evSnap = await firebase.firestore()
+        .collection('events').where('status','==','finished').get();
+      safeSet('totalEventsStat', evSnap.size);
+    } catch(e) {}
+  }
+
+  function safeSet(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  // ─── Section switching ───────────────────────
+  function setSection(name, btn) {
+    document.querySelectorAll('.adm-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.adm-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('sec-' + name)?.classList.add('active');
+    if (btn) btn.classList.add('active');
+    _currentSection = name;
+
+    // Lazy load per section
+    const loaders = {
+      events:        renderEvents,
+      forum:         renderForum,
+      shop:          loadShopSection,
+      reports:       renderReports,
+      warns:         renderWarns,
+      notifications: loadNotifications,
+      statistics:    loadStatistics,
+      logs:          renderLogs,
+      settings:      renderSettings,
+      economy:       renderEconomy,
+    };
+    loaders[name]?.();
+  }
+
+  // ─── USERS ───────────────────────────────────
+  function renderUsers(users) {
+    const tbody = document.getElementById('usersTbody');
+    if (!tbody) return;
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="adm-empty">Пусто</td></tr>';
+      return;
+    }
+
+    const page = users.slice(_userPage * USER_PAGE_SIZE, (_userPage + 1) * USER_PAGE_SIZE);
+    document.getElementById('userCountLabel').textContent = `${users.length} пользователей`;
+
+    tbody.innerHTML = page.map(u => {
+      const av = u.avatarUrl
+        ? `<img class="av-mini" src="${u.avatarUrl}">`
+        : `<div class="av-mini-div">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>`;
+      const roleKey = u.role || 'user';
+      const roleMap = {creator:'rb-creator',admin:'rb-admin',member:'rb-member',user:'rb-user'};
+      const warns = (u.warnings||[]).length;
+      return `<tr>
+        <td><div class="av-cell">${av}<div class="name-stack"><span class="name-main">${u.displayName||u.username||'—'}</span><span class="name-sub">${u.username || u.id}</span></div></div></td>
+        <td><span class="rb ${roleMap[roleKey]||'rb-user'}">${roleKey.toUpperCase()}</span></td>
+        <td style="font-family:var(--font-mono)">${fmtNum(u.elo||500)}</td>
+        <td style="font-family:var(--font-mono)">${u.level||0}</td>
+        <td style="font-family:var(--font-mono);color:var(--gold)">${fmtNum(u.currency||0)}</td>
+        <td style="font-family:var(--font-mono);color:${warns>0?'var(--red)':'var(--text-dim)'}">${warns}</td>
+        <td><div class="ia-row">
+          <button class="ia-btn gold" onclick="ADM.openGive('${u.discordId||u.id}','${(u.displayName||u.username||'').replace(/'/g,'')}')" title="Выдать ресурс">🎁</button>
+          <button class="ia-btn" onclick="ADM.openRole('${u.discordId||u.id}','${(u.displayName||u.username||'').replace(/'/g,'')}','${roleKey}')" title="Сменить роль">👑</button>
+          <button class="ia-btn green" onclick="ADM.openAch('${u.discordId||u.id}','${(u.displayName||u.username||'').replace(/'/g,'')}')" title="Выдать ачивку">🏅</button>
+          <button class="ia-btn red" onclick="ADM.quickWarn('${u.discordId||u.id}','${(u.displayName||u.username||'').replace(/'/g,'')}')" title="Варн">⚠️</button>
+          <a href="profile.html?id=${u.discordId||u.id}" class="ia-btn" title="Профиль" style="text-decoration:none">👤</a>
+        </div></td>
+      </tr>`;
+    }).join('');
+
+    renderUserPager(users.length);
+  }
+
+  function renderUserPager(total) {
+    const pages = Math.ceil(total / USER_PAGE_SIZE);
+    if (pages <= 1) { document.getElementById('userPager').innerHTML=''; return; }
+    const pager = document.getElementById('userPager');
+    pager.innerHTML = Array.from({length:Math.min(pages,10)},(_,i) =>
+      `<button class="pg-btn ${i===_userPage?'active':''}" onclick="ADM.goUserPage(${i})">${i+1}</button>`
+    ).join('');
+  }
+
+  function goUserPage(n) { _userPage = n; renderUsers(filteredUsers()); }
+
+  function filteredUsers() {
+    const q = (document.getElementById('userSearch')?.value||'').toLowerCase();
+    const rf = document.getElementById('userRoleFilter')?.value||'';
+    return _allUsers.filter(u => {
+      const matchQ = !q || (u.displayName||'').toLowerCase().includes(q) ||
+        (u.username||'').toLowerCase().includes(q) || (u.discordId||u.id||'').includes(q);
+      const matchR = !rf || u.role === rf;
+      return matchQ && matchR;
+    });
+  }
+
+  function searchUsers(q) { _userPage = 0; renderUsers(filteredUsers()); }
+
+  // ─── Give resource ───────────────────────────
+  function openGive(id, name) {
+    _giveTargetId = id;
+    document.getElementById('giveUserName').textContent = name;
+    document.getElementById('giveAmount').value = '';
+    document.getElementById('giveReason').value = '';
+    openModal('giveModal');
+  }
+  async function confirmGive() {
+    const type   = document.getElementById('giveType').value;
+    const amount = parseInt(document.getElementById('giveAmount').value);
+    const reason = document.getElementById('giveReason').value || 'Ручная выдача';
+    if (!_giveTargetId || isNaN(amount)) return showToast('❌','Ошибка','Заполните все поля',true);
+    try {
+      const user = await DB.getUser(_giveTargetId);
+      if (!user) throw new Error('Пользователь не найден');
+      const upd = {};
+      if (type === 'xp') { upd.xp = firebase.firestore.FieldValue.increment(amount); upd.level = gsLevel((user.xp||0)+amount); }
+      else if (type === 'coins') { upd.currency = firebase.firestore.FieldValue.increment(amount); }
+      else if (type === 'elo') {
+        const newElo = Math.max(0, (user.elo||500) + amount);
+        const rank = gsRank(newElo);
+        upd.elo = newElo; upd.rank = rank.id; upd.rankName = rank.name; upd.rankColor = rank.color;
+      }
+      await DB.updateUser(_giveTargetId, upd);
+      await DB.writeLog(type, user.displayName||user.username, `${amount>0?'+':''}${amount}`, reason, GS_AUTH.getUser()?.displayName||'Admin');
+      closeModal('giveModal');
+      showToast('✅','Выдано!',`${type} ${amount>0?'+':''}${amount} → ${user.displayName||user.username}`);
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── Role change ─────────────────────────────
+  function openRole(id, name, currentRole) {
+    _roleTargetId = id;
+    document.getElementById('roleUserName').textContent = name;
+    document.getElementById('newRole').value = currentRole;
+    openModal('roleModal');
+  }
+  async function confirmRoleChange() {
+    const newRole = document.getElementById('newRole').value;
+    if (!_roleTargetId) return;
+    try {
+      const user = await DB.getUser(_roleTargetId);
+      await DB.updateUser(_roleTargetId, { role: newRole });
+      await DB.writeLog('role', user?.displayName||_roleTargetId, `→ ${newRole}`, 'Смена роли', GS_AUTH.getUser()?.displayName||'Admin');
+      closeModal('roleModal');
+      showToast('✅','Роль изменена',`Новая роль: ${newRole.toUpperCase()}`);
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── Achievement ─────────────────────────────
+  function openAch(id, name) {
+    _achTargetId = id;
+    document.getElementById('achUserName').textContent = name;
+    document.getElementById('achId').value = '';
+    openModal('achModal');
+  }
+  async function confirmGiveAch() {
+    const achId = document.getElementById('achId').value.trim();
+    if (!_achTargetId || !achId) return showToast('❌','Ошибка','Введите ID ачивки',true);
+    try {
+      await DB.updateUser(_achTargetId, { achievements: firebase.firestore.FieldValue.arrayUnion(achId) });
+      const user = await DB.getUser(_achTargetId);
+      await DB.writeLog('achievement', user?.displayName||_achTargetId, `+ ${achId}`, 'Ручная выдача', GS_AUTH.getUser()?.displayName||'Admin');
+      closeModal('achModal');
+      showToast('🏅','Ачивка выдана',achId);
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── Quick Warn ──────────────────────────────
+  async function quickWarn(id, name) {
+    const reason = prompt(`Причина варна для ${name}:`);
+    if (!reason) return;
+    try {
+      const warn = { id:'w_'+Date.now(), reason, issuedBy: GS_AUTH.getUser()?.displayName||'Admin', issuedAt: new Date().toISOString(), expiresAt: null };
+      await DB.updateUser(id, { warnings: firebase.firestore.FieldValue.arrayUnion(warn) });
+      await DB.writeLog('warn', name, '+1 варн', reason, GS_AUTH.getUser()?.displayName||'Admin');
+      showToast('⚠️','Варн выдан',`${name}: ${reason}`);
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── EVENTS ──────────────────────────────────
+  function renderEvents() {
+    const tbody = document.getElementById('eventsTbody');
+    const table = document.getElementById('adminEventsTable');
+    const loading = document.getElementById('adminEventsLoading');
+    if (!tbody) return;
+    loading.style.display = 'none';
+    table.style.display = '';
+
+    if (!_allEvents.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="adm-empty">Нет ивентов</td></tr>'; return;
+    }
+    const sorted = [..._allEvents].sort((a,b) => {
+      const da = a.startDate?.toDate?.() || new Date(a.startDate);
+      const db_ = b.startDate?.toDate?.() || new Date(b.startDate);
+      return db_ - da;
+    });
+    tbody.innerHTML = sorted.map(ev => {
+      const start = ev.startDate?.toDate?.() || new Date(ev.startDate);
+      const statusMap = { finished:'✅ Завершён', live:'🔴 LIVE', upcoming:'⏳ Ожидает', open:'🟢 Открыт' };
+      const status = ev.status || 'upcoming';
+      return `<tr>
+        <td><div class="name-stack"><span class="name-main">${ev.gameIcon||'🎮'} ${ev.title}</span></div></td>
+        <td style="font-family:var(--font-mono);font-size:.78rem">${ev.game||'—'}</td>
+        <td style="font-family:var(--font-mono);font-size:.75rem">${start.toLocaleDateString('ru-RU')}</td>
+        <td style="font-family:var(--font-mono)">${(ev.participants||[]).length}/${ev.maxPlayers||'∞'}</td>
+        <td>${statusMap[status]||status}</td>
+        <td><div class="ia-row">
+          ${status!=='finished'?`<button class="ia-btn green" onclick="ADM.openFinishEvent('${ev.id}','${(ev.title||'').replace(/'/g,'')}','${(ev.participants||[]).join(',')}')">🏁 Завершить</button>`:''}
+          <button class="ia-btn red" onclick="ADM.deleteEvent('${ev.id}')">🗑️</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openCreateEvent() { window.location.href = 'events.html'; }
+
+  async function deleteEvent(id) {
+    if (!confirm('Удалить ивент?')) return;
+    try {
+      await firebase.firestore().collection('events').doc(id).delete();
+      showToast('🗑️','Удалено','Ивент удалён');
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  function openFinishEvent(id, name, participantsStr) {
+    // Redirect to events page finish flow for now
+    window.location.href = 'events.html';
+  }
+
+  // ─── FORUM ───────────────────────────────────
+  function renderForum(topics) {
+    const list = topics || _allTopics;
+    const q    = (document.getElementById('forumSearch')?.value||'').toLowerCase();
+    const cat  = document.getElementById('forumFilter')?.value||'';
+    const filtered = list.filter(t =>
+      (!q || (t.title||'').toLowerCase().includes(q) || (t.authorName||'').toLowerCase().includes(q)) &&
+      (!cat || t.category === cat)
+    );
+    const tbody = document.getElementById('forumTbody');
+    if (!tbody) return;
+    if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="6" class="adm-empty">Нет тем</td></tr>'; return; }
+    const catMap = {guide:'📖',discuss:'💬',suggest:'💡',news:'📡'};
+    tbody.innerHTML = filtered.slice(0,50).map(t => `
+      <tr>
+        <td><div class="name-stack"><span class="name-main">${t.pinned?'📌 ':''}${t.title}</span></div></td>
+        <td style="font-size:.82rem">${t.authorName||'—'}</td>
+        <td>${catMap[t.category]||'💬'} ${t.category||'—'}</td>
+        <td style="font-family:var(--font-mono)">${t.commentCount||0}</td>
+        <td style="font-family:var(--font-mono);font-size:.75rem">${timeAgo(t.createdAt)}</td>
+        <td><div class="ia-row">
+          <button class="ia-btn ${t.pinned?'gold':''}" onclick="ADM.togglePin('${t.id}',${!t.pinned})">${t.pinned?'📌':'📍'}</button>
+          <button class="ia-btn red" onclick="ADM.deleteTopic('${t.id}')">🗑️</button>
+        </div></td>
+      </tr>`).join('');
+  }
+
+  function searchForum(q) { renderForum(); }
+
+  async function togglePin(id, pin) {
+    await firebase.firestore().collection('forum_topics').doc(id).update({ pinned: pin });
+    showToast(pin?'📌':'📍', pin?'Закреплено':'Откреплено','');
+  }
+
+  async function deleteTopic(id) {
+    if (!confirm('Удалить тему?')) return;
+    await DB.deleteTopic(id);
+    showToast('🗑️','Удалено','Тема удалена');
+  }
+
+  function openCreateForumTopic() { openModal('forumTopicModal'); }
+
+  async function confirmCreateForumTopic() {
+    const title = document.getElementById('ftTitle').value.trim();
+    const category = document.getElementById('ftCategory').value;
+    const body = document.getElementById('ftBody').value.trim();
+    const pinned = document.getElementById('ftPinned').classList.contains('on');
+    if (!title || !body) return showToast('❌','Ошибка','Заполните заголовок и содержимое',true);
+    try {
+      const ref = await DB.createTopic({ title, category, body, authorId:'system', authorName:'Gray Squad', authorAvatar:null, asSystem:true });
+      if (pinned) await firebase.firestore().collection('forum_topics').doc(ref.id).update({ pinned: true });
+      closeModal('forumTopicModal');
+      showToast('📝','Опубликовано','Тема создана от имени Gray Squad');
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── SHOP ────────────────────────────────────
+  async function loadShopSection() {
+    try {
+      const items = await DB.getShopItems();
+      renderShopItems(items);
+      const purchases = await firebase.firestore()
+        .collection('purchases').orderBy('createdAt','desc').limit(30).get();
+      safeSet('purchasesCount', purchases.size + ' покупок');
+      renderPurchaseHistory(purchases.docs.map(d => ({id:d.id,...d.data()})));
+    } catch(e) {}
+  }
+
+  function renderShopItems(items) {
+    const el = document.getElementById('shopItemsList');
+    if (!el) return;
+    if (!items.length) { el.innerHTML = '<div class="adm-empty">Нет товаров</div>'; return; }
+    const typeIcons = {discord_role:'🎭',custom_role:'👑',custom_color:'🎨',title:'🏷️',nick_change:'✏️',create_event:'📅',double_xp:'⚡',triple_xp:'🔥',lootbox:'📦',lootbox_rare:'🎁'};
+    el.innerHTML = items.map(item => `
+      <div class="shop-row">
+        <div class="shop-ico">${item.icon||typeIcons[item.type]||'🛒'}</div>
+        <div class="shop-info">
+          <div class="shop-name">${item.name||'—'}</div>
+          <div class="shop-meta">${item.type} · ${item.active?'🟢 Активен':'⚪ Скрыт'}</div>
+        </div>
+        <div class="shop-price">${fmtNum(item.price)} 💰</div>
+        <div class="ia-row" style="margin-left:.5rem">
+          <button class="ia-btn" onclick="ADM.editShopItem('${item.id}')">✏️</button>
+          <button class="ia-btn red" onclick="ADM.deleteShopItem('${item.id}')">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderPurchaseHistory(purchases) {
+    const el = document.getElementById('purchaseHistoryList');
+    if (!el) return;
+    if (!purchases.length) { el.innerHTML = '<div class="adm-empty">Нет покупок</div>'; return; }
+    const typeIcons = {discord_role:'🎭',custom_role:'👑',custom_color:'🎨',title:'🏷️',nick_change:'✏️',create_event:'📅',double_xp:'⚡',triple_xp:'🔥',lootbox:'📦',lootbox_rare:'🎁'};
+    el.innerHTML = purchases.map(p => `
+      <div class="shop-row">
+        <div class="shop-ico">${typeIcons[p.itemType]||'🛒'}</div>
+        <div class="shop-info">
+          <div class="shop-name" style="font-size:.82rem">${p.itemType}</div>
+          <div class="shop-meta">${timeAgo(p.createdAt)}</div>
+        </div>
+        <div class="shop-price" style="color:var(--red)">−${fmtNum(p.price)}</div>
+      </div>`).join('');
+  }
+
+  function openCreateShopItem() {
+    _editingShopItemId = null;
+    document.getElementById('shopItemModalTitle').textContent = 'Добавить товар';
+    document.getElementById('siType').value = 'discord_role';
+    document.getElementById('siName').value = '';
+    document.getElementById('siDesc').value = '';
+    document.getElementById('siPrice').value = '';
+    document.getElementById('siIcon').value = '';
+    document.getElementById('siRoleId').value = '';
+    document.getElementById('siActive').classList.add('on');
+    document.getElementById('siFeatured').classList.remove('on');
+    onShopTypeChange();
+    openModal('shopItemModal');
+  }
+
+  async function editShopItem(id) {
+    _editingShopItemId = id;
+    const snap = await firebase.firestore().collection('shop_items').doc(id).get();
+    const item = snap.data();
+    document.getElementById('shopItemModalTitle').textContent = 'Редактировать товар';
+    document.getElementById('siType').value = item.type||'';
+    document.getElementById('siName').value = item.name||'';
+    document.getElementById('siDesc').value = item.description||'';
+    document.getElementById('siPrice').value = item.price||'';
+    document.getElementById('siIcon').value = item.icon||'';
+    document.getElementById('siRoleId').value = item.itemData?.roleId||'';
+    document.getElementById('siActive').classList.toggle('on', !!item.active);
+    document.getElementById('siFeatured').classList.toggle('on', !!item.featured);
+    onShopTypeChange();
+    openModal('shopItemModal');
+  }
+
+  function onShopTypeChange() {
+    const type = document.getElementById('siType').value;
+    const roleGrp = document.getElementById('siRoleIdGroup');
+    if (roleGrp) roleGrp.style.display = type === 'discord_role' ? '' : 'none';
+  }
+
+  async function saveShopItem() {
+    const type  = document.getElementById('siType').value;
+    const name  = document.getElementById('siName').value.trim();
+    const desc  = document.getElementById('siDesc').value.trim();
+    const price = parseInt(document.getElementById('siPrice').value);
+    const icon  = document.getElementById('siIcon').value.trim();
+    const roleId= document.getElementById('siRoleId').value.trim();
+    const active   = document.getElementById('siActive').classList.contains('on');
+    const featured = document.getElementById('siFeatured').classList.contains('on');
+    if (!name || isNaN(price)) return showToast('❌','Ошибка','Заполните название и цену',true);
+    const data = { type, name, description:desc, price, icon, active, featured,
+      itemData: type==='discord_role' ? {roleId} : {} };
+    try {
+      if (_editingShopItemId) {
+        await firebase.firestore().collection('shop_items').doc(_editingShopItemId).update(data);
+      } else {
+        await firebase.firestore().collection('shop_items').add(data);
+      }
+      closeModal('shopItemModal');
+      showToast('💾','Сохранено','Товар обновлён');
+      loadShopSection();
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  async function deleteShopItem(id) {
+    if (!confirm('Удалить товар?')) return;
+    await firebase.firestore().collection('shop_items').doc(id).delete();
+    showToast('🗑️','Удалено','Товар удалён');
+    loadShopSection();
+  }
+
+  // ─── REPORTS ─────────────────────────────────
+  function setReportFilter(f, btn) {
+    _reportFilter = f;
+    document.querySelectorAll('[id^="rTab-"]').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderReports();
+  }
+
+  function renderReports() {
+    const el = document.getElementById('reportsList');
+    if (!el) return;
+    const filtered = _allReports.filter(r => _reportFilter === 'all' || r.status === _reportFilter);
+    if (!filtered.length) { el.innerHTML = '<div class="adm-empty">Нет жалоб</div>'; return; }
+    el.innerHTML = filtered.map(r => `
+      <div class="report-card ${r.status}">
+        <div class="report-head">
+          <div>
+            <div style="font-weight:600;font-size:.9rem;margin-bottom:4px">${r.reason||'Жалоба'}</div>
+            <div class="report-meta">от ${r.reporterId||'—'} · ${timeAgo(r.createdAt)}</div>
+          </div>
+          <span class="report-tag ${r.status}">${r.status==='new'?'🔴 Новая':'✅ Закрыта'}</span>
+        </div>
+        <div class="report-text">${r.description||'Без описания'}</div>
+        ${r.adminResponse?`<div style="font-family:var(--font-mono);font-size:.68rem;color:var(--green);margin-bottom:.5rem">Ответ: ${r.adminResponse}</div>`:''}
+        ${r.status==='new'?`<div class="ia-row"><button class="ia-btn green" onclick="ADM.openReportModal('${r.id}','${(r.description||'').replace(/'/g,'').replace(/\n/g,' ')}')">✅ Закрыть жалобу</button></div>`:''}
+      </div>`).join('');
+  }
+
+  function openReportModal(id, desc) {
+    _reportTargetId = id;
+    document.getElementById('reportModalContent').textContent = desc;
+    document.getElementById('reportAction').value = 'warning';
+    document.getElementById('reportResponse').value = '';
+    document.getElementById('forumBanDaysGroup').style.display = 'none';
+    openModal('reportModal');
+  }
+
+  document.addEventListener('change', e => {
+    if (e.target.id === 'reportAction') {
+      document.getElementById('forumBanDaysGroup').style.display =
+        e.target.value === 'forum_ban' ? '' : 'none';
+    }
+  });
+
+  async function confirmReportClose() {
+    const action   = document.getElementById('reportAction').value;
+    const response = document.getElementById('reportResponse').value;
+    const banDays  = parseInt(document.getElementById('forumBanDays').value) || 7;
+    if (!_reportTargetId) return;
+    try {
+      await DB.closeReport(_reportTargetId, { adminResponse: response, action });
+      if (action === 'forum_ban') {
+        const report = _allReports.find(r => r.id === _reportTargetId);
+        if (report?.reporterId) {
+          const expires = new Date(Date.now() + banDays * 86400000).toISOString();
+          await DB.updateUser(report.reporterId, { forumBanExpiresAt: expires });
+        }
+      }
+      closeModal('reportModal');
+      showToast('✅','Закрыто','Жалоба обработана');
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── WARNS ───────────────────────────────────
+  async function issueWarn() {
+    const uid    = document.getElementById('warnUserId').value.trim();
+    const reason = document.getElementById('warnReason').value.trim();
+    const exp    = document.getElementById('warnExpires').value;
+    if (!uid || !reason) return showToast('❌','Ошибка','Заполните ID и причину',true);
+    try {
+      const warn = { id:'w_'+Date.now(), reason,
+        issuedBy: GS_AUTH.getUser()?.displayName||'Admin',
+        issuedAt: new Date().toISOString(),
+        expiresAt: exp || null };
+      await DB.updateUser(uid, { warnings: firebase.firestore.FieldValue.arrayUnion(warn) });
+      const user = await DB.getUser(uid);
+      await DB.writeLog('warn', user?.displayName||uid, '+1 варн', reason, GS_AUTH.getUser()?.displayName||'Admin');
+      document.getElementById('warnUserId').value = '';
+      document.getElementById('warnReason').value = '';
+      document.getElementById('warnExpires').value = '';
+      showToast('⚠️','Варн выдан',reason);
+      renderWarns();
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  async function renderWarns() {
+    const el = document.getElementById('warnsList');
+    if (!el) return;
+    const usersWithWarns = _allUsers.filter(u => (u.warnings||[]).length > 0);
+    if (!usersWithWarns.length) { el.innerHTML = '<div class="adm-empty">Нет активных варнов</div>'; return; }
+    el.innerHTML = usersWithWarns.flatMap(u =>
+      (u.warnings||[]).map(w => `
+        <div class="warn-row">
+          <span class="warn-num">⚠️</span>
+          <div class="warn-info">
+            <div class="warn-user">${u.displayName||u.username||u.id}</div>
+            <div class="warn-reason">${w.reason||'—'}</div>
+            <div class="warn-by">от ${w.issuedBy||'?'} · ${timeAgo(w.issuedAt)}</div>
+          </div>
+          <button class="ia-btn red" onclick="ADM.removeWarn('${u.discordId||u.id}','${w.id}')">✕</button>
+        </div>`)
+    ).join('');
+  }
+
+  async function removeWarn(userId, warnId) {
+    const user = _allUsers.find(u => (u.discordId||u.id) === userId);
+    if (!user) return;
+    const newWarns = (user.warnings||[]).filter(w => w.id !== warnId);
+    await DB.updateUser(userId, { warnings: newWarns });
+    showToast('✅','Варн снят','');
+    renderWarns();
+  }
+
+  // ─── NOTIFICATIONS ───────────────────────────
+  async function loadNotifications() {
+    const el = document.getElementById('recentNotifsList');
+    if (!el) return;
+    try {
+      const snap = await firebase.firestore()
+        .collection('notifications').where('userId','==','all')
+        .orderBy('createdAt','desc').limit(10).get();
+      const notifs = snap.docs.map(d => ({id:d.id,...d.data()}));
+      if (!notifs.length) { el.innerHTML = '<div class="adm-empty">Нет анонсов</div>'; return; }
+      el.innerHTML = notifs.map(n => `
+        <div class="log-item">
+          <div class="log-body">
+            <div class="log-main">${n.title||'—'}</div>
+            <div class="log-meta">${n.message||''} · ${timeAgo(n.createdAt)}</div>
+          </div>
+        </div>`).join('');
+    } catch(e) { el.innerHTML = '<div class="adm-empty">Ошибка загрузки</div>'; }
+  }
+
+  async function sendAnnouncement() {
+    const type    = document.getElementById('notifType').value;
+    const title   = document.getElementById('notifTitle').value.trim();
+    const message = document.getElementById('notifMessage').value.trim();
+    const link    = document.getElementById('notifLink').value.trim();
+    if (!title || !message) return showToast('❌','Ошибка','Заполните заголовок и текст',true);
+    try {
+      await firebase.firestore().collection('notifications').add({
+        userId: 'all', type, title, message,
+        link: link || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        readAt: null,
+      });
+      document.getElementById('notifTitle').value = '';
+      document.getElementById('notifMessage').value = '';
+      document.getElementById('notifLink').value = '';
+      showToast('📢','Отправлено!','Анонс доставлен всем пользователям');
+      loadNotifications();
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── STATISTICS ──────────────────────────────
+  function loadStatistics() {
+    renderVoiceLeaderboard();
+    renderXpLeaderboard();
+  }
+
+  function renderVoiceLeaderboard() {
+    const el = document.getElementById('voiceLeaderboard');
+    if (!el) return;
+    const sorted = [..._allUsers].sort((a,b) => (b.totalVoiceMinutes||0)-(a.totalVoiceMinutes||0)).slice(0,10);
+    if (!sorted.length) { el.innerHTML = '<div class="adm-empty">Нет данных</div>'; return; }
+    el.innerHTML = sorted.map((u,i) => {
+      const mins = u.totalVoiceMinutes||0;
+      const av = u.avatarUrl
+        ? `<img class="av-mini" src="${u.avatarUrl}">`
+        : `<div class="av-mini-div">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>`;
+      return `<div class="voice-row">
+        <div class="voice-pos">${['🥇','🥈','🥉'][i]||i+1}</div>
+        ${av}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.85rem;font-weight:600">${u.displayName||u.username||'—'}</div>
+        </div>
+        <div class="voice-mins">${fmtNum(mins)} мин</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderXpLeaderboard() {
+    const el = document.getElementById('xpLeaderboard');
+    if (!el) return;
+    const sorted = [..._allUsers].sort((a,b) => (b.xp||0)-(a.xp||0)).slice(0,10);
+    if (!sorted.length) { el.innerHTML = '<div class="adm-empty">Нет данных</div>'; return; }
+    el.innerHTML = sorted.map((u,i) => {
+      const av = u.avatarUrl
+        ? `<img class="av-mini" src="${u.avatarUrl}">`
+        : `<div class="av-mini-div">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>`;
+      return `<div class="voice-row">
+        <div class="voice-pos">${['🥇','🥈','🥉'][i]||i+1}</div>
+        ${av}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.85rem;font-weight:600">${u.displayName||u.username||'—'}</div>
+          <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim)">Ур. ${u.level||0}</div>
+        </div>
+        <div class="voice-mins" style="color:var(--green)">${fmtNum(u.xp||0)} XP</div>
+      </div>`;
+    }).join('');
+  }
+
+  async function givePrizesToVoiceTop() {
+    if (!confirm('Выдать 500 монет топ-10 по голосовым?')) return;
+    const top10 = [..._allUsers].sort((a,b) => (b.totalVoiceMinutes||0)-(a.totalVoiceMinutes||0)).slice(0,10);
+    try {
+      for (const u of top10) {
+        await DB.updateUser(u.discordId||u.id, { currency: firebase.firestore.FieldValue.increment(500) });
+        await DB.writeLog('currency', u.displayName||u.username, '+500', 'Приз за активность в войсе', GS_AUTH.getUser()?.displayName||'Admin');
+      }
+      showToast('🏆','Призы выданы',`+500 монет → ${top10.length} игрокам`);
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── LOGS ────────────────────────────────────
+  function filterLogs() { renderLogs(); }
+
+  function renderLogs() {
+    const el = document.getElementById('logsList');
+    if (!el) return;
+    const typeF  = document.getElementById('logTypeFilter')?.value||'';
+    const searchF= (document.getElementById('logSearch')?.value||'').toLowerCase();
+    const filtered = _allLogs.filter(l =>
+      (!typeF || l.type === typeF) &&
+      (!searchF || (l.targetUsername||'').toLowerCase().includes(searchF) || (l.byWhom||'').toLowerCase().includes(searchF))
+    );
+    safeSet('logCountLabel', filtered.length + ' записей');
+    if (!filtered.length) { el.innerHTML = '<div class="adm-empty">Нет логов</div>'; return; }
+    const colorMap = {xp:'xp',currency:'currency',elo:'elo',role:'role',warn:'warn',achievement:'achievement',purchase:'purchase',event_finish:'event_finish',daily_bonus:'daily_bonus'};
+    el.innerHTML = filtered.slice(0,100).map(l => `
+      <div class="log-item">
+        <div class="log-dot ${colorMap[l.type]||''}"></div>
+        <div class="log-body">
+          <div class="log-main">${l.targetUsername||'—'} · <span style="color:var(--text-dim);font-size:.82rem">${l.reason||''}</span></div>
+          <div class="log-meta">${l.type} · от ${l.byWhom||'?'} · ${timeAgo(l.createdAt)}</div>
+        </div>
+        <div class="log-change" style="color:${(l.change||'').startsWith('-')?'var(--red)':'var(--green)'}">${l.change||''}</div>
+      </div>`).join('');
+  }
+
+  // ─── SETTINGS ────────────────────────────────
+  function applyConfigToForm() {
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
+    set('cfgXpMsg',        _config.xpPerMessage);
+    set('cfgXpVoice',      _config.xpPer10MinVoice);
+    set('cfgCurrMsg',      _config.currencyPerMessage);
+    set('cfgCurrVoice',    _config.currencyPer10Min);
+    set('cfgMinVoice',     _config.minUsersInVoice);
+    set('cfgForbiddenWords', (_config.forbiddenRoleWords||[]).join(', '));
+    set('ecoDailyBonus',   _config.dailyBonus);
+    set('ecoAchievBonus',  _config.achievementBonus);
+    set('ecoLvlMult',      _config.levelUpMultiplier);
+    set('ecoEventPart',    _config.eventParticipation);
+    set('ecoEventWin',     _config.eventWinBonus);
+
+    const micToggle = document.getElementById('cfgMicToggle');
+    if (micToggle) micToggle.classList.toggle('on', !!_config.requireMic);
+
+    renderGlobalBoost();
+  }
+
+  function renderSettings() { applyConfigToForm(); }
+  function renderEconomy()  { applyConfigToForm(); }
+
+  function renderGlobalBoost() {
+    const el = document.getElementById('globalBoostDisplay');
+    if (!el) return;
+    const mult = _config.globalXpMultiplier || 1;
+    const exp  = _config.globalXpMultiplierExpiresAt;
+    if (mult <= 1 || !exp) {
+      el.className = 'boost-global-inactive';
+      el.textContent = 'Нет активного буста. Настройте ниже и нажмите «Применить».';
+    } else {
+      const expiresAt = exp.toDate ? exp.toDate() : new Date(exp);
+      el.className = 'boost-global-card';
+      el.innerHTML = `<div class="boost-global-mult">×${mult}</div>
+        <div class="boost-global-info">
+          <div class="boost-global-label">Глобальный XP-буст активен</div>
+          <div class="boost-global-val">Истекает ${expiresAt.toLocaleString('ru-RU')}</div>
+        </div>`;
+    }
+    safeSet('statsXpMult', `×${mult}`);
+    safeSet('statsXpUntil', mult > 1 && exp ? 'активен' : 'неактивен');
+  }
+
+  async function setGlobalBoost() {
+    const mult = parseFloat(document.getElementById('boostMultiplier').value);
+    const exp  = document.getElementById('boostExpires').value;
+    if (!exp && mult > 1) return showToast('❌','Ошибка','Укажите дату истечения',true);
+    try {
+      await DB.setConfig({ globalXpMultiplier: mult, globalXpMultiplierExpiresAt: exp ? new Date(exp).toISOString() : null });
+      _config.globalXpMultiplier = mult;
+      _config.globalXpMultiplierExpiresAt = exp;
+      renderGlobalBoost();
+      showToast('⚡','Буст применён',`×${mult} XP активирован`);
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  async function clearGlobalBoost() {
+    await DB.setConfig({ globalXpMultiplier: 1, globalXpMultiplierExpiresAt: null });
+    _config.globalXpMultiplier = 1;
+    _config.globalXpMultiplierExpiresAt = null;
+    renderGlobalBoost();
+    showToast('✅','Буст сброшен','');
+  }
+
+  async function saveXpSettings() {
+    const get = id => { const el = document.getElementById(id); return el ? Number(el.value) : null; };
+    const micToggle = document.getElementById('cfgMicToggle');
+    try {
+      await DB.setConfig({
+        xpPerMessage:        get('cfgXpMsg'),
+        xpPer10MinVoice:     get('cfgXpVoice'),
+        currencyPerMessage:  get('cfgCurrMsg'),
+        currencyPer10Min:    get('cfgCurrVoice'),
+        minUsersInVoice:     get('cfgMinVoice'),
+        requireMic:          micToggle?.classList.contains('on') ?? true,
+      });
+      showToast('💾','Сохранено','Настройки XP обновлены');
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  async function saveForbiddenWords() {
+    const raw = document.getElementById('cfgForbiddenWords').value;
+    const words = raw.split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
+    try {
+      await DB.setConfig({ forbiddenRoleWords: words });
+      showToast('💾','Сохранено',`${words.length} слов сохранено`);
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  async function saveEconomy() {
+    const get = id => { const el = document.getElementById(id); return el ? Number(el.value) : null; };
+    try {
+      await DB.setConfig({
+        dailyBonus:          get('ecoDailyBonus'),
+        achievementBonus:    get('ecoAchievBonus'),
+        levelUpMultiplier:   get('ecoLvlMult'),
+        eventParticipation:  get('ecoEventPart'),
+        eventWinBonus:       get('ecoEventWin'),
+      });
+      showToast('💾','Сохранено','Экономика обновлена');
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  // ─── Modal helpers ───────────────────────────
+  function openModal(id)  { document.getElementById(id)?.classList.add('open'); }
+  function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+
+  // ─── Toast ───────────────────────────────────
+  let _tt;
+  function showToast(icon, title, sub, err=false) {
+    const t = document.getElementById('toast');
+    t.className = 'toast' + (err ? ' err' : '');
+    document.getElementById('toastIcon').textContent  = icon;
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastTitle').style.color = err ? 'var(--red)' : 'var(--green)';
+    document.getElementById('toastSub').textContent   = sub;
+    clearTimeout(_tt); _tt = setTimeout(() => t.classList.add('hidden'), 3500);
+  }
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(o =>
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
+  );
+
+  return {
+    init, refreshAll, setSection,
+    searchUsers, goUserPage,
+    openGive, confirmGive,
+    openRole, confirmRoleChange,
+    openAch, confirmGiveAch,
+    quickWarn, removeWarn, issueWarn,
+    renderEvents, openCreateEvent, deleteEvent, openFinishEvent,
+    renderForum, searchForum, togglePin, deleteTopic, openCreateForumTopic, confirmCreateForumTopic,
+    loadShopSection, openCreateShopItem, editShopItem, onShopTypeChange, saveShopItem, deleteShopItem,
+    setReportFilter, openReportModal, confirmReportClose,
+    sendAnnouncement,
+    givePrizesToVoiceTop,
+    filterLogs,
+    setGlobalBoost, clearGlobalBoost, saveXpSettings, saveForbiddenWords, saveEconomy,
+    openModal, closeModal, showToast,
+  };
+})();
+
+// ── Boot ─────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait for nav inject to finish
+  setTimeout(() => ADM.init(), 100);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Авторизация Discord</title>
+</head>
+<body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
+    <div>Авторизация... Окно закроется автоматически.</div>
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+
+            if (!code) {
+                document.body.innerHTML = '<div style="color:red;">Ошибка: не передан код авторизации.</div>';
+                return;
+            }
+
+            // Проверяем, что окно открыто родителем (есть opener)
+            if (window.opener) {
+                // Отправляем данные родительскому окну
+                window.opener.postMessage({
+                    type: 'discord_auth',
+                    code: code,
+                    state: state
+                }, window.location.origin);
+
+                // Закрываем это окно
+                window.close();
+            } else {
+                // Фоллбек: если окно открыли не поп-апом (напрямую), покажем код для отладки
+                document.body.innerHTML = `
+                    <div>
+                        <p>Код авторизации получен, но окно не было открыто как popup.</p>
+                        <p>Скопируйте код и закройте страницу:</p>
+                        <textarea rows="4" cols="50" readonly>${code}</textarea>
+                    </div>
+                `;
+            }
+        })();
+    </script>
+</body>
+</html>

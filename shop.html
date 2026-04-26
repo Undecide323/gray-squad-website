@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">c:\Users\Undecide\Desktop\gray-squad\discord-bot\404.html
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gray Squad — Магазин</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+/* ── LAYOUT ── */
+.shop-layout{display:grid;grid-template-columns:1fr 290px;gap:1.75rem;align-items:start;}
+.shop-left{display:flex;flex-direction:column;gap:2rem;}
+.shop-right{display:flex;flex-direction:column;gap:1.25rem;}
+
+/* ── BALANCE ── */
+.balance-pill{display:flex;align-items:center;gap:.6rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.55rem 1.1rem;position:relative;overflow:hidden;flex-shrink:0;}
+.balance-pill::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+.balance-label{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.balance-val{font-family:var(--font-title);font-size:1.5rem;font-weight:700;color:var(--gold);line-height:1;}
+
+/* ── CATEGORY FILTER ── */
+.cat-filter{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.25rem;}
+.cat-btn{display:flex;align-items:center;gap:5px;padding:.38rem .9rem;font-family:var(--font-title);font-size:.85rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--surface);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text-dim);transition:all .2s;}
+.cat-btn:hover{border-color:rgba(255,255,255,.15);color:var(--text);}
+.cat-btn.active{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.35);color:var(--text);}
+.cat-cnt{font-family:var(--font-mono);font-size:.6rem;color:inherit;opacity:.7;}
+
+/* ── SHOP GRID ── */
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;}
+
+/* ── ITEM CARD ── */
+.item-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;transition:border-color .25s,transform .25s;display:flex;flex-direction:column;}
+.item-card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-3px);}
+.item-card.featured{border-color:rgba(255,193,7,.3);}
+.item-card.featured:hover{border-color:rgba(255,193,7,.5);}
+.item-card.rare-card{border-color:rgba(163,53,238,.3);}
+.item-card.rare-card:hover{border-color:rgba(163,53,238,.5);}
+
+.item-top-badge{position:absolute;top:10px;right:10px;z-index:2;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.08em;padding:2px 7px;border-radius:4px;text-transform:uppercase;}
+.badge-new{background:rgba(40,167,69,.15);color:var(--green);border:1px solid rgba(40,167,69,.3);}
+.badge-hot{background:rgba(220,53,69,.15);color:var(--red);border:1px solid rgba(220,53,69,.3);}
+.badge-rare{background:rgba(163,53,238,.15);color:#A335EE;border:1px solid rgba(163,53,238,.3);}
+.badge-limited{background:rgba(255,193,7,.12);color:var(--gold);border:1px solid rgba(255,193,7,.3);}
+
+.item-visual{height:110px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;position:relative;overflow:hidden;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border);}
+.item-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,var(--glow,rgba(220,53,69,.08)) 0%,transparent 70%);}
+.item-visual-inner{position:relative;z-index:1;transition:transform .25s;}
+.item-card:hover .item-visual-inner{transform:scale(1.08);}
+
+.item-body{padding:1rem;flex:1;display:flex;flex-direction:column;gap:.45rem;}
+.item-type{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.item-name{font-family:var(--font-title);font-size:1.05rem;font-weight:700;letter-spacing:.03em;line-height:1.2;}
+.item-desc{font-size:.78rem;color:var(--text-dim);line-height:1.5;flex:1;}
+
+.item-footer{padding:.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.item-price{font-family:var(--font-title);font-size:1.2rem;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:4px;}
+.item-price small{font-size:.7rem;color:var(--text-dim);font-weight:400;}
+
+.btn-buy{padding:.38rem .9rem;font-family:var(--font-title);font-size:.85rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.btn-buy-red{background:var(--red);color:#fff;box-shadow:0 3px 12px rgba(220,53,69,.3);}.btn-buy-red:hover{background:#e8404f;box-shadow:0 4px 18px rgba(220,53,69,.45);}
+.btn-buy-gold{background:rgba(255,193,7,.15);color:var(--gold);border:1px solid rgba(255,193,7,.35);}.btn-buy-gold:hover{background:rgba(255,193,7,.25);}
+.btn-buy-gray{background:rgba(255,255,255,.06);color:var(--text-dim);border:1px solid var(--border);}
+.btn-buy-gray:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ── LOOTBOX ── */
+.lootbox-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+.lootbox-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:center;gap:1.1rem;padding:1.25rem;transition:border-color .25s,transform .25s;}
+.lootbox-card:hover{transform:translateY(-2px);}
+.lootbox-card.lb-rare{border-color:rgba(163,53,238,.3);}.lootbox-card.lb-rare:hover{border-color:rgba(163,53,238,.5);}
+.lootbox-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.lootbox-card.lb-common::before{background:linear-gradient(90deg,var(--red),transparent);}
+.lootbox-card.lb-rare::before{background:linear-gradient(90deg,#A335EE,transparent);}
+.lb-icon{font-size:2.5rem;flex-shrink:0;transition:transform .25s;}
+.lootbox-card:hover .lb-icon{transform:rotate(10deg) scale(1.1);}
+.lb-info{flex:1;min-width:0;}
+.lb-name{font-family:var(--font-title);font-size:1.1rem;font-weight:700;margin-bottom:3px;}
+.lb-desc{font-size:.77rem;color:var(--text-dim);line-height:1.5;margin-bottom:.6rem;}
+.lb-foot{display:flex;align-items:center;justify-content:space-between;}
+.lb-price{font-family:var(--font-title);font-size:1.15rem;font-weight:700;color:var(--gold);}
+
+/* ── BOOSTS ── */
+.boost-row{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+.boost-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;transition:border-color .25s,transform .25s;display:flex;flex-direction:column;gap:.75rem;}
+.boost-card:hover{transform:translateY(-2px);}
+.boost-card.x2{border-color:rgba(40,167,69,.3);}.boost-card.x2:hover{border-color:rgba(40,167,69,.5);}
+.boost-card.x3{border-color:rgba(255,193,7,.3);}.boost-card.x3:hover{border-color:rgba(255,193,7,.5);}
+.boost-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.boost-card.x2::before{background:linear-gradient(90deg,var(--green),transparent);}
+.boost-card.x3::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.boost-top{display:flex;align-items:center;gap:.85rem;}
+.boost-mult{font-family:var(--font-title);font-size:2.5rem;font-weight:700;line-height:1;flex-shrink:0;}
+.boost-card.x2 .boost-mult{color:var(--green);text-shadow:0 0 20px rgba(40,167,69,.4);}
+.boost-card.x3 .boost-mult{color:var(--gold);text-shadow:0 0 20px rgba(255,193,7,.4);}
+.boost-name{font-family:var(--font-title);font-size:1rem;font-weight:700;margin-bottom:2px;}
+.boost-sub{font-size:.77rem;color:var(--text-dim);}
+.boost-foot{display:flex;align-items:center;justify-content:space-between;}
+.boost-price{font-family:var(--font-title);font-size:1.15rem;font-weight:700;color:var(--gold);}
+
+/* ── SIDEBAR ── */
+.side-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.side-head{padding:.8rem 1.1rem;border-bottom:1px solid var(--border);font-family:var(--font-title);font-size:.95rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.side-head::before{content:'';display:block;width:3px;height:1em;background:var(--red);border-radius:2px;}
+
+.hist-row{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);transition:background .15s;}
+.hist-row:last-child{border-bottom:none;}.hist-row:hover{background:rgba(255,255,255,.02);}
+.hist-ico{font-size:1.2rem;flex-shrink:0;}
+.hist-info{flex:1;min-width:0;}.hist-name{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.hist-date{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);}
+.hist-price{font-family:var(--font-mono);font-size:.78rem;color:var(--red);flex-shrink:0;}
+
+/* ── DAILY ── */
+.daily-card{background:var(--surface);border:1px solid rgba(255,193,7,.25);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;text-align:center;}
+.daily-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.daily-icon{font-size:2.5rem;margin-bottom:.6rem;display:block;}
+.daily-title{font-family:var(--font-title);font-size:1.1rem;font-weight:700;margin-bottom:.35rem;color:var(--gold);}
+.daily-desc{font-size:.8rem;color:var(--text-dim);line-height:1.5;margin-bottom:1rem;}
+.btn-daily{width:100%;padding:.55rem;font-family:var(--font-title);font-size:1rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,193,7,.12);border:1px solid rgba(255,193,7,.35);color:var(--gold);border-radius:8px;cursor:pointer;transition:all .2s;}
+.btn-daily:hover{background:rgba(255,193,7,.22);}
+.btn-daily:disabled{opacity:.45;cursor:not-allowed;}
+.daily-timer{font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);margin-top:.5rem;}
+
+/* ── ACTIVE BOOSTS ── */
+.boost-active-row{display:flex;align-items:center;justify-content:space-between;padding:.65rem 1.1rem;background:rgba(40,167,69,.06);border:1px solid rgba(40,167,69,.18);border-radius:8px;margin:.75rem 1.1rem;}
+.ba-mult{font-family:var(--font-title);font-size:1rem;font-weight:700;color:var(--green);}
+.ba-info-lbl{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);}
+.ba-info-val{font-family:var(--font-mono);font-size:.75rem;color:var(--green);}
+.no-boosts{padding:1rem;text-align:center;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);}
+
+/* ── BUY MODAL ── */
+.modal-icon{font-size:3.5rem;margin-bottom:.75rem;display:block;}
+.modal-item-name{font-family:var(--font-title);font-size:1.4rem;font-weight:700;margin-bottom:.4rem;}
+.modal-item-desc{font-size:.85rem;color:var(--text-dim);line-height:1.6;margin-bottom:1.25rem;}
+.modal-price-box{display:flex;align-items:center;justify-content:center;gap:1.5rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.85rem;}
+.mp-col{text-align:center;}
+.mp-label{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.mp-val{font-family:var(--font-title);font-size:1.3rem;font-weight:700;margin-top:2px;}
+.mp-divider{font-size:1.5rem;color:var(--border);}
+
+/* ── COLOR PICKER ── */
+.color-row{display:flex;align-items:center;gap:.6rem;}
+.color-swatch{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);cursor:pointer;flex-shrink:0;}
+
+@media(max-width:1100px){.shop-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){.shop-layout{grid-template-columns:1fr;}}
+@media(max-width:600px){.shop-grid{grid-template-columns:1fr 1fr;}.lootbox-row,.boost-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<div id="tabs-root"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">// clan store</div>
+      <div class="page-title">Магазин</div>
+    </div>
+    <div class="balance-pill" id="balancePill" style="display:none">
+      <span style="font-size:1.2rem">💰</span>
+      <div>
+        <div class="balance-label">Ваш баланс</div>
+        <div class="balance-val" id="balanceVal">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY FILTER -->
+  <div class="cat-filter">
+    <button class="cat-btn active" onclick="filterCat('all',this)">Все</button>
+    <button class="cat-btn" onclick="filterCat('role',this)">🎭 Роли</button>
+    <button class="cat-btn" onclick="filterCat('cosmetic',this)">🎨 Косметика</button>
+    <button class="cat-btn" onclick="filterCat('boost',this)">⚡ Бусты</button>
+    <button class="cat-btn" onclick="filterCat('lootbox',this)">📦 Лутбоксы</button>
+    <button class="cat-btn" onclick="filterCat('access',this)">🔑 Доступ</button>
+  </div>
+
+  <div class="shop-layout">
+
+    <!-- LEFT -->
+    <div class="shop-left">
+
+      <!-- MAIN ITEMS GRID -->
+      <div>
+        <div class="sec-label">Товары</div>
+        <div class="shop-grid">
+
+          <!-- Discord Role -->
+          <div class="item-card" data-cat="role">
+            <div class="item-top-badge badge-hot">🔥 Популярное</div>
+            <div class="item-visual" style="--glow:rgba(88,101,242,.15)">
+              <div class="item-visual-inner">🎭</div>
+            </div>
+            <div class="item-body">
+              <div class="item-type">discord_role</div>
+              <div class="item-name">Роль на Discord</div>
+              <div class="item-desc">Готовая роль на сервере. Выдаётся ботом автоматически после покупки.</div>
+            </div>
+            <div class="item-footer">
+              <div class="item-price">750 <small>монет</small></div>
+              <button class="btn-buy btn-buy-red" onclick="openBuy('Роль на Discord','🎭',750,'discord_role')">Купить</button>
+            </div>
+          </div>
+
+          <!-- Custom Role -->
+          <div class="item-card featured" data-cat="role">
+            <div class="item-top-badge badge-rare">⭐ Редкое</div>
+            <div class="item-visual" style="--glow:rgba(163,53,238,.15)">
+              <div class="item-visual-inner">👑</div>
+            </div>
+            <div class="item-body">
+              <div class="item-type">custom_role</div>
+              <div class="item-name">Эксклюзивная роль</div>
+              <div class="item-desc">Своё название и цвет. Бот создаёт уникальную роль лично для тебя.</div>
+            </div>
+            <div class="item-footer">
+              <div class="item-price">2 000 <small>монет</small></div>
+              <button class="btn-buy btn-buy-gold" onclick="openBuy('Эксклюзивная роль','👑',2000,'custom_role')">Купить</button>
+            </div>
+          </div>
+
+          <!-- Custom Color -->
+          <div class="item-card" data-cat="cosmetic">
+            <div class="item-top-badge badge-new">✨ Новинка</div>
+            <div class="item-visual" style="--glow:rgba(220,53,69,.12)">
+              <div class="item-visual-inner">🎨</div>
+            </div>
+            <div class="item-body">
+              <div class="item-type">custom_color</div>
+              <div class="item-name">Цвет ника</div>
+              <div class="item-desc">Выбери любой HEX-цвет для своего ника на сайте. Навсегда.</div>
+            </div>
+            <div class="item-footer">
+              <div class="item-price">500 <small>монет</small></div>
+              <button class="btn-buy btn-buy-red" onclick="openBuy('Цвет ника','🎨',500,'custom_color')">Купить</button>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div class="item-card" data-cat="cosmetic">
+            <div class="item-visual" style="--glow:rgba(255,193,7,.1)">
+              <div class="item-visual-inner">🏷️</div>
+            </div>
+            <div class="item-body">
+              <div class="item-type">title</div>
+              <div class="item-name">Титул</div>
+              <div class="item-desc">Уникальный титул под ником в профиле. Любой текст (с фильтром).</div>
+            </div>
+            <div class="item-footer">
+              <div class="item-price">300 <small>монет</small></div>
+              <button class="btn-buy btn-buy-red" onclick="openBuy('Титул','🏷️',300,'title')">Купить</button>
+            </div>
+          </div>
+
+          <!-- Nick change -->
+          <div class="item-card" data-cat="cosmetic">
+            <div class="item-visual" style="--glow:rgba(40,167,69,.08)">
+              <div class="item-visual-inner">✏️</div>
+            </div>
+            <div class="item-body">
+              <div class="item-type">nick_change</div>
+              <div class="item-name">Смена ника</div>
+              <div class="item-desc">Разово поменять отображаемый ник на сайте без смены аккаунта.</div>
+            </div>
+            <div class="item-footer">
+              <div class="item-price">100 <small>монет</small></div>
+              <button class="btn-buy btn-buy-red" onclick="openBuy('Смена ника','✏️',100,'nick_change')">Купить</button>
+            </div>
+          </div>
+
+          <!-- Create Event -->
+          <div class="item-card featured" data-cat="access">
+            <div class="item-top-badge badge-limited">⏳ Ограничено</div>
+            <div class="item-visual" style="--glow:rgba(255,193,7,.12)">
+              <div class="item-visual-inner">📅</div>
+            </div>
+            <div class="item-body">
+              <div class="item-type">create_event</div>
+              <div class="item-name">Право создавать ивенты</div>
+              <div class="item-desc">Разблокирует возможность создавать и управлять ивентами в сообществе.</div>
+            </div>
+            <div class="item-footer">
+              <div class="item-price">1 000 <small>монет</small></div>
+              <button class="btn-buy btn-buy-gold" onclick="openBuy('Право создавать ивенты','📅',1000,'create_event')">Купить</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BOOSTS -->
+      <div data-section="boost">
+        <div class="sec-label">Бусты опыта</div>
+        <div class="boost-row">
+          <div class="boost-card x2" data-cat="boost">
+            <div class="boost-top">
+              <div class="boost-mult">×2</div>
+              <div>
+                <div class="boost-name">Double XP</div>
+                <div class="boost-sub">Удвоение опыта на 7 дней. Работает со всеми источниками XP.</div>
+              </div>
+            </div>
+            <div class="boost-foot">
+              <div class="boost-price">800 монет</div>
+              <button class="btn-buy btn-buy-red" onclick="openBuy('Double XP (7 дней)','⚡',800,'double_xp')">Купить</button>
+            </div>
+          </div>
+          <div class="boost-card x3" data-cat="boost">
+            <div class="boost-top">
+              <div class="boost-mult">×3</div>
+              <div>
+                <div class="boost-name">Triple XP</div>
+                <div class="boost-sub">Утроение опыта на 7 дней. Стакается с глобальным бустом.</div>
+              </div>
+            </div>
+            <div class="boost-foot">
+              <div class="boost-price">1 500 монет</div>
+              <button class="btn-buy btn-buy-gold" onclick="openBuy('Triple XP (7 дней)','🔥',1500,'triple_xp')">Купить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOOTBOXES -->
+      <div data-section="lootbox">
+        <div class="sec-label">Лутбоксы</div>
+        <div class="lootbox-row">
+          <div class="lootbox-card lb-common" data-cat="lootbox">
+            <div class="lb-icon">📦</div>
+            <div class="lb-info">
+              <div class="lb-name">Лутбокс Обычный</div>
+              <div class="lb-desc">Случайный предмет из общего пула — роли, валюта, косметика.</div>
+              <div class="lb-foot">
+                <div class="lb-price">150 монет</div>
+                <button class="btn-buy btn-buy-red" onclick="openBuy('Лутбокс Обычный','📦',150,'lootbox')">Открыть</button>
+              </div>
+            </div>
+          </div>
+          <div class="lootbox-card lb-rare" data-cat="lootbox">
+            <div class="lb-icon">🎁</div>
+            <div class="lb-info">
+              <div class="lb-name">Лутбокс Редкий</div>
+              <div class="lb-desc">Повышенный шанс на эксклюзивные роли и редкие предметы.</div>
+              <div class="lb-foot">
+                <div class="lb-price">500 монет</div>
+                <button class="btn-buy btn-buy-gold" onclick="openBuy('Лутбокс Редкий','🎁',500,'lootbox_rare')">Открыть</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /shop-left -->
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="shop-right">
+
+      <!-- Daily bonus -->
+      <div class="daily-card">
+        <span class="daily-icon">🎁</span>
+        <div class="daily-title">Ежедневный бонус</div>
+        <div class="daily-desc">Заходи каждый день и получай бесплатные монеты. Не пропускай стрик!</div>
+        <button class="btn-daily" id="dailyBtn" onclick="claimDaily()">Забрать +25 монет</button>
+        <div class="daily-timer" id="dailyTimer"></div>
+      </div>
+
+      <!-- Active boosts -->
+      <div class="side-card">
+        <div class="side-head">⚡ Активные бусты</div>
+        <div id="activeBoostsEl">
+          <div class="no-boosts">Нет активных бустов</div>
+        </div>
+      </div>
+
+      <!-- Purchase history -->
+      <div class="side-card">
+        <div class="side-head">История покупок</div>
+        <div id="historyEl">
+          <div style="padding:1.25rem;text-align:center;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim)">
+            Загрузка...
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ── BUY MODAL ── -->
+<div class="modal-overlay" id="buyModal">
+  <div class="modal">
+    <div class="modal-head">
+      Подтверждение покупки
+      <button class="modal-close" onclick="closeBuy()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center">
+      <span class="modal-icon" id="modalIcon">🎮</span>
+      <div class="modal-item-name" id="modalName"></div>
+      <div class="modal-item-desc" id="modalDesc"></div>
+
+      <!-- Custom Role fields -->
+      <div id="customRoleFields" style="display:none;text-align:left">
+        <div class="f-group">
+          <div class="f-label">Название роли</div>
+          <input class="f-input" id="crName" type="text" placeholder="Например: Ночной Волк" maxlength="32">
+        </div>
+        <div class="f-group" style="margin-top:.65rem">
+          <div class="f-label">Цвет роли</div>
+          <div class="color-row">
+            <input type="color" class="color-swatch" id="crColorPicker" value="#dc3545"
+              oninput="document.getElementById('crColorHex').value=this.value">
+            <input class="f-input" id="crColorHex" type="text" placeholder="#dc3545" style="flex:1"
+              oninput="document.getElementById('crColorPicker').value=this.value">
+          </div>
+        </div>
+      </div>
+
+      <!-- Title field -->
+      <div id="titleField" style="display:none;text-align:left;margin-top:.75rem">
+        <div class="f-group">
+          <div class="f-label">Ваш титул</div>
+          <input class="f-input" id="titleInput" type="text" placeholder="Например: ⚡ Молния" maxlength="24">
+        </div>
+      </div>
+
+      <!-- Custom color field -->
+      <div id="colorField" style="display:none;text-align:left;margin-top:.75rem">
+        <div class="f-group">
+          <div class="f-label">Цвет ника</div>
+          <div class="color-row">
+            <input type="color" class="color-swatch" id="nickColorPicker" value="#ffc107"
+              oninput="document.getElementById('nickColorHex').value=this.value">
+            <input class="f-input" id="nickColorHex" type="text" placeholder="#ffc107" style="flex:1"
+              oninput="document.getElementById('nickColorPicker').value=this.value">
+          </div>
+        </div>
+      </div>
+
+      <!-- Nick change field -->
+      <div id="nickField" style="display:none;text-align:left;margin-top:.75rem">
+        <div class="f-group">
+          <div class="f-label">Новый ник</div>
+          <input class="f-input" id="nickInput" type="text" placeholder="Желаемый ник" maxlength="32">
+        </div>
+      </div>
+
+      <div class="modal-price-box" style="margin-top:1.25rem">
+        <div class="mp-col">
+          <div class="mp-label">Цена</div>
+          <div class="mp-val" id="modalPrice" style="color:var(--red)">0</div>
+        </div>
+        <div class="mp-divider">→</div>
+        <div class="mp-col">
+          <div class="mp-label">Баланс после</div>
+          <div class="mp-val" id="modalAfter" style="color:var(--gold)">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeBuy()">Отмена</button>
+      <button class="btn-confirm" onclick="confirmBuy()">💰 Купить</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast">
+  <div class="toast-icon" id="toastIcon">✅</div>
+  <div>
+    <div class="toast-title" id="toastTitle"></div>
+    <div class="toast-sub" id="toastSub"></div>
+  </div>
+</div>
+
+<!-- FIREBASE + SHARED -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="assets/config.js"></script>
+<script>firebase.initializeApp(GS.firebase);</script>
+<script src="assets/auth.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+// ── STATE ───────────────────────────────────────────────────
+const shopUser = GS_AUTH.getUser();
+let currentBalance = 0;
+let currentItem    = null;
+
+// ── INIT ────────────────────────────────────────────────────
+if (shopUser) {
+  // Показать баланс
+  document.getElementById('balancePill').style.display = 'flex';
+
+  // Слушать профиль в реальном времени → обновлять баланс
+  DB.listenUser(shopUser.discordId || shopUser.id, user => {
+    currentBalance = user.currency || 0;
+    document.getElementById('balanceVal').textContent = fmtNum(currentBalance);
+    renderActiveBoosts(user);
+    renderDailyBtn(user);
+  });
+
+  // История покупок
+  loadHistory();
+} else {
+  document.getElementById('historyEl').innerHTML =
+    '<div style="padding:1.25rem;text-align:center;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim)">Войдите для просмотра</div>';
+  document.getElementById('activeBoostsEl').innerHTML =
+    '<div class="no-boosts">Войдите для просмотра</div>';
+  document.getElementById('dailyBtn').disabled = true;
+  document.getElementById('dailyBtn').textContent = '🔒 Войдите для получения';
+}
+
+// ── CATEGORY FILTER ─────────────────────────────────────────
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('[data-cat]').forEach(el => {
+    el.style.display = (cat === 'all' || el.dataset.cat === cat) ? '' : 'none';
+  });
+  ['boost','lootbox'].forEach(sec => {
+    const show = cat === 'all' || cat === sec;
+    document.querySelectorAll(`[data-section="${sec}"]`).forEach(el => el.style.display = show ? '' : 'none');
+  });
+}
+
+// ── DESCRIPTIONS ────────────────────────────────────────────
+const DESCS = {
+  discord_role: 'Готовая роль выдаётся ботом автоматически сразу после покупки.',
+  custom_role:  'Введи название и выбери цвет — бот создаст и выдаст роль только тебе.',
+  custom_color: 'Выбери любой цвет для своего ника на сайте. Отображается везде.',
+  title:        'Введи желаемый титул. Он появится под ником в профиле.',
+  nick_change:  'Разовая смена отображаемого ника. Аккаунт остаётся прежним.',
+  create_event: 'Разблокирует возможность создавать ивенты для всего сообщества.',
+  double_xp:    'Двойной опыт за всё: сообщения, голосовые, ивенты. Действует 7 дней.',
+  triple_xp:    'Тройной опыт за всё. Стакается с глобальным бустом. Действует 7 дней.',
+  lootbox:      'Случайный предмет из пула: валюта, роли, косметика. Удача решает!',
+  lootbox_rare: 'Повышенный шанс на редкие и эксклюзивные предметы.',
+};
+
+// ── OPEN BUY MODAL ───────────────────────────────────────────
+function openBuy(name, icon, price, type) {
+  if (!shopUser) { GS_AUTH.login(); return; }
+
+  currentItem = { name, icon, price, type };
+
+  document.getElementById('modalName').textContent  = name;
+  document.getElementById('modalIcon').textContent  = icon;
+  document.getElementById('modalDesc').textContent  = DESCS[type] || '';
+  document.getElementById('modalPrice').textContent = fmtNum(price);
+
+  const after = currentBalance - price;
+  const afterEl = document.getElementById('modalAfter');
+  afterEl.textContent  = after >= 0 ? fmtNum(after) : 'Недостаточно';
+  afterEl.style.color  = after >= 0 ? 'var(--gold)' : 'var(--red)';
+
+  // Доп. поля
+  document.getElementById('customRoleFields').style.display = type === 'custom_role' ? 'block' : 'none';
+  document.getElementById('titleField').style.display        = type === 'title'       ? 'block' : 'none';
+  document.getElementById('colorField').style.display        = type === 'custom_color'? 'block' : 'none';
+  document.getElementById('nickField').style.display         = type === 'nick_change' ? 'block' : 'none';
+
+  document.getElementById('buyModal').classList.add('open');
+}
+
+function closeBuy() { document.getElementById('buyModal').classList.remove('open'); }
+document.getElementById('buyModal').addEventListener('click', e => { if (e.target.id === 'buyModal') closeBuy(); });
+
+// ── CONFIRM PURCHASE ─────────────────────────────────────────
+async function confirmBuy() {
+  if (!currentItem || !shopUser) return;
+
+  const uid = shopUser.discordId || shopUser.id;
+
+  if (currentBalance < currentItem.price) {
+    showToast('❌', 'Недостаточно монет', 'Зарабатывай монеты в голосовых и за сообщения', true);
+    closeBuy();
+    return;
+  }
+
+  // Собрать доп. данные
+  let itemData = {};
+  if (currentItem.type === 'custom_role') {
+    const rName = document.getElementById('crName').value.trim();
+    if (!rName) { showToast('❌', 'Укажите название роли', '', true); return; }
+    itemData = { name: rName, color: document.getElementById('crColorHex').value || '#dc3545' };
+  } else if (currentItem.type === 'title') {
+    const tVal = document.getElementById('titleInput').value.trim();
+    if (!tVal) { showToast('❌', 'Введите титул', '', true); return; }
+    itemData = { title: tVal };
+  } else if (currentItem.type === 'custom_color') {
+    itemData = { color: document.getElementById('nickColorHex').value || '#ffc107' };
+  } else if (currentItem.type === 'nick_change') {
+    const nVal = document.getElementById('nickInput').value.trim();
+    if (!nVal) { showToast('❌', 'Введите новый ник', '', true); return; }
+    itemData = { nick: nVal };
+  }
+
+  try {
+    await DB.createPurchase({
+      userId:   uid,
+      itemId:   currentItem.type,
+      itemType: currentItem.type,
+      itemData,
+      price:    currentItem.price,
+    });
+
+    // nick_change применяем сразу на сайте
+    if (currentItem.type === 'nick_change' && itemData.nick) {
+      await DB.updateUser(uid, { displayName: itemData.nick });
+    }
+    // custom_color применяем сразу
+    if (currentItem.type === 'custom_color' && itemData.color) {
+      await DB.updateUser(uid, { customColor: itemData.color });
+    }
+    // title применяем сразу
+    if (currentItem.type === 'title' && itemData.title) {
+      await DB.updateUser(uid, { title: itemData.title });
+    }
+
+    closeBuy();
+    showToast('✅', 'Куплено!', `«${currentItem.name}» — списано ${fmtNum(currentItem.price)} монет`);
+    loadHistory();
+
+  } catch (e) {
+    showToast('❌', 'Ошибка покупки', e.message, true);
+  }
+}
+
+// ── HISTORY ──────────────────────────────────────────────────
+const ITEM_ICONS = {
+  discord_role:'🎭', custom_role:'👑', custom_color:'🎨', title:'🏷️',
+  nick_change:'✏️', create_event:'📅', double_xp:'⚡', triple_xp:'🔥',
+  lootbox:'📦', lootbox_rare:'🎁',
+};
+
+async function loadHistory() {
+  if (!shopUser) return;
+  const hist = await DB.getPurchaseHistory(shopUser.discordId || shopUser.id, 8);
+  const el   = document.getElementById('historyEl');
+
+  if (!hist.length) {
+    el.innerHTML = '<div style="padding:1.25rem;text-align:center;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim)">Нет покупок</div>';
+    return;
+  }
+
+  el.innerHTML = hist.map(h => `
+    <div class="hist-row">
+      <div class="hist-ico">${ITEM_ICONS[h.itemType] || '🛒'}</div>
+      <div class="hist-info">
+        <div class="hist-name">${h.itemType}</div>
+        <div class="hist-date">${timeAgo(h.createdAt)}</div>
+      </div>
+      <div class="hist-price">−${fmtNum(h.price)}</div>
+    </div>`).join('');
+}
+
+// ── ACTIVE BOOSTS ────────────────────────────────────────────
+function renderActiveBoosts(user) {
+  const el = document.getElementById('activeBoostsEl');
+  const mult = user.xpMultiplier || 1;
+  const exp  = user.xpMultiplierExpiresAt;
+
+  if (mult <= 1 || !exp) {
+    el.innerHTML = '<div class="no-boosts">Нет активных бустов</div>';
+    return;
+  }
+
+  const expiresAt = exp.toDate ? exp.toDate() : new Date(exp);
+  const left = expiresAt - Date.now();
+  if (left <= 0) { el.innerHTML = '<div class="no-boosts">Нет активных бустов</div>'; return; }
+
+  const days  = Math.floor(left / 86400000);
+  const hours = Math.floor((left % 86400000) / 3600000);
+  const label = days > 0 ? `${days}д ${hours}ч` : `${hours}ч`;
+
+  el.innerHTML = `
+    <div class="boost-active-row">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <span>⚡</span>
+        <div>
+          <div style="font-size:.82rem;font-weight:600">×${mult} XP</div>
+          <div class="ba-info-lbl">Осталось ${label}</div>
+        </div>
+      </div>
+      <div class="ba-mult">×${mult}</div>
+    </div>`;
+}
+
+// ── DAILY BONUS ───────────────────────────────────────────────
+function renderDailyBtn(user) {
+  const btn   = document.getElementById('dailyBtn');
+  const timer = document.getElementById('dailyTimer');
+  const last  = user.lastDailyBonus?.toDate?.() || null;
+
+  if (last) {
+    const diff = Date.now() - last;
+    if (diff < 86400000) {
+      btn.disabled = true;
+      btn.textContent = '✅ Уже забрано';
+      const left = 86400000 - diff;
+      const h = Math.floor(left / 3600000);
+      const m = Math.floor((left % 3600000) / 60000);
+      timer.textContent = `Следующий через ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      return;
+    }
+  }
+  btn.disabled = false;
+  btn.textContent = `Забрать +${25} монет`;
+  timer.textContent = '';
+}
+
+async function claimDaily() {
+  if (!shopUser) return;
+  const uid = shopUser.discordId || shopUser.id;
+  const result = await DB.claimDaily(uid);
+  if (result.ok) {
+    showToast('🎁', 'Ежедневный бонус!', `+${result.bonus} монет зачислено`);
+  } else {
+    showToast('⏳', 'Уже забрано', result.reason, true);
+  }
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+let _tt;
+function showToast(icon, title, sub, err=false) {
+  const t = document.getElementById('toast');
+  t.className = 'toast' + (err ? ' err' : '');
+  document.getElementById('toastIcon').textContent  = icon;
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastTitle').style.color = err ? 'var(--red)' : 'var(--green)';
+  document.getElementById('toastSub').textContent   = sub;
+  clearTimeout(_tt); _tt = setTimeout(() => t.classList.add('hidden'), 3500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gray Squad — Ивенты</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/events.css">
+</head>
+<body>
+
+<div id="nav-root"></div>
+<div id="tabs-root"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-eyebrow">// community events</div>
+      <div class="page-title">Ивенты</div>
+    </div>
+    <button class="btn btn-red" id="createBtn" style="display:none" onclick="EV.openCreateModal()">+ Создать ивент</button>
+  </div>
+
+  <div class="events-layout">
+
+    <!-- LEFT -->
+    <div class="ev-left">
+
+      <!-- LIVE -->
+      <div id="liveSection" style="display:none">
+        <div class="sec-label">🔴 Идёт сейчас</div>
+        <div class="live-banner" id="liveBanner"></div>
+      </div>
+
+      <!-- UPCOMING -->
+      <div>
+        <div class="sec-label g" style="margin-bottom:.75rem">⏳ Предстоящие</div>
+      <div class="filter-tabs" id="filterTabs">
+        <button class="ftab active" data-game="all">Все</button>
+        <!-- сюда будут подгружаться динамические фильтры -->
+      </div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;margin-top:.85rem" id="upcomingList">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+      <!-- FINISHED -->
+      <div>
+        <div class="sec-label" style="color:var(--text-dim)">📁 Прошедшие</div>
+        <div style="display:flex;flex-direction:column;gap:.75rem" id="finishedList">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="ev-right">
+      <!-- Управление играми (только creator) -->
+<div class="side-card" id="gameFiltersPanel" style="display:none">
+  <div class="side-head">🎮 Управление играми</div>
+  <div class="card-body" style="padding:1rem">
+    <div id="gamesManageList" style="margin-bottom:1rem; max-height:200px; overflow-y:auto">
+      <!-- список игр с кнопками удаления -->
+    </div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
+      <input type="text" id="newGameName" placeholder="Название" class="inp" style="flex:1; min-width:100px">
+      <input type="text" id="newGameId" placeholder="id (cs2)" class="inp" style="width:100px">
+      <input type="text" id="newGameIcon" placeholder="Иконка 🎮" class="inp" style="width:70px">
+      <button class="btn btn-red btn-sm" id="addGameBtn">➕</button>
+    </div>
+  </div>
+</div>
+
+      <!-- Calendar -->
+      <div class="side-card">
+        <div class="side-head">📅 Календарь</div>
+        <div class="mini-cal">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="EV.calPrev()">‹</button>
+            <div class="cal-month" id="calMonth"></div>
+            <button class="cal-nav" onclick="EV.calNext()">›</button>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-day-name">Пн</div><div class="cal-day-name">Вт</div><div class="cal-day-name">Ср</div>
+            <div class="cal-day-name">Чт</div><div class="cal-day-name">Пт</div><div class="cal-day-name">Сб</div><div class="cal-day-name">Вс</div>
+            <div id="calGrid" style="display:contents"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Events (авторизованным) -->
+      <div class="side-card" id="myEventsCard" style="display:none">
+        <div class="side-head">Мои ивенты</div>
+        <div id="myEventsList">
+          <div style="padding:1rem;text-align:center;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim)">Загрузка...</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="side-card">
+        <div class="side-head">Статистика</div>
+        <div class="side-stat-grid">
+          <div class="ss"><div class="ss-lbl">Идёт</div><div class="ss-val" id="statLive" style="color:var(--red)">—</div></div>
+          <div class="ss"><div class="ss-lbl">Предстоит</div><div class="ss-val" id="statUp" style="color:var(--gold)">—</div></div>
+          <div class="ss"><div class="ss-lbl">Всего</div><div class="ss-val" id="statTotal">—</div></div>
+          <div class="ss"><div class="ss-lbl">Моих</div><div class="ss-val" id="statMine" style="color:var(--green)">—</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── CREATE MODAL ── -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal" style="width:580px">
+    <div class="modal-head">📅 Создать ивент <button class="modal-close" onclick="EV.closeCreateModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="f-group"><div class="f-label">Название *</div><input class="f-input" id="evTitle" type="text" placeholder="Турнир CS2 — Майский кубок" maxlength="80"></div>
+      <div class="f-row">
+        <div class="f-group"><div class="f-label">Игра</div><input class="f-input" id="evGame" type="text" placeholder="CS2, Valorant..."></div>
+        <div class="f-group"><div class="f-label">Иконка (emoji)</div><input class="f-input" id="evIcon" type="text" placeholder="🎮" maxlength="4"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-group"><div class="f-label">Дата начала *</div><input class="f-input" id="evStart" type="datetime-local"></div>
+        <div class="f-group"><div class="f-label">Дата окончания</div><input class="f-input" id="evEnd" type="datetime-local"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-group"><div class="f-label">Лимит участников</div><input class="f-input" id="evMax" type="number" placeholder="16" min="0"></div>
+      </div>
+      <div class="f-group"><div class="f-label">Описание</div><textarea class="f-input" id="evDesc" rows="2" placeholder="Формат, правила, требования..."></textarea></div>
+      <div class="f-label" style="margin-top:.25rem">Призы</div>
+      <div class="f-row3">
+        <div class="f-group"><div class="f-label">ELO</div><input class="f-input" id="prElo" type="number" placeholder="500" min="0"></div>
+        <div class="f-group"><div class="f-label">Монеты</div><input class="f-input" id="prCoin" type="number" placeholder="1000" min="0"></div>
+        <div class="f-group"><div class="f-label">XP</div><input class="f-input" id="prXp" type="number" placeholder="200" min="0"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="EV.closeCreateModal()">Отмена</button>
+      <button class="btn-confirm" onclick="EV.submitCreate()">📅 Создать</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── FINISH MODAL ── -->
+<div class="modal-overlay" id="finishModal">
+  <div class="modal">
+    <div class="modal-head">🏁 Завершить: <span id="finishEventName"></span><button class="modal-close" onclick="EV.closeFinishModal()">✕</button></div>
+    <div class="modal-body">
+      <div style="font-size:.85rem;color:var(--text-dim);margin-bottom:.5rem">Отметьте участников которые присутствовали — им будут выданы призы:</div>
+      <div id="finishParticipants" style="max-height:300px;overflow-y:auto"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="EV.closeFinishModal()">Отмена</button>
+      <button class="btn-confirm green" onclick="EV.confirmFinish()">🏆 Выдать призы</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast">
+  <div class="toast-icon" id="toastIcon">✅</div>
+  <div><div class="toast-title" id="toastTitle"></div><div class="toast-sub" id="toastSub"></div></div>
+</div>
+
+<!-- FIREBASE + SHARED -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="assets/config.js"></script>
+<script>firebase.initializeApp(GS.firebase);</script>
+<script src="assets/auth.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/nav.js"></script>
+<script src="assets/events.js"></script>
+<script>
+  // Показать «Мои ивенты» если залогинен
+  if (GS_AUTH.isLoggedIn()) {
+    document.getElementById('myEventsCard').style.display = '';
+  }
+</script>
+</body>
+</html>

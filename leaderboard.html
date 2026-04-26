@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gray Squad — Лидерборд</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.lb-layout{display:grid;grid-template-columns:1fr 260px;gap:1.75rem;align-items:start;}
+.lb-left,.lb-right{display:flex;flex-direction:column;gap:1.5rem;}
+/* Podium */
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:.75rem;align-items:end;}
+.pod{border-radius:14px;overflow:hidden;display:flex;flex-direction:column;align-items:center;padding:1.25rem 1rem 1rem;position:relative;transition:transform .25s;cursor:pointer;text-decoration:none;color:inherit;}
+.pod:hover{transform:translateY(-4px);}
+.pod.p1{background:linear-gradient(180deg,rgba(255,193,7,.12),rgba(255,193,7,.04));border:1px solid rgba(255,193,7,.3);order:2;}
+.pod.p2{background:linear-gradient(180deg,rgba(192,192,192,.08),rgba(192,192,192,.02));border:1px solid rgba(192,192,192,.2);order:1;}
+.pod.p3{background:linear-gradient(180deg,rgba(205,127,50,.08),rgba(205,127,50,.02));border:1px solid rgba(205,127,50,.2);order:3;}
+.pod::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.pod.p1::before{background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.pod.p2::before{background:linear-gradient(90deg,transparent,#C0C0C0,transparent);}
+.pod.p3::before{background:linear-gradient(90deg,transparent,#CD7F32,transparent);}
+.pod-crown{font-size:1.5rem;margin-bottom:.4rem;}
+.pod-av{width:60px;height:60px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:1.4rem;font-weight:700;color:#fff;margin-bottom:.65rem;position:relative;overflow:hidden;}
+.pod-av img{width:100%;height:100%;object-fit:cover;}
+.pod.p1 .pod-av{width:70px;height:70px;}
+.pod-pos{position:absolute;bottom:-6px;right:-6px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.65rem;font-weight:700;border:2px solid var(--bg);}
+.pod.p1 .pod-pos{background:var(--gold);color:#000;}
+.pod.p2 .pod-pos{background:#C0C0C0;color:#000;}
+.pod.p3 .pod-pos{background:#CD7F32;color:#000;}
+.pod-name{font-family:var(--font-title);font-size:1rem;font-weight:700;margin-bottom:3px;text-align:center;}
+.pod.p1 .pod-name{font-size:1.1rem;}
+.pod-elo{font-family:var(--font-mono);font-size:.78rem;margin-bottom:6px;}
+.pod.p1 .pod-elo{color:var(--gold);}
+.pod.p2 .pod-elo{color:#C0C0C0;}
+.pod.p3 .pod-elo{color:#CD7F32;}
+.pod-rank{font-family:var(--font-mono);font-size:.62rem;padding:2px 9px;border-radius:4px;}
+/* Controls */
+.lb-controls{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.sw{flex:1;min-width:180px;position:relative;}
+.si{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);font-size:.85rem;color:var(--text-dim);pointer-events:none;}
+.si-inp{width:100%;padding:.55rem .8rem .55rem 2.3rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body);font-size:.88rem;outline:none;transition:border-color .2s;}.si-inp:focus{border-color:rgba(220,53,69,.4);}.si-inp::placeholder{color:var(--text-dim);}
+.sort-btn{display:flex;align-items:center;gap:6px;padding:.55rem .9rem;font-family:var(--font-title);font-size:.82rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--surface);border:1px solid var(--border);color:var(--text-dim);border-radius:8px;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.sort-btn:hover{border-color:rgba(255,255,255,.15);color:var(--text);}
+.sort-btn.active{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.35);color:var(--text);}
+/* Table */
+.lb-table{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.lb-col-head{display:grid;grid-template-columns:50px 1fr 90px 90px 80px 100px;gap:0;padding:.6rem 1rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.lb-col-head span{text-align:center;cursor:pointer;user-select:none;transition:color .2s;padding:3px 0;}.lb-col-head span:hover{color:var(--text);}.lb-col-head span.sa{color:var(--red);}
+.lb-col-head span:nth-child(2){text-align:left;}
+.lb-row{display:grid;grid-template-columns:50px 1fr 90px 90px 80px 100px;gap:0;align-items:center;padding:.7rem 1rem;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;text-decoration:none;color:inherit;}
+.lb-row:last-child{border-bottom:none;}.lb-row:hover{background:rgba(255,255,255,.03);}
+.lb-row.me{background:rgba(220,53,69,.05);}.lb-row.me:hover{background:rgba(220,53,69,.08);}
+.lb-row.top1{background:rgba(255,193,7,.04);}.lb-row.top2{background:rgba(192,192,192,.03);}.lb-row.top3{background:rgba(205,127,50,.03);}
+.lb-pos{font-family:var(--font-mono);font-size:.85rem;color:var(--text-dim);text-align:center;font-weight:700;}
+.lb-player{display:flex;align-items:center;gap:10px;min-width:0;}
+.lb-av{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;overflow:hidden;}
+.lb-av img{width:100%;height:100%;object-fit:cover;}
+.lb-name{font-weight:700;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-name.me{color:var(--red);}
+.lb-title-tag{font-family:var(--font-mono);font-size:.6rem;color:var(--gold);}
+.lb-cell{font-family:var(--font-mono);font-size:.82rem;text-align:center;}
+.lb-cell.elo{color:var(--gold);font-weight:700;}.lb-cell.lvl{color:var(--text);}.lb-cell.ev{color:var(--text-dim);}
+.lb-rank{font-family:var(--font-mono);font-size:.6rem;padding:2px 7px;border-radius:4px;text-align:center;white-space:nowrap;}
+/* Sidebar */
+.my-card{background:rgba(220,53,69,.06);border:1px solid rgba(220,53,69,.2);border-radius:12px;padding:1.25rem;position:relative;overflow:hidden;}
+.my-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),transparent);}
+.my-av{width:42px;height:42px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0;}
+.my-av img{width:100%;height:100%;object-fit:cover;}
+.mrc-xp{margin-top:.85rem;}
+.mrc-xp-head{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);margin-bottom:5px;}
+.mrc-xp-track{height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;}
+.mrc-xp-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--red-dim),var(--red));box-shadow:0 0 8px var(--red-glow);}
+.rank-row{display:flex;align-items:center;gap:.75rem;padding:.55rem 1.1rem;border-bottom:1px solid var(--border);transition:background .15s;}
+.rank-row:last-child{border-bottom:none;}.rank-row.cur{background:rgba(255,193,7,.05);}
+.rank-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.rank-name-c{flex:1;font-size:.82rem;font-weight:600;}.rank-range{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);}
+@media(max-width:1100px){.lb-col-head,.lb-row{grid-template-columns:44px 1fr 80px 80px 90px;}.lb-col-head span:nth-child(6),.lb-row>*:nth-child(6){display:none;}}
+@media(max-width:900px){.lb-layout{grid-template-columns:1fr;}.lb-right{order:-1;}}
+@media(max-width:600px){.lb-col-head,.lb-row{grid-template-columns:36px 1fr 75px 75px;}.lb-col-head span:nth-child(n+4):not(:nth-child(4)):not(:nth-child(5)),.lb-row>*:nth-child(n+4):not(:nth-child(4)):not(:nth-child(5)){display:none;}.podium{grid-template-columns:1fr 1.1fr 1fr;}}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<div id="tabs-root"></div>
+
+<div class="page">
+  <div class="page-header">
+    <div><div class="page-eyebrow">// global ranking</div><div class="page-title">Лидерборд</div></div>
+  </div>
+  <div class="lb-layout">
+    <div class="lb-left">
+      <div class="podium" id="podium"><div class="spinner" style="grid-column:1/-1"></div></div>
+      <div class="lb-controls">
+        <div class="sw"><span class="si">🔍</span><input class="si-inp" id="searchInp" type="text" placeholder="Поиск игрока..." oninput="renderTable()"></div>
+        <button class="sort-btn active" id="sb-elo"   onclick="setSort('elo',this)">ELO ↓</button>
+        <button class="sort-btn" id="sb-level"  onclick="setSort('level',this)">Уровень</button>
+        <button class="sort-btn" id="sb-currency" onclick="setSort('currency',this)">Монеты</button>
+      </div>
+      <div class="lb-table">
+        <div class="lb-col-head">
+          <span>#</span><span>Игрок</span>
+          <span id="head-elo" class="sa" onclick="setSort('elo')">ELO ↓</span>
+          <span id="head-level" onclick="setSort('level')">Уровень</span>
+          <span id="head-ev">Ивенты</span>
+          <span id="head-rank">Ранг</span>
+        </div>
+        <div id="lbBody"><div class="spinner"></div></div>
+      </div>
+    </div>
+    <div class="lb-right">
+      <div id="myRankCard" style="display:none"></div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">Таблица рангов</div></div>
+        <div id="ranks-list">
+           </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="assets/config.js"></script>
+<script>firebase.initializeApp(GS.firebase);</script>
+<script src="assets/auth.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+let allUsers = [];
+let sortField = 'elo';
+const myUser = GS_AUTH.getUser();
+
+DB.listenUsers('elo', 200, users => {
+  const activeUsers = users.filter(u => (u.gamesPlayed || 0) > 0 || (u.elo || 0) > 500);
+  allUsers = activeUsers;
+  renderRankTable(); // Отрисовываем таблицу рангов ПЕРЕД подсветкой
+  renderPodium();
+  renderTable();
+  renderMyCard();
+  highlightMyRank();
+});
+
+function renderRankTable() {
+  const container = document.getElementById('ranks-list');
+  if (!container || !GS.ranks) return;
+  
+  container.innerHTML = GS.ranks.map(r => `
+    <div class="rank-row" id="rr-${r.id}">
+      <div class="rank-dot" style="background:${r.color}"></div>
+      <div class="rank-name-c">${r.name}</div>
+      <div class="rank-range">${r.max === Infinity ? r.min + '+' : r.min + '–' + r.max}</div>
+    </div>`).join('');
+}
+
+function renderPodium() {
+  const activeUsers = allUsers.filter(u => (u.gamesPlayed || 0) > -1);
+  const top3 = activeUsers.slice(0, 3);
+  
+  if (top3.length < 1) {
+    document.getElementById('podium').innerHTML = '<div class="empty-state" style="grid-column:1/-1">Нет активных игроков</div>';
+    return;
+  }
+  
+  const [p1, p2, p3] = top3;
+  
+  function podHtml(u, cls, crown, pos) {
+    if (!u) return `<div class="pod ${cls}"></div>`;
+    const rank = gsRank(u.elo || 500);
+    const av = u.avatarUrl
+      ? `<img src="${u.avatarUrl}" alt="${u.displayName || u.username}">`
+      : (u.displayName || u.username || '?')[0].toUpperCase();
+    return `<a href="profile.html?id=${u.discordId || u.id}" class="pod ${cls}">
+      <div class="pod-crown">${crown}</div>
+      <div class="pod-av">${av}<div class="pod-pos">${pos}</div></div>
+      <div class="pod-name">${u.displayName || u.username}</div>
+      <div class="pod-elo">${fmtNum(u.elo || 500)} ELO</div>
+      <div class="pod-rank" style="background:${rank.color}15;color:${rank.color};border:1px solid ${rank.color}40">${rank.name}</div>
+    </a>`;
+  }
+  
+  document.getElementById('podium').innerHTML =
+    podHtml(p2, 'p2', '🥈', 2) + podHtml(p1, 'p1', '👑', 1) + podHtml(p3, 'p3', '🥉', 3);
+}
+
+function renderTable() {
+  const q = document.getElementById('searchInp').value.toLowerCase().trim();
+  let users = [...allUsers];
+  users = users.filter(u => (u.gamesPlayed || 0) > 0);
+  if (q) users = users.filter(u => (u.displayName || u.username || '').toLowerCase().includes(q));
+  users.sort((a, b) => (b[sortField] || 0) - (a[sortField] || 0));
+
+  const el = document.getElementById('lbBody');
+  if (!users.length) {
+    el.innerHTML = '<div class="empty-state">Нет активных игроков</div>';
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const myId = myUser?.discordId || myUser?.id;
+
+  el.innerHTML = users.map((u, i) => {
+    const rank = gsRank(u.elo || 500);
+    const isMe = u.discordId === myId || u.id === myId;
+    const posLabel = i < 3 ? medals[i] : i + 1;
+    const av = u.avatarUrl
+      ? `<div class="lb-av"><img src="${u.avatarUrl}" alt="${u.displayName || u.username}"></div>`
+      : `<div class="lb-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0]}</div>`;
+    return `<a href="profile.html?id=${u.discordId || u.id}" class="lb-row${isMe ? ' me' : ''}${i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : ''}">
+      <div class="lb-pos" style="${i < 3 ? 'color:var(--gold)' : ''}">${posLabel}</div>
+      <div class="lb-player">
+        ${av}
+        <div>
+          <div class="lb-name${isMe ? ' me' : ''}">${u.displayName || u.username}${isMe ? ' <span style="font-size:.65rem;color:var(--text-dim)">(вы)</span>' : ''}</div>
+          ${u.title ? `<div class="lb-title-tag">${u.title}</div>` : ''}
+        </div>
+      </div>
+      <div class="lb-cell elo">${fmtNum(u.elo || 500)}</div>
+      <div class="lb-cell lvl">${u.level || 0}</div>
+      <div class="lb-cell ev">${u.eventsParticipated || 0}</div>
+      <div><div class="lb-rank" style="background:${rank.color}15;color:${rank.color};border:1px solid ${rank.color}40">${rank.name}</div></div>
+    </a>`;
+  }).join('');
+}
+
+function setSort(field, btn) {
+  sortField = field;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.lb-col-head span').forEach(s=>s.classList.remove('sa'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('head-'+field)?.classList.add('sa');
+  renderTable();
+}
+
+function renderMyCard() {
+  if (!myUser) return;
+  const myId = myUser.discordId||myUser.id;
+  const me = allUsers.find(u=>u.discordId===myId||u.id===myId);
+  if (!me) return;
+  const pos = allUsers.findIndex(u=>u.discordId===myId||u.id===myId)+1;
+  const xp = gsXpProgress(me.xp||0);
+  const av = me.avatarUrl
+    ? `<img src="${me.avatarUrl}" style="width:100%;height:100%;object-fit:cover">`
+    : (me.displayName||me.username||'?')[0].toUpperCase();
+  document.getElementById('myRankCard').style.display='block';
+  document.getElementById('myRankCard').innerHTML=`
+    <div class="my-card">
+      <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:1rem;">
+        <div class="my-av">${av}</div>
+        <div>
+          <div style="font-family:var(--font-title);font-size:1.05rem;font-weight:700">${me.displayName||me.username}</div>
+          <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)">Место <b style="color:var(--red)">#${pos}</b> из ${allUsers.length}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.85rem;">
+        ${[['💰','Монеты','currency','var(--gold)'],['⚡','Уровень','level',''],['🎮','Ивенты','eventsParticipated','var(--red)'],['🏆','ELO','elo','var(--gold)']].map(([ic,lb,k,c])=>`
+          <div style="background:rgba(0,0,0,.2);border-radius:7px;padding:.55rem .7rem;">
+            <div style="font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);text-transform:uppercase">${ic} ${lb}</div>
+            <div style="font-family:var(--font-title);font-size:1.1rem;font-weight:700${c?';color:'+c:''}">${fmtNum(me[k]||0)}</div>
+          </div>`).join('')}
+      </div>
+      <div class="mrc-xp">
+        <div class="mrc-xp-head"><span>XP до Ур. ${xp.level+1}</span><span style="color:var(--red)">${xp.pct}%</span></div>
+        <div class="mrc-xp-track"><div class="mrc-xp-fill" style="width:${xp.pct}%"></div></div>
+      </div>
+    </div>`;
+}
+
+function highlightMyRank() {
+  if (!myUser) return;
+  const me = allUsers.find(u=>(u.discordId||u.id)===(myUser.discordId||myUser.id));
+  if (!me) return;
+  const rank = gsRank(me.elo||1000);
+  const row = document.getElementById('rr-'+rank.id);
+  if (row) { 
+    row.classList.add('cur'); 
+    if (!row.innerHTML.includes('← вы')) {
+      row.innerHTML += ' <span style="font-family:var(--font-mono);font-size:.6rem;color:var(--gold)">← вы</span>'; 
+    }
+  }
+}
+</script>
+</body>
+</html>

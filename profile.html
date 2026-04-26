@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gray Squad — Профиль</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.cover{height:140px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#0f0f14,#1a0a0e,#200d12);position:relative;margin-bottom:0;}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(220,53,69,.25),transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(220,53,69,.1),transparent 50%);}
+.cover-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(220,53,69,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(220,53,69,.06) 1px,transparent 1px);background-size:30px 30px;}
+.prof-head{display:flex;align-items:flex-end;gap:1.5rem;margin-top:-50px;margin-bottom:1.75rem;padding:0 .25rem;position:relative;flex-wrap:wrap;}
+.prof-av-wrap{position:relative;flex-shrink:0;}
+.prof-av{width:96px;height:96px;border-radius:16px;background:linear-gradient(135deg,var(--red-dim),var(--red));border:3px solid var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:2.2rem;font-weight:700;color:#fff;box-shadow:0 0 30px rgba(220,53,69,.3);overflow:hidden;position:relative;z-index:1;}
+.prof-av img{width:100%;height:100%;object-fit:cover;}
+.online-dot{position:absolute;bottom:6px;right:6px;width:14px;height:14px;border-radius:50%;background:var(--green);border:2px solid var(--bg);z-index:2;}
+.prof-meta{flex:1;padding-bottom:.25rem;min-width:0;}
+.prof-name{font-family:var(--font-title);font-size:1.8rem;font-weight:700;line-height:1;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;}
+.prof-title{font-family:var(--font-mono);font-size:.72rem;color:var(--gold);background:rgba(255,193,7,.08);border:1px solid rgba(255,193,7,.2);padding:2px 8px;border-radius:4px;}
+.prof-sub{display:flex;align-items:center;gap:1rem;margin-top:.4rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);}
+.prof-actions{display:flex;align-items:flex-end;gap:.6rem;padding-bottom:.25rem;flex-shrink:0;}
+.grid{display:grid;grid-template-columns:300px 1fr;gap:1.5rem;align-items:start;}
+.col-l,.col-r{display:flex;flex-direction:column;gap:1.25rem;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;}
+.stat-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.75rem .85rem;}
+.stat-box-lbl{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.stat-box-val{font-family:var(--font-title);font-size:1.5rem;font-weight:700;margin-top:1px;}
+.xp-section{padding:0 1.15rem 1.15rem;}
+.xp-header{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);margin-bottom:7px;}
+.xp-track{height:7px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;}
+.xp-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--red-dim),var(--red));box-shadow:0 0 10px var(--red-glow);transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.elo-box{margin:0 1.15rem 1.15rem;display:flex;align-items:center;justify-content:space-between;background:rgba(255,193,7,.05);border:1px solid rgba(255,193,7,.18);border-radius:8px;padding:.8rem 1rem;}
+.elo-val{font-family:var(--font-mono);font-size:1.3rem;font-weight:700;color:var(--gold);}
+.elo-lbl{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;}
+.rank-pill{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.rank-badge-big{font-family:var(--font-title);font-size:.9rem;font-weight:700;padding:2px 10px;border-radius:4px;letter-spacing:.06em;}
+.d-roles{display:flex;flex-wrap:wrap;gap:.4rem;padding:1rem 1.15rem;}
+.d-role{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;font-size:.75rem;font-weight:600;background:rgba(255,255,255,.04);border:1px solid var(--border);}
+.d-role-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ach-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;padding:.85rem 1.15rem;}
+.ach-item{aspect-ratio:1;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:border-color .2s,transform .2s;position:relative;}
+.ach-item:hover{border-color:rgba(255,255,255,.15);transform:scale(1.06);}
+.ach-item.rare{border-color:rgba(255,193,7,.3);background:rgba(255,193,7,.05);}
+.ach-item.epic{border-color:rgba(163,53,238,.3);background:rgba(163,53,238,.05);}
+.ach-icon{font-size:1.1rem;line-height:1;}
+.ach-name{font-family:var(--font-mono);font-size:.45rem;color:var(--text-dim);text-align:center;padding:0 2px;line-height:1.2;}
+.evh-row{display:flex;align-items:center;gap:.85rem;padding:.75rem 1.15rem;border-bottom:1px solid var(--border);}
+.evh-row:last-child{border-bottom:none;}
+.evh-ico{font-size:1.2rem;flex-shrink:0;}.evh-info{flex:1;min-width:0;}.evh-name{font-size:.88rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.evh-sub{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);}
+.evh-result{text-align:right;flex-shrink:0;}.evh-place{font-family:var(--font-title);font-size:1rem;font-weight:700;}.evh-reward{font-family:var(--font-mono);font-size:.63rem;color:var(--text-dim);}
+.comments-list{display:flex;flex-direction:column;}
+.comment{padding:.9rem 1.15rem;border-bottom:1px solid var(--border);display:flex;gap:.85rem;}
+.comment:last-child{border-bottom:none;}
+.c-av{width:32px;height:32px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;}
+.c-body{flex:1;}.c-header{display:flex;align-items:center;gap:.6rem;margin-bottom:4px;flex-wrap:wrap;}
+.c-name{font-size:.85rem;font-weight:700;}.c-time{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);}
+.c-text{font-size:.84rem;color:var(--text-dim);line-height:1.6;}
+.c-actions{display:flex;gap:.6rem;margin-top:5px;}
+.c-btn{font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);background:none;border:none;cursor:pointer;padding:0;transition:color .15s;}.c-btn:hover{color:var(--red);}
+.comment-form{padding:1rem 1.15rem;display:flex;gap:.7rem;align-items:flex-start;}
+.comment-input{width:100%;padding:.65rem .9rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body);font-size:.88rem;outline:none;resize:none;transition:border-color .2s;}.comment-input:focus{border-color:rgba(220,53,69,.4);}.comment-input::placeholder{color:var(--text-dim);}
+.btn-send{padding:.65rem 1.1rem;background:var(--red);color:#fff;font-family:var(--font-title);font-size:.88rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:none;border-radius:8px;cursor:pointer;transition:background .2s;flex-shrink:0;}.btn-send:hover{background:#e8404f;}
+@media(max-width:900px){.grid{grid-template-columns:1fr;}.prof-actions{flex-wrap:wrap;}.ach-grid{grid-template-columns:repeat(7,1fr);}}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<div id="tabs-root"></div>
+
+<div class="page" id="profilePage">
+  <div class="spinner" id="loadSpinner"></div>
+</div>
+
+<div class="toast hidden" id="toast"><div class="toast-icon" id="toastIcon">✅</div><div><div class="toast-title" id="toastTitle"></div><div class="toast-sub" id="toastSub"></div></div></div>
+
+<!-- Edit Modal (admin/creator) -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-head">⚙️ Редактировать профиль <button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="f-row">
+        <div class="f-group"><div class="f-label">Роль</div><select class="f-input sel" id="editRole"><option value="user">user</option><option value="member">member</option><option value="admin">admin</option><option value="creator">creator</option></select></div>
+        <div class="f-group"><div class="f-label">Титул</div><input class="f-input" id="editTitle" type="text" placeholder="⚡ Молния"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-group"><div class="f-label">Валюта</div><input class="f-input" id="editCurrency" type="number"></div>
+        <div class="f-group"><div class="f-label">ELO</div><input class="f-input" id="editElo" type="number"></div>
+      </div>
+      <div class="f-row">
+        <div class="f-group"><div class="f-label">XP</div><input class="f-input" id="editXp" type="number"></div>
+        <div class="f-group"><div class="f-label">Уровень</div><input class="f-input" id="editLevel" type="number"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Отмена</button>
+      <button class="btn-confirm" id="saveEdit">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="assets/config.js"></script>
+<script>firebase.initializeApp(GS.firebase);</script>
+<script src="assets/auth.js"></script>
+<script src="assets/db.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+let profileUser = null;
+
+// Определить чей профиль смотрим
+const urlId = new URLSearchParams(window.location.search).get('id');
+const myUser = GS_AUTH.getUser();
+const targetId = urlId || myUser?.discordId || myUser?.id;
+
+if (!targetId) {
+  document.getElementById('profilePage').innerHTML =
+    '<div class="empty-state"><span class="empty-icon">👤</span>Войдите через Discord для просмотра профиля<br><br>' +
+    '<a href="#" class="btn btn-red" onclick="GS_AUTH.login()">🎮 Войти</a></div>';
+} else {
+  DB.listenUser(targetId, user => {
+    profileUser = user;
+    renderProfile(user);
+  });
+}
+
+function renderProfile(user) {
+  document.getElementById('loadSpinner')?.remove();
+  const isMe    = myUser && (myUser.discordId === user.discordId || myUser.id === user.id);
+  const isAdmin = GS_AUTH.hasRole('admin');
+  const rank    = gsRank(user.elo || 1000);
+  const xp      = gsXpProgress(user.xp || 0);
+  const warns   = (user.warnings || []).length;
+
+  // Аватар
+  const avContent = user.avatarUrl
+    ? `<img src="${user.avatarUrl}" alt="${user.displayName||user.username}">`
+    : (user.displayName||user.username||'?')[0].toUpperCase();
+
+  const discordRoles = (user.discordRoles || []);
+
+  document.getElementById('profilePage').innerHTML = `
+    <div class="cover"><div class="cover-grid"></div></div>
+
+    <div class="prof-head">
+      <div class="prof-av-wrap">
+        <div class="prof-av">${avContent}</div>
+        ${user.online ? '<div class="online-dot"></div>' : ''}
+      </div>
+      <div class="prof-meta">
+        <div class="prof-name">
+          ${user.displayName || user.username}
+          ${GS_NAV.roleBadgeHtml(user.role)}
+          ${user.title ? `<span class="prof-title">${user.title}</span>` : ''}
+        </div>
+        <div class="prof-sub">
+          <span>📅 С нами с ${user.createdAt?.toDate?.()?.toLocaleDateString('ru-RU') || '—'}</span>
+          <span>🎮 ${user.eventsParticipated||0} ивентов</span>
+          <span>🏅 ${(user.achievements||[]).length} ачивок</span>
+          <span>🎙️ ${user.totalVoiceMinutes||0} мин в войсе</span>
+          ${warns > 0 ? `<span style="color:var(--red)">⚠️ ${warns} варн(ов)</span>` : ''}
+        </div>
+      </div>
+      <div class="prof-actions">
+        ${isAdmin ? `<button class="btn btn-icon" title="Редактировать" onclick="openEdit()">⚙️</button>` : ''}
+        ${!isMe ? `<a href="#" class="btn btn-ghost btn-sm">✉️ Написать</a>` : ''}
+        ${isMe ? `<a href="#" class="btn btn-ghost btn-sm" data-action="logout">🚪 Выйти</a>` : ''}
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col-l">
+        <!-- Stats -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Статистика</div></div>
+          <div class="card-body" style="padding-bottom:.5rem">
+            <div class="stats-grid">
+              <div class="stat-box"><div class="stat-box-lbl">💰 Валюта</div><div class="stat-box-val" style="color:var(--gold)">${fmtNum(user.currency)}</div></div>
+              <div class="stat-box"><div class="stat-box-lbl">⚡ Уровень</div><div class="stat-box-val">${xp.level}</div></div>
+              <div class="stat-box"><div class="stat-box-lbl">🎮 Ивенты</div><div class="stat-box-val" style="color:var(--red)">${user.eventsParticipated||0}</div></div>
+              <div class="stat-box"><div class="stat-box-lbl">🏅 Ачивки</div><div class="stat-box-val" style="color:#A335EE">${(user.achievements||[]).length}</div></div>
+            </div>
+          </div>
+          <div class="xp-section">
+            <div class="xp-header"><span>XP: ${fmtNum(user.xp||0)}</span><span style="color:var(--red)">Ур. ${xp.level} → ${xp.level+1} · ${xp.pct}%</span></div>
+            <div class="xp-track"><div class="xp-fill" style="width:${xp.pct}%"></div></div>
+          </div>
+          <div class="elo-box">
+            <div><div class="elo-lbl">ELO Рейтинг</div><div class="elo-val">${fmtNum(user.elo||1000)}</div></div>
+            <div class="rank-pill">
+              <div class="rank-badge-big" style="background:${rank.color}15;color:${rank.color};border:1px solid ${rank.color}40">${rank.name}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discord Roles -->
+        ${discordRoles.length ? `
+        <div class="card">
+          <div class="card-head"><div class="card-title">Роли Discord</div><span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim)">синхронизировано</span></div>
+          <div class="d-roles">
+            ${discordRoles.map(r=>`<div class="d-role"><div class="d-role-dot" style="background:${r.color||'#888'}"></div>${r.name}</div>`).join('')}
+          </div>
+        </div>` : ''}
+      </div>
+
+      <div class="col-r">
+        <!-- Achievements -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Ачивки</div><span style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim)">${(user.achievements||[]).length} получено</span></div>
+          <div id="achGrid"></div>
+        </div>
+
+        <!-- Comments -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Комментарии</div></div>
+          <div class="comments-list" id="commentsList"><div style="padding:1.5rem;text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim)">Нет комментариев</div></div>
+          ${myUser ? `
+          <div class="comment-form">
+            <div style="flex:1"><textarea class="comment-input" id="commentInput" rows="2" placeholder="Написать комментарий..."></textarea></div>
+            <button class="btn-send" onclick="postComment()">→</button>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>`;
+
+  // Bind logout
+  document.querySelector('[data-action="logout"]')?.addEventListener('click', e=>{e.preventDefault();GS_AUTH.logout();});
+
+  // Load achievements from DB
+  loadAchievements(user.achievements || []);
+
+  // Load profile comments
+  loadComments(user.discordId || user.id);
+
+  // Edit modal values
+  if (isAdmin) {
+    document.getElementById('editRole').value     = user.role || 'user';
+    document.getElementById('editTitle').value    = user.title || '';
+    document.getElementById('editCurrency').value = user.currency || 0;
+    document.getElementById('editElo').value      = user.elo || 1000;
+    document.getElementById('editXp').value       = user.xp || 0;
+    document.getElementById('editLevel').value    = user.level || 0;
+  }
+}
+
+// ── Ачивки ──────────────────────────────────────────────────
+const ACH_ICONS = {
+  first_message:'💬', chatter:'🗣️', big_mouth:'📢',
+  first_step:'👣', level5:'🔰', level10:'⚡', level25:'🎖️', level50:'🌟', level100:'💎',
+  voice_30:'🎧', voice_marathon:'🎙️', voice_addict:'📡', voice_legend:'📻',
+  first_purchase:'🛒', shopaholic:'💸',
+  joined:'🎉', week:'📅', month:'🗓️', veteran:'🏅', year:'🎂',
+  first_event:'🎮', event5:'🏆', event_winner:'🥇', triple_win:'🎯',
+  night_owl:'🦉', early_bird:'🌅',
+};
+const ACH_NAMES = {
+  first_message:'Первое слово', chatter:'Болтун', big_mouth:'Оратор',
+  first_step:'Первый шаг', level5:'Новобранец', level10:'Опытный', level25:'Ветеран', level50:'Легенда сквада', level100:'Непоколебимый',
+  voice_30:'Тихоня', voice_marathon:'Голосовой марафон', voice_addict:'Голосоман', voice_legend:'Вещатель',
+  first_purchase:'Первая покупка', shopaholic:'Шопоголик',
+  joined:'Добро пожаловать', week:'Неделя', month:'Месяц', veteran:'Ветеран', year:'Год в скваде',
+  first_event:'Участник', event5:'Турнирщик', event_winner:'Победитель', triple_win:'Хет-трик',
+  night_owl:'Ночная сова', early_bird:'Жаворонок',
+};
+function loadAchievements(earned) {
+  const el = document.getElementById('achGrid');
+  if (!el) return;
+  if (!earned.length) {
+    el.innerHTML = '<div style="padding:1.25rem;text-align:center;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim)">Нет ачивок</div>';
+    return;
+  }
+  el.className = 'ach-grid';
+  el.innerHTML = earned.map(id => `
+    <div class="ach-item" title="${ACH_NAMES[id]||id}">
+      <div class="ach-icon">${ACH_ICONS[id]||'🏅'}</div>
+      <div class="ach-name">${ACH_NAMES[id]||id}</div>
+    </div>`).join('');
+}
+
+// ── Комментарии к профилю ────────────────────────────────────
+function loadComments(userId) {
+  // Слушаем комменты с topicId = 'profile_' + userId
+  DB.listenComments('profile_' + userId, comments => {
+    const el = document.getElementById('commentsList');
+    if (!el) return;
+    if (!comments.length) {
+      el.innerHTML = '<div style="padding:1.5rem;text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim)">Нет комментариев</div>';
+      return;
+    }
+    el.innerHTML = comments.map(c => {
+      const av = c.authorAvatar
+        ? `<img src="${c.authorAvatar}" style="width:32px;height:32px;border-radius:7px;object-fit:cover">`
+        : `<div class="c-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(c.authorName||'?')[0]}</div>`;
+      return `<div class="comment">
+        ${av}
+        <div class="c-body">
+          <div class="c-header">
+            <span class="c-name">${c.authorName}</span>
+            <span class="c-time">${timeAgo(c.createdAt)}</span>
+          </div>
+          <div class="c-text">${c.body}</div>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+async function postComment() {
+  const u = GS_AUTH.getUser();
+  if (!u) return;
+  const inp = document.getElementById('commentInput');
+  const body = inp.value.trim();
+  if (!body) return;
+  await DB.addComment({
+    topicId: 'profile_' + targetId,
+    authorId: u.discordId || u.id,
+    authorName: u.displayName || u.username,
+    authorAvatar: u.avatarUrl || null,
+    body,
+  });
+  inp.value = '';
+}
+
+// ── Edit modal ───────────────────────────────────────────────
+function openEdit() { document.getElementById('editModal').classList.add('open'); }
+function closeModal() { document.getElementById('editModal').classList.remove('open'); }
+document.getElementById('editModal')?.addEventListener('click', e => { if (e.target.id==='editModal') closeModal(); });
+
+document.getElementById('saveEdit')?.addEventListener('click', async () => {
+  if (!profileUser) return;
+  const newElo = parseInt(document.getElementById('editElo').value);
+  const rank   = gsRank(newElo);
+  await DB.updateUser(profileUser.discordId || profileUser.id, {
+    role:     document.getElementById('editRole').value,
+    title:    document.getElementById('editTitle').value || null,
+    currency: parseInt(document.getElementById('editCurrency').value),
+    elo:      newElo,
+    rank:     rank.id,
+    rankName: rank.name,
+    rankColor:rank.color,
+    xp:       parseInt(document.getElementById('editXp').value),
+    level:    parseInt(document.getElementById('editLevel').value),
+  });
+  closeModal();
+  showToast('✅','Профиль обновлён','');
+});
+
+let toastTimer;
+function showToast(icon, title, sub, err=false) {
+  const t = document.getElementById('toast');
+  t.className = 'toast' + (err?' err':'');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastSub').textContent = sub;
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.add('hidden'), 3500);
+}
+</script>
+</body>
+</html>

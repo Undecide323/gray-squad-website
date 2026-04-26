@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Gray Squad — Главная</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.hero{position:relative;z-index:1;padding:110px 2rem 0;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden;}
+.hero-glow{position:absolute;top:0;left:50%;transform:translate(-50%,-30%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(220,53,69,.1) 0%,transparent 70%);pointer-events:none;animation:glowPulse 5s ease-in-out infinite;}
+@keyframes glowPulse{0%,100%{opacity:.7;transform:translate(-50%,-30%) scale(1)}50%{opacity:1;transform:translate(-50%,-30%) scale(1.08)}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;color:var(--red);text-transform:uppercase;background:rgba(220,53,69,.07);border:1px solid rgba(220,53,69,.22);padding:5px 14px;border-radius:4px;margin-bottom:1.4rem;animation:fadeUp .5s .1s ease both;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.4s infinite;}
+.hero h1{font-family:var(--font-title);font-size:clamp(3.2rem,7.5vw,7rem);font-weight:700;line-height:.9;letter-spacing:-.01em;animation:fadeUp .5s .2s ease both;}
+.hero h1 .wg{color:var(--gray);}.hero h1 .wr{color:var(--red);text-shadow:0 0 50px var(--red-glow);}
+.hero-sub{margin-top:1.2rem;font-size:1rem;font-weight:300;color:var(--text-dim);animation:fadeUp .5s .3s ease both;}
+.features{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:3rem 2rem 0;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;animation:fadeUp .6s .4s ease both;}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;transition:border-color .25s,transform .25s;}
+.feat-card:hover{border-color:rgba(220,53,69,.3);transform:translateY(-3px);}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.feat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--red),transparent);}
+.feat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.feat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--green),transparent);}
+.feat-icon{font-size:2rem;margin-bottom:1rem;display:block;}
+.feat-title{font-family:var(--font-title);font-size:1.2rem;font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;}
+.feat-card:nth-child(1) .feat-title{color:var(--red);}
+.feat-card:nth-child(2) .feat-title{color:var(--gold);}
+.feat-card:nth-child(3) .feat-title{color:var(--green);}
+.feat-desc{font-size:.88rem;color:var(--text-dim);line-height:1.7;}
+main{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:2.5rem 2rem 6rem;display:grid;grid-template-columns:1fr 320px;gap:2rem;align-items:start;}
+.col-l,.col-r{display:flex;flex-direction:column;gap:1.75rem;}
+/* Events */
+.ev-list{display:flex;flex-direction:column;gap:.6rem;}
+.ev-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;display:flex;align-items:center;gap:1rem;text-decoration:none;color:inherit;position:relative;overflow:hidden;transition:border-color .2s,background .2s;}
+.ev-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.ev-card.cr::before{background:var(--red);}.ev-card.cg::before{background:var(--gold);}.ev-card.cn::before{background:var(--green);}
+.ev-card:hover{border-color:rgba(255,255,255,.11);background:rgba(255,255,255,.025);}
+.ev-ico{width:42px;height:42px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:rgba(255,255,255,.04);border:1px solid var(--border);}
+.ev-info{flex:1;min-width:0;}
+.ev-name{font-family:var(--font-title);font-size:.97rem;font-weight:600;letter-spacing:.03em;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ev-meta{display:flex;flex-wrap:wrap;gap:.6rem;font-family:var(--font-mono);font-size:.67rem;color:var(--text-dim);}
+.ev-tag{display:inline-block;padding:2px 7px;border-radius:4px;margin-top:5px;font-family:var(--font-mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;}
+.tl{background:rgba(220,53,69,.12);color:var(--red);border:1px solid rgba(220,53,69,.25);}
+.ts{background:rgba(255,193,7,.09);color:var(--gold);border:1px solid rgba(255,193,7,.22);}
+.to{background:rgba(40,167,69,.09);color:var(--green);border:1px solid rgba(40,167,69,.22);}
+.ev-tmr{text-align:right;flex-shrink:0;}
+.tmr-l{font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.tmr-v{font-family:var(--font-mono);font-size:.97rem;font-weight:700;display:block;margin-top:2px;}
+.tvr{color:var(--red);}.tvg{color:var(--gold);}.tvn{color:var(--green);}
+/* Forum */
+.forum-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.f-row{display:flex;align-items:center;gap:.85rem;padding:.8rem 1.1rem;border-bottom:1px solid var(--border);text-decoration:none;color:inherit;transition:background .15s;cursor:pointer;}
+.f-row:last-child{border-bottom:none;}.f-row:hover{background:rgba(255,255,255,.03);}
+.f-ico{width:33px;height:33px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;background:rgba(255,255,255,.04);border:1px solid var(--border);}
+.f-info{flex:1;min-width:0;}.f-title{font-weight:600;font-size:.86rem;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.f-sub{font-size:.71rem;color:var(--text-dim);}
+.f-right{font-family:var(--font-mono);font-size:.67rem;color:var(--text-dim);text-align:right;flex-shrink:0;}
+.pindot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--red);margin-right:4px;vertical-align:middle;}
+/* Voice */
+.voice-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.2rem;position:relative;overflow:hidden;}
+.voice-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),transparent);}
+.v-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
+.v-live{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:.63rem;color:var(--green);text-transform:uppercase;letter-spacing:.1em;}
+.vdot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite;}
+.v-list{display:flex;flex-direction:column;gap:.45rem;}
+.v-user{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:rgba(255,255,255,.03);border:1px solid var(--border);transition:border-color .15s;}
+.v-user:hover{border-color:rgba(255,255,255,.1);}
+.vav{width:26px;height:26px;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#fff;}
+.vname{font-size:.83rem;font-weight:600;flex:1;}.vchan{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);}.vicons{font-size:.7rem;}
+/* Top players */
+.top-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.tp-row{display:flex;align-items:center;gap:.7rem;padding:.62rem 1.1rem;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;text-decoration:none;color:inherit;}
+.tp-row:last-child{border-bottom:none;}.tp-row:hover{background:rgba(255,255,255,.03);}
+.tp-pos{font-family:var(--font-mono);font-size:.73rem;color:var(--text-dim);width:22px;text-align:center;flex-shrink:0;}
+.tp-av{width:27px;height:27px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#fff;flex-shrink:0;}
+.tp-name{font-size:.86rem;font-weight:600;flex:1;}.tp-elo{font-family:var(--font-mono);font-size:.76rem;color:var(--gold);flex-shrink:0;}
+.tp-rank{font-family:var(--font-mono);font-size:.62rem;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+@media(max-width:900px){.features{grid-template-columns:1fr;}main{grid-template-columns:1fr;}.col-r{order:-1;}}
+@media(max-width:600px){.hero{padding:95px 1.2rem 0;}.features{padding:2rem 1.2rem 0;}}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<div id="tabs-root"></div>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge"><div class="live-dot"></div>Игровое сообщество · Онлайн</div>
+  <h1><span class="wg">GRAY</span><span class="wr">SQUAD</span></h1>
+  <p class="hero-sub">Сообщество любителей онлайн-игр</p>
+</section>
+
+<div class="features">
+  <div class="feat-card"><span class="feat-icon">🎮</span><div class="feat-title">Играем вместе</div><div class="feat-desc">Регулярные ивенты, турниры и посиделки в разных играх — всегда есть с кем поиграть.</div></div>
+  <div class="feat-card"><span class="feat-icon">🤝</span><div class="feat-title">Своя атмосфера</div><div class="feat-desc">Никакого токсика. Только адекватные люди и хорошее настроение.</div></div>
+  <div class="feat-card"><span class="feat-icon">📈</span><div class="feat-title">Развивайся</div><div class="feat-desc">Турниры, рейтинг ELO, форум, клановый магазин и команда — всё для роста как игрока.</div></div>
+</div>
+
+<main>
+  <div class="col-l">
+    <!-- EVENTS -->
+    <div>
+      <div class="sec-hd">
+        <div class="sec-label" style="margin-bottom:0">Активные ивенты</div>
+        <a href="events.html" class="sec-link">Все ивенты →</a>
+      </div>
+      <div class="ev-list" id="homeEvents"><div class="spinner"></div></div>
+    </div>
+    <!-- FORUM -->
+    <div>
+      <div class="sec-hd">
+        <div class="sec-label" style="margin-bottom:0">Форум</div>
+        <a href="forum.html" class="sec-link">Все темы →</a>
+      </div>
+      <div class="forum-card" id="homeTopics"><div style="padding:1.5rem;text-align:center;color:var(--text-dim);font-family:var(--font-mono);font-size:.75rem;">Загрузка...</div></div>
+    </div>
+  </div>
+
+  <div class="col-r">
+    <!-- VOICE -->
+    <div class="voice-card">
+      <div class="v-hd">
+        <div class="sec-label" style="font-size:1rem;margin-bottom:0">В голосовых</div>
+        <div class="v-live"><div class="vdot"></div><span id="voiceTime">—</span></div>
+      </div>
+      <div class="v-list" id="voiceList"><div style="color:var(--text-dim);font-size:.8rem;font-family:var(--font-mono)">Загрузка...</div></div>
+    </div>
+    <!-- TOP PLAYERS -->
+    <div>
+      <div class="sec-hd">
+        <div class="sec-label" style="font-size:1rem;margin-bottom:0">Топ игроков</div>
+        <a href="leaderboard.html" class="sec-link">Все →</a>
+      </div>
+      <div class="top-card" id="homeTop"><div class="spinner"></div></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="ft-brand">Gray<em>Squad</em></div> 
+  <div>© 2026 Gray Squad</div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="assets/config.js"></script>
+<script>firebase.initializeApp(GS.firebase);</script>
+<script src="assets/config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/nav.js"></script>
+<script>
+// ── VOICE WIDGET ────────────────────────────────────────────
+DB.listenVoice((users, updatedAt) => {
+  const list = document.getElementById('voiceList');
+  const timeEl = document.getElementById('voiceTime');
+  if (updatedAt) timeEl.textContent = timeAgo(updatedAt);
+  if (!users.length) {
+    list.innerHTML = '<div style="color:var(--text-dim);font-size:.8rem;font-family:var(--font-mono);padding:.5rem 0">Никого нет в голосовых</div>';
+    return;
+  }
+  list.innerHTML = users.map(u => `
+    <div class="v-user">
+      ${u.avatarUrl
+        ? `<img src="${u.avatarUrl}" class="vav" style="object-fit:cover">`
+        : `<div class="vav" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>`}
+      <div class="vname">${u.displayName||u.username}</div>
+      <div class="vchan">${u.channelName||''}</div>
+      <div class="vicons">${u.selfMuted?'🔇':u.selfDeafed?'🎧':'🎙️'}</div>
+    </div>`).join('');
+});
+
+// ── EVENTS ─────────────────────────────────────────────────
+DB.listenEvents(events => {
+  const el = document.getElementById('homeEvents');
+  const now = new Date();
+  const active = events.filter(e => {
+    const start = e.startDate?.toDate?.() || new Date(e.startDate);
+    const end   = e.endDate?.toDate?.()   || (e.endDate ? new Date(e.endDate) : null);
+    return e.status !== 'finished' && start <= now || (start > now && (!end || end > now));
+  }).slice(0,3);
+
+  if (!active.length) {
+    el.innerHTML = '<div class="empty-state"><span class="empty-icon">📅</span>Нет активных ивентов</div>';
+    return;
+  }
+  el.innerHTML = active.map(ev => {
+    const start = ev.startDate?.toDate?.() || new Date(ev.startDate);
+    const isLive = start <= now && ev.status !== 'finished';
+    const isSoon = start > now;
+    const tagCls = isLive ? 'tl' : isSoon ? 'ts' : 'to';
+    const tagTxt = isLive ? '🔴 LIVE' : isSoon ? '⏳ СКОРО' : '✅ ОТКРЫТ';
+    const accent = isLive ? 'cr' : 'cg';
+    const parts  = (ev.participants||[]).length;
+    return `<a href="events.html" class="ev-card ${accent}">
+      <div class="ev-ico">${ev.gameIcon||'🎮'}</div>
+      <div class="ev-info">
+        <div class="ev-name">${ev.title}</div>
+        <div class="ev-meta">
+          <span>👥 ${parts}/${ev.maxPlayers||'∞'}</span>
+          ${ev.prizes?.elo?`<span>🏆 +${ev.prizes.elo} ELO</span>`:''}
+          ${ev.prizes?.currency?`<span>💰 ${fmtNum(ev.prizes.currency)} монет</span>`:''}
+        </div>
+        <span class="ev-tag ${tagCls}">${tagTxt}</span>
+      </div>
+      <div class="ev-tmr">
+        <div class="tmr-l">${isLive?'Осталось':'Начало'}</div>
+        <span class="tmr-v tvg" data-ts="${start.getTime()}" data-live="${isLive}">—</span>
+      </div>
+    </a>`;
+  }).join('');
+  startTimers();
+});
+
+function startTimers() {
+  document.querySelectorAll('[data-ts]').forEach(el => {
+    const target = parseInt(el.dataset.ts);
+    const isLive = el.dataset.live === 'true';
+    function tick() {
+      const diff = isLive ? (target + 4*3600000) - Date.now() : target - Date.now();
+      if (diff <= 0) { el.textContent = isLive ? 'Завершается' : 'СЕЙЧАС'; return; }
+      const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+      el.textContent = h > 0 ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick(); setInterval(tick, 1000);
+  });
+}
+
+// ── FORUM TOPICS ───────────────────────────────────────────
+DB.listenTopics(null, topics => {
+  const el = document.getElementById('homeTopics');
+  if (!topics.length) {
+    el.innerHTML = '<div class="f-row"><div class="f-ico">💬</div><div class="f-info"><div class="f-title" style="color:var(--text-dim)">Форум пуст</div><div class="f-sub">Станьте первым!</div></div></div>';
+    return;
+  }
+  const icons = { guide:'📖', discuss:'💬', suggest:'💡', news:'📡' };
+  // Сначала закреплённые
+  const sorted = [...topics.filter(t=>t.pinned), ...topics.filter(t=>!t.pinned)].slice(0,6);
+  el.innerHTML = sorted.map(t => `
+    <a href="forum.html#${t.id}" class="f-row">
+      <div class="f-ico">${t.pinned?'📌':(icons[t.category]||'💬')}</div>
+      <div class="f-info">
+        <div class="f-title">${t.pinned?`<span class="pindot"></span>`:''} ${t.title}</div>
+        <div class="f-sub">от ${t.authorName} · ${t.commentCount||0} комментариев</div>
+      </div>
+      <div class="f-right">${timeAgo(t.createdAt)}</div>
+    </a>`).join('');
+});
+
+// ── TOP PLAYERS (только активные) ────────────────────────────
+DB.listenUsers('elo', 20, users => { // запрашиваем побольше, чтобы отфильтровать
+  // Фильтруем активных (хотя бы одна игра)
+  const activeUsers = users.filter(u => (u.gamesPlayed || 0) > 0);
+  const top5 = activeUsers.slice(0, 5);
+  const el = document.getElementById('homeTop');
+  if (!top5.length) { 
+    el.innerHTML = '<div class="empty-state">Нет активных игроков</div>'; 
+    return; 
+  }
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = top5.map((u,i) => {
+    const rank = gsRank(u.elo || 500); // старт с 500
+    const av = u.avatarUrl
+      ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
+      : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>`;
+    return `<a href="profile.html?id=${u.discordId||u.id}" class="tp-row">
+      <div class="tp-pos">${medals[i] || (i+1)}</div>
+      ${av}
+      <div class="tp-name">${u.displayName || u.username}</div>
+      <div class="tp-elo">${fmtNum(u.elo || 500)}</div>
+      <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.name}</div>
+    </a>`;
+  }).join('');
+});
+</script>
+</body>
+</html>
