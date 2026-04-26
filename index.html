@@ -140,14 +140,20 @@ main{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:2.5rem 2
   <div>© 2026 Gray Squad</div>
 </footer>
 
+<!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<!-- КОНФИГУРАЦИЯ-->
 <script src="assets/config.js"></script>
 <script>firebase.initializeApp(GS.firebase);</script>
-<script src="assets/config.js"></script>
+
+<!-- ОСТАЛЬНЫЕ СКРИПТЫ -->
 <script src="assets/auth.js"></script>
+<script src="assets/db.js"></script>
 <script src="assets/nav.js"></script>
+
 <script>
 // ── VOICE WIDGET ────────────────────────────────────────────
 DB.listenVoice((users, updatedAt) => {
