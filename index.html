@@ -255,7 +255,7 @@ DB.listenTopics(null, topics => {
 // ── TOP PLAYERS (только активные) ────────────────────────────
 DB.listenUsers('elo', 20, users => { // запрашиваем побольше, чтобы отфильтровать
   // Фильтруем активных (хотя бы одна игра)
-  const activeUsers = users.filter(u => (u.gamesPlayed || 0) > 0);
+  const activeUsers = users.filter(u => (u.totalVoiceMinutes || 0) > 0);
   const top5 = activeUsers.slice(0, 5);
   const el = document.getElementById('homeTop');
   if (!top5.length) { 
