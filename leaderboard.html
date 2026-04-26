@@ -132,8 +132,7 @@ let sortField = 'elo';
 const myUser = GS_AUTH.getUser();
 
 DB.listenUsers('elo', 200, users => {
-  // Временно показываем всех пользователей без фильтров
-  allUsers = users;  // было: const activeUsers = users.filter(...)
+  allUsers = users; 
   renderPodium();
   renderTable();
   renderMyCard();
@@ -185,13 +184,17 @@ function renderPodium() {
 function renderTable() {
   const q = document.getElementById('searchInp').value.toLowerCase().trim();
   let users = [...allUsers];
-  users = users.filter(u => (u.gamesPlayed || 0) > 0);
+
+  // Убрали требование "только с играми", теперь показываем всех
+  // Фильтрация по поисковой строке (если введена)
   if (q) users = users.filter(u => (u.displayName || u.username || '').toLowerCase().includes(q));
+
+  // Сортировка по выбранному полю
   users.sort((a, b) => (b[sortField] || 0) - (a[sortField] || 0));
 
   const el = document.getElementById('lbBody');
   if (!users.length) {
-    el.innerHTML = '<div class="empty-state">Нет активных игроков</div>';
+    el.innerHTML = '<div class="empty-state">Нет игроков</div>';
     return;
   }
 
