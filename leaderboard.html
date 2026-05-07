@@ -153,10 +153,6 @@
       <div class="page-eyebrow">// global ranking</div>
       <div class="page-title">Лидерборд</div>
     </div>
-    <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);text-align:right">
-      ELO = base + уровень + XP + голос + монеты<br>
-      <span style="color:var(--green)">⬆ Упасть очень тяжело</span>
-    </div>
   </div>
 
   <!-- Stat strip -->
@@ -225,36 +221,7 @@
         <div id="ranksList"></div>
       </div>
 
-      <!-- Formula hint -->
-      <div class="card">
-        <div class="card-head"><div class="card-title">Формула ELO</div></div>
-        <div style="padding:.85rem 1.1rem;display:flex;flex-direction:column;gap:.45rem">
-          <div class="elo-bd-row">
-            <span class="elo-bd-lbl">⚔️ base_elo</span>
-            <span style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim)">из ивентов, ≥<span id="fhFloor">500</span></span>
-          </div>
-          <div class="elo-bd-row">
-            <span class="elo-bd-lbl">⚡ Уровень</span>
-            <span style="font-family:var(--font-mono);font-size:.68rem;color:var(--green)">× <span id="fhLevel">25</span> за ур.</span>
-          </div>
-          <div class="elo-bd-row">
-            <span class="elo-bd-lbl">📈 XP</span>
-            <span style="font-family:var(--font-mono);font-size:.68rem;color:#B9F2FF">÷ <span id="fhXp">120</span></span>
-          </div>
-          <div class="elo-bd-row">
-            <span class="elo-bd-lbl">🎙️ Голос</span>
-            <span style="font-family:var(--font-mono);font-size:.68rem;color:var(--gold)">÷ <span id="fhVoice">6</span> мин</span>
-          </div>
-          <div class="elo-bd-row">
-            <span class="elo-bd-lbl">💰 Монеты</span>
-            <span style="font-family:var(--font-mono);font-size:.68rem;color:#ff9900">√монет × <span id="fhCoin">1.5</span></span>
-          </div>
-          <div style="margin-top:.35rem;font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);border-top:1px solid var(--border);padding-top:.5rem">Все компоненты кроме base_elo только растут — упасть очень тяжело</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
