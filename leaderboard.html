@@ -364,16 +364,6 @@ const LB = (() => {
 
       const rowCls = `lb-row${isMe?' me':''}${gi===0?' top1':gi===1?' top2':gi===2?' top3':''}`;
 
-      // Tooltip with breakdown
-      const tooltip = `<div class="elo-tooltip">
-        <div class="elo-tooltip-row"><span>⚔️ base_elo</span><span style="color:var(--red)">${fmtNum(bd.components[0].value)}</span></div>
-        <div class="elo-tooltip-row"><span>⚡ Уровень</span><span style="color:var(--green)">+${fmtNum(bd.components[1].value)}</span></div>
-        <div class="elo-tooltip-row"><span>📈 XP</span><span style="color:#B9F2FF">+${fmtNum(bd.components[2].value)}</span></div>
-        <div class="elo-tooltip-row"><span>🎙️ Голос</span><span style="color:var(--gold)">+${fmtNum(bd.components[3].value)}</span></div>
-        <div class="elo-tooltip-row"><span>💰 Монеты</span><span style="color:#ff9900">+${fmtNum(bd.components[4].value)}</span></div>
-        <div class="elo-tooltip-row elo-tooltip-total"><span>Итого</span><span style="color:${rank.color};font-size:.78rem">${fmtNum(u._composite)}</span></div>
-      </div>`;
-
       const eloCell = `<div class="elo-wrap">
         ${tooltip}
         <div class="elo-score" style="color:${rank.color}">${fmtNum(u._composite)}</div>
