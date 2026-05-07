@@ -377,7 +377,6 @@ const LB = (() => {
       const eloCell = `<div class="elo-wrap">
         ${tooltip}
         <div class="elo-score" style="color:${rank.color}">${fmtNum(u._composite)}</div>
-        <div class="elo-base">base: ${fmtNum(Math.max(u.elo||500,_weights?.elo_floor||500))}</div>
       </div>`;
 
       const voiceFmt = u.totalVoiceMinutes >= 60
