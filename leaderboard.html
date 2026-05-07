@@ -153,10 +153,6 @@
       <div class="page-eyebrow">// global ranking</div>
       <div class="page-title">Лидерборд</div>
     </div>
-    <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);text-align:right">
-      ELO = base + уровень + XP + голос + монеты<br>
-      <span style="color:var(--green)">⬆ Упасть очень тяжело</span>
-    </div>
   </div>
 
   <!-- Stat strip -->
@@ -190,11 +186,10 @@
           <span class="si">🔍</span>
           <input class="si-inp" id="searchInp" type="text" placeholder="Поиск игрока..." oninput="LB.search()">
         </div>
-        <button class="sort-btn active" data-sort="composite" onclick="LB.setSort('composite',this)">🏆 ELO ↓</button>
+        <button class="sort-btn active" data-sort="composite" onclick="LB.setSort('composite',this)">🏆 ELO</button>
         <button class="sort-btn" data-sort="level" onclick="LB.setSort('level',this)">⚡ Уровень</button>
         <button class="sort-btn" data-sort="totalVoiceMinutes" onclick="LB.setSort('totalVoiceMinutes',this)">🎙️ Голос</button>
         <button class="sort-btn" data-sort="currency" onclick="LB.setSort('currency',this)">💰 Монеты</button>
-        <button class="sort-btn" data-sort="elo" onclick="LB.setSort('elo',this)">⚔️ base_elo</button>
       </div>
 
       <!-- Table -->
