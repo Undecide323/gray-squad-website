@@ -103,6 +103,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script src="assets/config.js"></script>
 <script>firebase.initializeApp(GS.firebase);</script>
+<script src="assets/elo.js"></script>
 <script src="assets/auth.js"></script>
 <script src="assets/db.js"></script>
 <script src="assets/nav.js"></script>
@@ -129,7 +130,7 @@ function renderProfile(user) {
   document.getElementById('loadSpinner')?.remove();
   const isMe    = myUser && (myUser.discordId === user.discordId || myUser.id === user.id);
   const isAdmin = GS_AUTH.hasRole('admin');
-  const rank    = gsRank(user.elo || 1000);
+  const rank    = gsRank(user);
   const xp      = gsXpProgress(user.xp || 0);
   const warns   = (user.warnings || []).length;
 
@@ -186,11 +187,33 @@ function renderProfile(user) {
             <div class="xp-header"><span>XP: ${fmtNum(user.xp||0)}</span><span style="color:var(--red)">Ур. ${xp.level} → ${xp.level+1} · ${xp.pct}%</span></div>
             <div class="xp-track"><div class="xp-fill" style="width:${xp.pct}%"></div></div>
           </div>
-          <div class="elo-box">
-            <div><div class="elo-lbl">ELO Рейтинг</div><div class="elo-val">${fmtNum(user.elo||1000)}</div></div>
-            <div class="rank-pill">
-              <div class="rank-badge-big" style="background:${rank.color}15;color:${rank.color};border:1px solid ${rank.color}40">${rank.name}</div>
+          <div class="elo-box" style="flex-direction:column;gap:.6rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+              <div>
+                <div class="elo-lbl">Составной ELO</div>
+                <div class="elo-val" style="color:${rank.color}">${fmtNum(typeof computeCompositeElo !== 'undefined' ? computeCompositeElo(user, GS.eloFormula) : user.elo||500)}</div>
+                <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:2px">base_elo: ${fmtNum(user.elo||500)}</div>
+              </div>
+              <div class="rank-pill">
+                <div style="font-size:1.6rem">${rank.icon||'🏆'}</div>
+                <div class="rank-badge-big" style="background:${rank.color}15;color:${rank.color};border:1px solid ${rank.color}40">${rank.name}</div>
+              </div>
             </div>
+            ${typeof computeCompositeElo !== 'undefined' ? (() => {
+              const bd = eloBreakdown(user, GS.eloFormula);
+              const max = bd.total || 1;
+              return bd.components.map(comp => {
+                const colors = {base_elo:'var(--red)',level:'var(--green)',xp:'#B9F2FF',voice:'var(--gold)',coins:'#ff9900'};
+                const pct = Math.min(Math.round((comp.value/max)*100), 100);
+                return \`<div style="display:flex;align-items:center;gap:.5rem;margin-top:2px">
+                  <span style="font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);width:85px;flex-shrink:0">\${comp.icon} \${comp.label}</span>
+                  <div style="flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
+                    <div style="width:\${pct}%;height:100%;background:\${colors[comp.key]||'var(--red)'};border-radius:2px"></div>
+                  </div>
+                  <span style="font-family:var(--font-mono);font-size:.6rem;color:\${colors[comp.key]||'var(--text)'};width:35px;text-align:right">\${fmtNum(comp.value)}</span>
+                </div>\`;
+              }).join('');
+            })() : ''}
           </div>
         </div>
 
@@ -238,7 +261,7 @@ function renderProfile(user) {
     document.getElementById('editRole').value     = user.role || 'user';
     document.getElementById('editTitle').value    = user.title || '';
     document.getElementById('editCurrency').value = user.currency || 0;
-    document.getElementById('editElo').value      = user.elo || 1000;
+    document.getElementById('editElo').value      = user.elo || 500;
     document.getElementById('editXp').value       = user.xp || 0;
     document.getElementById('editLevel').value    = user.level || 0;
   }
@@ -330,15 +353,11 @@ document.getElementById('editModal')?.addEventListener('click', e => { if (e.tar
 document.getElementById('saveEdit')?.addEventListener('click', async () => {
   if (!profileUser) return;
   const newElo = parseInt(document.getElementById('editElo').value);
-  const rank   = gsRank(newElo);
   await DB.updateUser(profileUser.discordId || profileUser.id, {
     role:     document.getElementById('editRole').value,
     title:    document.getElementById('editTitle').value || null,
     currency: parseInt(document.getElementById('editCurrency').value),
-    elo:      newElo,
-    rank:     rank.id,
-    rankName: rank.name,
-    rankColor:rank.color,
+    elo:      newElo,   // base_elo — ранг вычисляется динамически
     xp:       parseInt(document.getElementById('editXp').value),
     level:    parseInt(document.getElementById('editLevel').value),
   });

@@ -2,10 +2,121 @@
 <html lang="ru">
 <head>
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Gray Squad — Ивенты</title>
-<link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/events.css">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Gray Squad — Ивенты</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           Вставка содержимого assets/events.css
+           ═══════════════════════════════════════════════════════════ */
+        /* ── EVENTS PAGE ─────────────────────────────────────────── */
+        .events-layout{display:grid;grid-template-columns:1fr 280px;gap:1.75rem;align-items:start;}
+        .ev-left,.ev-right{display:flex;flex-direction:column;gap:1.5rem;}
+
+        /* ── LIVE BANNER ── */
+        .live-banner{background:rgba(220,53,69,.07);border:1px solid rgba(220,53,69,.2);border-radius:14px;padding:1.5rem 1.75rem;display:flex;align-items:center;gap:1.5rem;position:relative;overflow:hidden;}
+        .live-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--red-dim),transparent);}
+        .live-pill{position:absolute;top:1rem;right:1.25rem;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.15em;background:var(--red);color:#fff;padding:3px 9px;border-radius:4px;animation:pulseBg 1.5s infinite;text-transform:uppercase;}
+        @keyframes pulseBg{0%,100%{opacity:1}50%{opacity:.55}}
+        .live-game-ico{font-size:3rem;flex-shrink:0;animation:floatY 3s ease-in-out infinite;}
+        @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+        .live-info{flex:1;min-width:0;}
+        .live-title{font-family:var(--font-title);font-size:1.5rem;font-weight:700;line-height:1.1;margin-bottom:.5rem;}
+        .live-meta{display:flex;gap:1.25rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);}
+        .live-prizes{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap;}
+        .live-timer-col{text-align:center;flex-shrink:0;}
+        .timer-label{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px;}
+        .timer-digits{display:flex;gap:4px;align-items:center;}
+        .timer-block{background:rgba(0,0,0,.3);border:1px solid rgba(220,53,69,.25);border-radius:6px;padding:6px 10px;min-width:46px;text-align:center;}
+        .timer-num{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--red);line-height:1;display:block;}
+        .timer-unit{font-family:var(--font-mono);font-size:.5rem;color:var(--text-dim);}
+        .timer-sep{font-family:var(--font-mono);font-size:1.4rem;color:var(--red);opacity:.5;}
+
+        /* ── FILTER TABS ── */
+        .filter-tabs{display:flex;gap:.35rem;flex-wrap:wrap;}
+        .ftab{padding:.35rem .85rem;font-family:var(--font-title);font-size:.82rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--surface);border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text-dim);transition:all .2s;}
+        .ftab:hover{border-color:rgba(255,255,255,.15);color:var(--text);}
+        .ftab.active{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.35);color:var(--text);}
+
+        /* ── EVENT CARD ── */
+        .ev-card-full{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .2s;}
+        .ev-card-full:hover{border-color:rgba(255,255,255,.12);transform:translateY(-2px);}
+        .ev-card-full.c-gold{border-color:rgba(255,193,7,.15);}
+        .ev-card-full.c-green{border-color:rgba(40,167,69,.15);}
+        .ev-card-full.c-gray{opacity:.7;}
+        .ev-accent{height:3px;width:100%;}
+        .acc-red{background:linear-gradient(90deg,var(--red),transparent);}
+        .acc-gold{background:linear-gradient(90deg,var(--gold),transparent);}
+        .acc-green{background:linear-gradient(90deg,var(--green),transparent);}
+        .acc-gray{background:linear-gradient(90deg,var(--gray),transparent);}
+        .ev-inner{padding:1.1rem 1.25rem;display:flex;gap:1.1rem;align-items:flex-start;}
+        .ev-game-ico{width:52px;height:52px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.7rem;background:rgba(255,255,255,.04);border:1px solid var(--border);}
+        .ev-body{flex:1;min-width:0;}
+        .ev-title{font-family:var(--font-title);font-size:1.1rem;font-weight:700;letter-spacing:.03em;margin-bottom:5px;}
+        .ev-badges{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:7px;}
+        .ev-badge{font-family:var(--font-mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:4px;}
+        .eb-live{background:rgba(220,53,69,.15);color:var(--red);border:1px solid rgba(220,53,69,.3);}
+        .eb-soon{background:rgba(255,193,7,.1);color:var(--gold);border:1px solid rgba(255,193,7,.25);}
+        .eb-open{background:rgba(40,167,69,.1);color:var(--green);border:1px solid rgba(40,167,69,.25);}
+        .eb-closed{background:rgba(108,117,125,.1);color:var(--gray);border:1px solid rgba(108,117,125,.25);}
+        .eb-done{background:rgba(108,117,125,.1);color:var(--gray);border:1px solid rgba(108,117,125,.2);}
+        .ev-info-row{display:flex;gap:1rem;flex-wrap:wrap;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);margin-bottom:7px;}
+        .ev-right-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;}
+        .ev-countdown{text-align:right;}
+        .ev-tmr-lbl{font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+        .ev-tmr-val{font-family:var(--font-mono);font-size:1.05rem;font-weight:700;margin-top:2px;}
+        .tv-red{color:var(--red);}.tv-gold{color:var(--gold);}.tv-green{color:var(--green);}.tv-gray{color:var(--gray);}
+        .part-avatars{display:flex;}
+        .part-av{width:22px;height:22px;border-radius:50%;border:2px solid var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff;margin-left:-6px;flex-shrink:0;background:rgba(255,255,255,.15);}
+        .part-av:first-child{margin-left:0;}
+        .part-av img{width:100%;height:100%;object-fit:cover;}
+        .btn-join{padding:.42rem 1rem;border-radius:7px;cursor:pointer;font-family:var(--font-title);font-size:.85rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:none;transition:all .2s;flex-shrink:0;}
+        .bj-red{background:var(--red);color:#fff;box-shadow:0 2px 10px rgba(220,53,69,.3);}.bj-red:hover{background:#e8404f;}
+        .bj-gold{background:rgba(255,193,7,.12);color:var(--gold);border:1px solid rgba(255,193,7,.3);}.bj-gold:hover{background:rgba(255,193,7,.22);}
+        .bj-gray{background:rgba(255,255,255,.06);color:var(--text-dim);border:1px solid var(--border);cursor:not-allowed;}
+        .bj-done{background:rgba(40,167,69,.1);color:var(--green);border:1px solid rgba(40,167,69,.25);cursor:default;}
+        .part-bar-wrap{padding:0 1.25rem 1rem;}
+        .part-bar-header{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);margin-bottom:5px;}
+        .part-bar-track{height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;}
+        .part-bar-fill{height:100%;border-radius:99px;transition:width .6s ease;}
+        .pbf-red{background:linear-gradient(90deg,var(--red-dim),var(--red));}
+        .pbf-gold{background:linear-gradient(90deg,#856404,var(--gold));}
+        .pbf-green{background:linear-gradient(90deg,#155724,var(--green));}
+
+        /* ── SIDEBAR ── */
+        .side-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+        .side-head{padding:.8rem 1.1rem;border-bottom:1px solid var(--border);font-family:var(--font-title);font-size:.95rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+        .side-head::before{content:'';display:block;width:3px;height:1em;background:var(--red);border-radius:2px;}
+        .my-ev-row{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.1rem;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;}
+        .my-ev-row:last-child{border-bottom:none;}.my-ev-row:hover{background:rgba(255,255,255,.02);}
+        .my-ev-ico{font-size:1.1rem;flex-shrink:0;}
+        .my-ev-info{flex:1;min-width:0;}.my-ev-name{font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.my-ev-sub{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);}
+        .my-ev-status{font-family:var(--font-title);font-size:.9rem;font-weight:700;flex-shrink:0;}
+        .side-stat-grid{display:grid;grid-template-columns:1fr 1fr;}
+        .ss{padding:.85rem 1.1rem;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+        .ss:nth-child(2n){border-right:none;}.ss:nth-last-child(-n+2){border-bottom:none;}
+        .ss-lbl{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+        .ss-val{font-family:var(--font-title);font-size:1.35rem;font-weight:700;margin-top:2px;}
+
+        /* ── MINI CALENDAR ── */
+        .mini-cal{padding:1rem;}
+        .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+        .cal-month{font-family:var(--font-title);font-size:1rem;font-weight:700;}
+        .cal-nav{background:none;border:1px solid var(--border);color:var(--text-dim);border-radius:5px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:border-color .2s;}.cal-nav:hover{border-color:var(--red);color:var(--text);}
+        .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+        .cal-day-name{font-family:var(--font-mono);font-size:.55rem;color:var(--text-dim);text-align:center;padding:3px 0;}
+        .cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);cursor:pointer;transition:background .15s;position:relative;}
+        .cal-day:hover{background:rgba(255,255,255,.05);color:var(--text);}
+        .cal-day.today{background:rgba(220,53,69,.15);color:var(--red);font-weight:700;}
+        .cal-day.has-ev::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--red);}
+        .cal-day.other-month{opacity:.3;}
+
+        /* ── CREATE MODAL ── */
+        .f-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;}
+
+        @media(max-width:960px){.events-layout{grid-template-columns:1fr;}.ev-right{order:-1;}.live-timer-col{display:none;}}
+        @media(max-width:600px){.ev-inner{flex-wrap:wrap;}.ev-right-col{flex-direction:row;align-items:center;width:100%;}.filter-tabs{overflow-x:auto;flex-wrap:nowrap;}.live-banner{flex-wrap:wrap;}}
+    </style>
 </head>
 <body>
 
@@ -39,7 +150,7 @@
         <div class="sec-label g" style="margin-bottom:.75rem">⏳ Предстоящие</div>
       <div class="filter-tabs" id="filterTabs">
         <button class="ftab active" data-game="all">Все</button>
-        <!-- сюда будут подгружаться динамические фильтры -->
+        <!-- dynamic filters inserted here -->
       </div>
         <div style="display:flex;flex-direction:column;gap:.75rem;margin-top:.85rem" id="upcomingList">
           <div class="spinner"></div>
@@ -63,7 +174,7 @@
   <div class="side-head">🎮 Управление играми</div>
   <div class="card-body" style="padding:1rem">
     <div id="gamesManageList" style="margin-bottom:1rem; max-height:200px; overflow-y:auto">
-      <!-- список игр с кнопками удаления -->
+      <!-- game list with delete buttons -->
     </div>
     <div style="display:flex; gap:0.5rem; flex-wrap:wrap">
       <input type="text" id="newGameName" placeholder="Название" class="inp" style="flex:1; min-width:100px">
@@ -167,13 +278,12 @@
   <div><div class="toast-title" id="toastTitle"></div><div class="toast-sub" id="toastSub"></div></div>
 </div>
 
-
 <!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-<!-- КОНФИГУРАЦИЯ-->
+<!-- КОНФИГУРАЦИЯ -->
 <script src="assets/config.js"></script>
 <script>firebase.initializeApp(GS.firebase);</script>
 
@@ -181,11 +291,558 @@
 <script src="assets/auth.js"></script>
 <script src="assets/db.js"></script>
 <script src="assets/nav.js"></script>
+
 <script>
   // Показать «Мои ивенты» если залогинен
   if (GS_AUTH.isLoggedIn()) {
     document.getElementById('myEventsCard').style.display = '';
   }
+
+  // ══════════════════════════════════════════════════════════════
+  //  Вставка содержимого assets/events.js
+  // ══════════════════════════════════════════════════════════════
+  const EV = (() => {
+
+    let allEvents  = [];
+    let myJoined   = new Set();
+    let isCreator  = false;
+    const user     = GS_AUTH.getUser();
+    const isAdmin  = GS_AUTH.hasRole('admin');
+    const canCreate = isAdmin || user?.canCreateEvents;
+
+    // ── INIT ────────────────────────────────────────────────────
+    function init() {
+      if (canCreate) {
+        document.getElementById('createBtn').style.display = 'inline-flex';
+      }
+
+      // Проверка на creator (роль создателя)
+      if (user && user.role === 'creator') {
+        isCreator = true;
+        const panel = document.getElementById('gameFiltersPanel');
+        if (panel) panel.style.display = '';
+        loadGamesManage();
+        document.getElementById('addGameBtn')?.addEventListener('click', () => addGame());
+      }
+
+      // Слушаем все ивенты в реальном времени
+      DB.listenEvents(events => {
+        allEvents = events;
+        renderAll();
+        updateSideStats();
+        buildCalendar();
+      });
+
+      // Моя статистика (sidebar)
+      if (user) {
+        DB.listenUser(user.discordId || user.id, u => {
+          renderMyEvents(u);
+        });
+      }
+
+      // Загружаем динамические фильтры
+      loadGameFilters();
+
+      // Закрытие модалок
+      document.getElementById('createModal')
+        ?.addEventListener('click', e => { if (e.target.id === 'createModal') closeCreateModal(); });
+
+      document.getElementById('finishModal')
+        ?.addEventListener('click', e => { if (e.target.id === 'finishModal') closeFinishModal(); });
+    }
+
+    // ── ДИНАМИЧЕСКИЕ ФИЛЬТРЫ ────────────────────────────────────
+    function loadGameFilters() {
+      DB.listenGameFilters(games => {
+        const container = document.getElementById('filterTabs');
+        if (!container) return;
+
+        let html = `<button class="ftab active" data-game="all">Все</button>`;
+        games.forEach(game => {
+          html += `<button class="ftab" data-game="${game.id}" data-icon="${game.icon || '🎮'}">${game.icon || '🎮'} ${game.name}</button>`;
+        });
+        container.innerHTML = html;
+
+        // Перепривязываем события
+        document.querySelectorAll('.ftab').forEach(btn =>
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.ftab').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            renderAll();
+          })
+        );
+
+        renderAll(); // перерисовка с учётом выбранного фильтра
+      });
+    }
+
+    // ── УПРАВЛЕНИЕ ИГРАМИ (ТОЛЬКО CREATOR) ─────────────────────
+    function loadGamesManage() {
+      DB.listenGameFilters(games => {
+        const container = document.getElementById('gamesManageList');
+        if (!container) return;
+        if (!games.length) {
+          container.innerHTML = '<div style="color:var(--text-dim); font-size:.75rem">Нет игр. Добавьте первую.</div>';
+          return;
+        }
+        container.innerHTML = games.map(g => `
+          <div style="display:flex; align-items:center; gap:0.5rem; padding:0.3rem 0; border-bottom:1px solid var(--border)">
+            <span style="font-size:1rem">${g.icon || '🎮'}</span>
+            <span style="flex:1"><b>${g.name}</b> <span style="font-size:.65rem; color:var(--text-dim)">(${g.id})</span></span>
+            <button class="btn-ghost btn-sm" onclick="EV.removeGame('${g.id}')" style="padding:2px 8px">🗑️</button>
+          </div>
+        `).join('');
+      });
+    }
+
+    async function addGame() {
+      const name = document.getElementById('newGameName').value.trim();
+      let id     = document.getElementById('newGameId').value.trim().toLowerCase();
+      const icon = document.getElementById('newGameIcon').value.trim() || '🎮';
+      if (!name || !id) { showToast('❌', 'Заполните название и id', '', true); return; }
+      id = id.replace(/\s+/g, '_');
+      await DB.addGameFilter({ id, name, icon, active: true });
+      document.getElementById('newGameName').value = '';
+      document.getElementById('newGameId').value = '';
+      document.getElementById('newGameIcon').value = '';
+      showToast('✅', `Игра "${name}" добавлена`, '');
+    }
+
+    async function removeGame(gameId) {
+      if (confirm('Удалить игру из фильтров?')) {
+        await DB.removeGameFilter(gameId);
+        showToast('🗑️', 'Игра удалена', '');
+      }
+    }
+
+    // ── RENDER ALL SECTIONS ─────────────────────────────────────
+    function renderAll() {
+      const now    = new Date();
+      const filter = document.querySelector('.ftab.active')?.dataset.game || 'all';
+
+      let events = allEvents;
+      if (filter !== 'all') events = events.filter(e => (e.game || '').toLowerCase() === filter);
+
+      const live     = events.filter(e => isLive(e, now));
+      const upcoming = events.filter(e => !isLive(e, now) && e.status !== 'finished' && getStart(e) > now);
+      const finished = events.filter(e => e.status === 'finished');
+
+      renderLiveBanner(live[0] || null);
+      renderList('upcomingList', upcoming, now, 'upcoming');
+      renderList('finishedList', finished, now, 'finished');
+
+      // Пересобрать joined set
+      myJoined = new Set(
+        allEvents
+          .filter(e => (e.participants || []).includes(user?.discordId || user?.id))
+          .map(e => e.id)
+      );
+    }
+
+    // ── LIVE BANNER ─────────────────────────────────────────────
+    function renderLiveBanner(ev) {
+      const section = document.getElementById('liveSection');
+      if (!ev) { section.style.display = 'none'; return; }
+      section.style.display = '';
+
+      const parts = (ev.participants || []).length;
+      const joined = myJoined.has(ev.id);
+
+      document.getElementById('liveBanner').innerHTML = `
+        <div class="live-pill">LIVE</div>
+        <div class="live-game-ico">${ev.gameIcon || '🎮'}</div>
+        <div class="live-info">
+          <div class="live-title">${ev.title}</div>
+          <div class="live-meta">
+            <span>👥 ${parts}/${ev.maxPlayers || '∞'} участников</span>
+            <span>🎮 ${ev.game || ''}</span>
+            <span>📅 ${formatDate(getStart(ev))}</span>
+          </div>
+          <div class="live-prizes" style="margin-top:.75rem">
+            ${ev.prizes?.elo      ? `<div class="prize-chip pc-elo">🏆 +${ev.prizes.elo} ELO</div>` : ''}
+            ${ev.prizes?.currency ? `<div class="prize-chip pc-coin">💰 ${fmtNum(ev.prizes.currency)} монет</div>` : ''}
+            ${ev.prizes?.xp       ? `<div class="prize-chip pc-xp">⚡ +${ev.prizes.xp} XP</div>` : ''}
+          </div>
+          ${user ? `<button class="btn-join ${joined ? 'bj-done' : 'bj-red'}" style="margin-top:.85rem;width:100%" 
+            onclick="EV.joinEvent('${ev.id}', this)">
+            ${joined ? '✅ Вы участвуете' : '🎮 Записаться'}
+          </button>` : ''}
+          ${isAdmin ? `<button class="btn btn-ghost btn-sm" style="margin-top:.5rem;width:100%" 
+            onclick="EV.openFinish('${ev.id}')">🏁 Завершить ивент</button>` : ''}
+        </div>
+        <div class="live-timer-col">
+          <div class="timer-label">Осталось</div>
+          <div class="timer-digits">
+            <div class="timer-block"><span class="timer-num" id="lh">--</span><span class="timer-unit">ЧАС</span></div>
+            <span class="timer-sep">:</span>
+            <div class="timer-block"><span class="timer-num" id="lm">--</span><span class="timer-unit">МИН</span></div>
+            <span class="timer-sep">:</span>
+            <div class="timer-block"><span class="timer-num" id="ls">--</span><span class="timer-unit">СЕК</span></div>
+          </div>
+        </div>`;
+
+      // Таймер обратного отсчёта
+      const endTs = ev.endDate ? (ev.endDate.toDate?.() || new Date(ev.endDate)) : new Date(getStart(ev).getTime() + 4 * 3600000);
+      startLiveTimer(endTs);
+    }
+
+    let liveTimerInterval = null;
+    function startLiveTimer(endTs) {
+      if (liveTimerInterval) clearInterval(liveTimerInterval);
+      function tick() {
+        const diff = endTs - Date.now();
+        if (diff <= 0) { clearInterval(liveTimerInterval); return; }
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        const nh = document.getElementById('lh');
+        const nm = document.getElementById('lm');
+        const ns = document.getElementById('ls');
+        if (nh) nh.textContent = String(h).padStart(2, '0');
+        if (nm) nm.textContent = String(m).padStart(2, '0');
+        if (ns) ns.textContent = String(s).padStart(2, '0');
+      }
+      tick();
+      liveTimerInterval = setInterval(tick, 1000);
+    }
+
+    // ── EVENT LIST ───────────────────────────────────────────────
+    function renderList(containerId, events, now, type) {
+      const el = document.getElementById(containerId);
+      if (!el) return;
+
+      if (!events.length) {
+        el.innerHTML = `<div class="empty-state"><span class="empty-icon">${type === 'finished' ? '📁' : '📅'}</span>${type === 'finished' ? 'Нет завершённых ивентов' : 'Нет предстоящих ивентов'}</div>`;
+        return;
+      }
+
+      el.innerHTML = events.map(ev => buildEventCard(ev, now, type)).join('');
+
+      // Таймеры обратного отсчёта
+      el.querySelectorAll('[data-countdown]').forEach(span => {
+        const target = parseInt(span.dataset.countdown);
+        const isEnd  = span.dataset.end === '1';
+        const ticker = setInterval(() => {
+          const diff = target - Date.now();
+          if (diff <= 0) { span.textContent = isEnd ? 'Завершается' : 'СЕЙЧАС'; clearInterval(ticker); return; }
+          const h = Math.floor(diff / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          const s = Math.floor((diff % 60000) / 1000);
+          span.textContent = h > 0
+            ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+            : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }, 1000);
+      });
+    }
+
+    function buildEventCard(ev, now, type) {
+      const start   = getStart(ev);
+      const end     = ev.endDate ? (ev.endDate.toDate?.() || new Date(ev.endDate)) : null;
+      const parts   = ev.participants || [];
+      const count   = parts.length;
+      const max     = ev.maxPlayers || 0;
+      const pct     = max ? Math.round(count / max * 100) : 0;
+      const live    = isLive(ev, now);
+      const soon    = !live && start > now;
+      const done    = ev.status === 'finished';
+      const joined  = myJoined.has(ev.id);
+      const myId    = user?.discordId || user?.id;
+
+      const accentCls = done ? 'acc-gray' : live ? 'acc-red' : soon ? 'acc-gold' : 'acc-green';
+      const cardCls   = done ? 'c-gray'   : live ? ''        : soon ? 'c-gold'   : 'c-green';
+
+      let badge = '';
+      if (live) badge = '<span class="ev-badge eb-live">🔴 LIVE</span>';
+      else if (done) badge = '<span class="ev-badge eb-done">✔ Завершён</span>';
+      else if (soon && max && count >= max) badge = '<span class="ev-badge eb-closed">🔒 Мест нет</span>';
+      else if (soon) badge = '<span class="ev-badge eb-soon">⏳ Скоро</span>';
+      else badge = '<span class="ev-badge eb-open">✅ Открыт</span>';
+
+      const countdownTs = live
+        ? (end ? end.getTime() : start.getTime() + 4 * 3600000)
+        : start.getTime();
+
+      let btnHtml = '';
+      if (user && !done) {
+        if (joined) {
+          btnHtml = `<button class="btn-join bj-done">✅ Записан</button>`;
+        } else if (max && count >= max) {
+          btnHtml = `<button class="btn-join bj-gray" disabled>Нет мест</button>`;
+        } else {
+          btnHtml = `<button class="btn-join bj-${live ? 'red' : 'gold'}" onclick="EV.joinEvent('${ev.id}',this)">Записаться</button>`;
+        }
+      }
+      if (isAdmin && !done) {
+        btnHtml += `<button class="btn btn-ghost btn-sm" onclick="EV.openFinish('${ev.id}')">🏁 Завершить</button>`;
+      }
+
+      // Аватарки участников
+      const shownParts = parts.slice(0, 4);
+      const partAvatars = shownParts.map(id => {
+        return `<div class="part-av">${id.slice(0,1).toUpperCase()}</div>`;
+      }).join('') + (parts.length > 4 ? `<div class="part-av">+${parts.length - 4}</div>` : '');
+
+      return `
+  <div class="ev-card-full ${cardCls}">
+    <div class="ev-accent ${accentCls}"></div>
+    <div class="ev-inner">
+      <div class="ev-game-ico">${ev.gameIcon || '🎮'}</div>
+      <div class="ev-body">
+        <div class="ev-title">${ev.title}</div>
+        <div class="ev-badges">${badge}</div>
+        <div class="ev-info-row">
+          <span>👥 ${count}${max ? '/'+max : ''} мест</span>
+          <span>📅 ${formatDate(start)}</span>
+          ${ev.game ? `<span>🎮 ${ev.game}</span>` : ''}
+          ${ev.description ? `<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.description}</span>` : ''}
+        </div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          ${ev.prizes?.elo      ? `<div class="prize-chip pc-elo">🏆 +${ev.prizes.elo} ELO</div>` : ''}
+          ${ev.prizes?.currency ? `<div class="prize-chip pc-coin">💰 ${fmtNum(ev.prizes.currency)} монет</div>` : ''}
+          ${ev.prizes?.xp       ? `<div class="prize-chip pc-xp">⚡ +${ev.prizes.xp} XP</div>` : ''}
+        </div>
+      </div>
+      <div class="ev-right-col">
+        ${!done ? `
+        <div class="ev-countdown">
+          <div class="ev-tmr-lbl">${live ? 'Осталось' : 'Начало через'}</div>
+          <span class="ev-tmr-val tv-${live?'red':soon?'gold':'green'}" data-countdown="${countdownTs}" ${live?'data-end="1"':''}>—</span>
+        </div>` : `
+        <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim)">Завершён<br>${formatDate(start)}</div>`}
+        ${parts.length ? `<div class="part-avatars">${partAvatars}</div>` : ''}
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">${btnHtml}</div>
+      </div>
+    </div>
+    ${!done && max ? `
+    <div class="part-bar-wrap">
+      <div class="part-bar-header"><span>Заполнено мест</span><span>${count} / ${max}</span></div>
+      <div class="part-bar-track"><div class="part-bar-fill pbf-${live?'red':soon?'gold':'green'}" style="width:${pct}%"></div></div>
+    </div>` : ''}
+  </div>`;
+    }
+
+    // ── JOIN / LEAVE ─────────────────────────────────────────────
+    async function joinEvent(eventId, btn) {
+      if (!user) { GS_AUTH.login(); return; }
+      try {
+        btn.disabled = true;
+        const result = await DB.toggleEventJoin(eventId, user.discordId || user.id);
+        if (result === 'added') {
+          btn.className = 'btn-join bj-done';
+          btn.textContent = '✅ Записан';
+          myJoined.add(eventId);
+          showToast('✅', 'Записан на ивент!', '');
+        } else {
+          btn.className = 'btn-join bj-gold';
+          btn.textContent = 'Записаться';
+          myJoined.delete(eventId);
+        }
+      } catch (e) {
+        showToast('❌', 'Ошибка', e.message, true);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── FINISH EVENT ─────────────────────────────────────────────
+    let finishingEventId = null;
+    function openFinish(eventId) {
+      const ev = allEvents.find(e => e.id === eventId);
+      if (!ev) return;
+      finishingEventId = eventId;
+      document.getElementById('finishEventName').textContent = ev.title;
+
+      const parts = ev.participants || [];
+      document.getElementById('finishParticipants').innerHTML = parts.length
+        ? parts.map(id => `
+            <label style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;cursor:pointer;font-size:.88rem">
+              <input type="checkbox" value="${id}" checked style="accent-color:var(--red)">
+              <span>${id}</span>
+            </label>`).join('')
+        : '<div style="color:var(--text-dim);font-size:.85rem">Нет записавшихся</div>';
+
+      document.getElementById('finishModal').classList.add('open');
+    }
+
+    async function confirmFinish() {
+      const checked = [...document.querySelectorAll('#finishParticipants input:checked')].map(i => i.value);
+      try {
+        await DB.finishEvent(finishingEventId, checked);
+        closeFinishModal();
+        showToast('🏁', 'Ивент завершён!', `Призы выданы ${checked.length} участникам`);
+      } catch (e) {
+        showToast('❌', 'Ошибка', e.message, true);
+      }
+    }
+    function closeFinishModal() { document.getElementById('finishModal').classList.remove('open'); }
+
+    // ── CREATE EVENT ─────────────────────────────────────────────
+    function openCreateModal() { document.getElementById('createModal').classList.add('open'); }
+    function closeCreateModal() { document.getElementById('createModal').classList.remove('open'); }
+
+    async function submitCreate() {
+      if (!user) return;
+      const title   = document.getElementById('evTitle').value.trim();
+      const game    = document.getElementById('evGame').value.trim();
+      const icon    = document.getElementById('evIcon').value.trim() || '🎮';
+      const maxP    = parseInt(document.getElementById('evMax').value) || 0;
+      const startDt = document.getElementById('evStart').value;
+      const endDt   = document.getElementById('evEnd').value;
+      const desc    = document.getElementById('evDesc').value.trim();
+      const prElo   = parseInt(document.getElementById('prElo').value)  || 0;
+      const prCoin  = parseInt(document.getElementById('prCoin').value) || 0;
+      const prXp    = parseInt(document.getElementById('prXp').value)   || 0;
+
+      if (!title)   { showToast('❌', 'Укажите название', '', true); return; }
+      if (!startDt) { showToast('❌', 'Укажите дату начала', '', true); return; }
+
+      try {
+        await DB.createEvent({
+          title, game, gameIcon: icon,
+          maxPlayers:  maxP,
+          startDate:   firebase.firestore.Timestamp.fromDate(new Date(startDt)),
+          endDate:     endDt ? firebase.firestore.Timestamp.fromDate(new Date(endDt)) : null,
+          description: desc,
+          prizes:      { elo: prElo, currency: prCoin, xp: prXp },
+          createdBy:   user.discordId || user.id,
+          status:      'open',
+        });
+        closeCreateModal();
+        clearCreateForm();
+        showToast('📅', 'Ивент создан!', title);
+      } catch (e) {
+        showToast('❌', 'Ошибка создания', e.message, true);
+      }
+    }
+
+    function clearCreateForm() {
+      ['evTitle','evGame','evIcon','evMax','evStart','evEnd','evDesc','prElo','prCoin','prXp']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    }
+
+    // ── SIDEBAR ──────────────────────────────────────────────────
+    function renderMyEvents(u) {
+      const myId = u.discordId || u.id;
+      const mine = allEvents.filter(e => (e.participants || []).includes(myId));
+      const el   = document.getElementById('myEventsList');
+      if (!el) return;
+
+      if (!mine.length) {
+        el.innerHTML = '<div style="padding:1rem;text-align:center;font-family:var(--font-mono);font-size:.72rem;color:var(--text-dim)">Вы не записаны</div>';
+        return;
+      }
+
+      const now = new Date();
+      el.innerHTML = mine.map(ev => {
+        const start = getStart(ev);
+        const live  = isLive(ev, now);
+        const done  = ev.status === 'finished';
+        return `<div class="my-ev-row">
+          <div class="my-ev-ico">${ev.gameIcon || '🎮'}</div>
+          <div class="my-ev-info">
+            <div class="my-ev-name">${ev.title}</div>
+            <div class="my-ev-sub">${formatDate(start)}</div>
+          </div>
+          <div class="my-ev-status" style="color:${done?'var(--text-dim)':live?'var(--red)':'var(--gold)'}">
+            ${done ? '✔' : live ? 'LIVE' : '⏳'}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function updateSideStats() {
+      const now  = new Date();
+      const live = allEvents.filter(e => isLive(e, now)).length;
+      const up   = allEvents.filter(e => !isLive(e, now) && e.status !== 'finished').length;
+      const done = allEvents.filter(e => e.status === 'finished').length;
+      const myId = user?.discordId || user?.id;
+      const myCount = myId ? allEvents.filter(e => (e.participants||[]).includes(myId)).length : 0;
+
+      document.getElementById('statLive').textContent  = live;
+      document.getElementById('statUp').textContent    = up;
+      document.getElementById('statTotal').textContent = allEvents.length;
+      document.getElementById('statMine').textContent  = myCount;
+    }
+
+    // ── CALENDAR ─────────────────────────────────────────────────
+    let calDate = new Date();
+    function buildCalendar() {
+      const year  = calDate.getFullYear();
+      const month = calDate.getMonth();
+      const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+      document.getElementById('calMonth').textContent = `${monthNames[month]} ${year}`;
+
+      const eventDays = new Set(
+        allEvents.map(e => {
+          const d = getStart(e);
+          return d.getFullYear() === year && d.getMonth() === month ? d.getDate() : null;
+        }).filter(Boolean)
+      );
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const offset   = (firstDay === 0 ? 6 : firstDay - 1); // Mon=0
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const today    = new Date();
+
+      let html = '';
+      for (let i = 0; i < offset; i++) {
+        const d = new Date(year, month, -offset + i + 1).getDate();
+        html += `<div class="cal-day other-month">${d}</div>`;
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+        const hasEv   = eventDays.has(d);
+        html += `<div class="cal-day${isToday?' today':''}${hasEv?' has-ev':''}">${d}</div>`;
+      }
+      document.getElementById('calGrid').innerHTML = html;
+    }
+
+    function calPrev() { calDate.setMonth(calDate.getMonth() - 1); buildCalendar(); }
+    function calNext() { calDate.setMonth(calDate.getMonth() + 1); buildCalendar(); }
+
+    // ── HELPERS ──────────────────────────────────────────────────
+    function getStart(ev) { return ev.startDate?.toDate?.() || new Date(ev.startDate); }
+    function isLive(ev, now) {
+      if (ev.status === 'finished') return false;
+      const s = getStart(ev);
+      const e = ev.endDate ? (ev.endDate.toDate?.() || new Date(ev.endDate)) : new Date(s.getTime() + 4 * 3600000);
+      return s <= now && now <= e;
+    }
+    function formatDate(d) {
+      return d.toLocaleDateString('ru-RU', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    }
+
+    // Toast
+    let _tt;
+    function showToast(icon, title, sub, err=false) {
+      const t = document.getElementById('toast');
+      t.className = 'toast' + (err ? ' err' : '');
+      document.getElementById('toastIcon').textContent  = icon;
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastTitle').style.color = err ? 'var(--red)' : 'var(--green)';
+      document.getElementById('toastSub').textContent   = sub;
+      clearTimeout(_tt); _tt = setTimeout(() => t.classList.add('hidden'), 3200);
+    }
+
+    // Public API
+    return {
+      init,
+      joinEvent,
+      openFinish,
+      confirmFinish,
+      closeFinishModal,
+      openCreateModal,
+      closeCreateModal,
+      submitCreate,
+      calPrev,
+      calNext,
+      addGame,
+      removeGame
+    };
+  })();
+
+  document.addEventListener('DOMContentLoaded', EV.init);
 </script>
 </body>
 </html>
