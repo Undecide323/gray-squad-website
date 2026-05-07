@@ -49,15 +49,14 @@
 .sort-btn:hover{border-color:rgba(255,255,255,.15);color:var(--text);}
 .sort-btn.active{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.35);color:var(--text);}
 
-/* ── Table (FIXED COLUMNS) ── */
+/* ── Table ── */
 .lb-table{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.lb-col-head{display:grid;grid-template-columns:50px minmax(0, 1fr) 110px 80px 90px 110px;padding:.6rem 1rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
-.lb-col-head span{text-align:center;cursor:pointer;user-select:none;transition:color .2s;padding:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-col-head{display:grid;grid-template-columns:50px 1fr 110px 80px 90px 110px;padding:.6rem 1rem;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;}
+.lb-col-head span{text-align:center;cursor:pointer;user-select:none;transition:color .2s;padding:3px 0;}
 .lb-col-head span:hover{color:var(--text);}
 .lb-col-head span.sa{color:var(--red);}
 .lb-col-head span:nth-child(2){text-align:left;}
-.lb-row{display:grid;grid-template-columns:50px minmax(0, 1fr) 110px 80px 90px 110px;align-items:center;padding:.7rem 1rem;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;text-decoration:none;color:inherit;}
-.lb-row > *{overflow:hidden;text-overflow:ellipsis;}
+.lb-row{display:grid;grid-template-columns:50px 1fr 110px 80px 90px 110px;align-items:center;padding:.7rem 1rem;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;text-decoration:none;color:inherit;}
 .lb-row:last-child{border-bottom:none;}
 .lb-row:hover{background:rgba(255,255,255,.03);}
 .lb-row.me{background:rgba(220,53,69,.05);}
@@ -105,15 +104,15 @@
 .rank-prog-track{height:8px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin:.5rem 0;}
 .rank-prog-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.22,1,.36,1);}
 
-/* Rank table in sidebar – FIXED WIDTHS */
+/* Rank table in sidebar */
 .rank-row{display:flex;align-items:center;gap:.65rem;padding:.5rem 1rem;border-bottom:1px solid var(--border);transition:background .15s;}
 .rank-row:last-child{border-bottom:none;}
 .rank-row.cur{background:rgba(255,193,7,.05);}
 .rank-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.rank-icon{font-size:.95rem;flex-shrink:0;width:1.2em;text-align:center;}
-.rank-name-c{flex:1;font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rank-range{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);width:85px;text-align:right;flex-shrink:0;}
-.rank-count{font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px;min-width:32px;text-align:center;flex-shrink:0;}
+.rank-name-c{flex:1;font-size:.82rem;font-weight:600;}
+.rank-range{font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);}
+.rank-icon{font-size:.95rem;flex-shrink:0;}
+.rank-count{font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px;}
 
 /* ── Pager ── */
 .pager{display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.75rem;}
@@ -131,12 +130,12 @@
 
 /* ── Responsive ── */
 @media(max-width:1100px){
-  .lb-col-head,.lb-row{grid-template-columns:44px minmax(0, 1fr) 100px 80px 100px;}
+  .lb-col-head,.lb-row{grid-template-columns:44px 1fr 100px 80px 100px;}
   .lb-col-head span:nth-child(5),.lb-row>*:nth-child(5){display:none;}
 }
 @media(max-width:900px){.lb-layout{grid-template-columns:1fr;}.lb-right{order:-1;}}
 @media(max-width:600px){
-  .lb-col-head,.lb-row{grid-template-columns:36px minmax(0, 1fr) 90px 90px;}
+  .lb-col-head,.lb-row{grid-template-columns:36px 1fr 90px 90px;}
   .lb-col-head span:nth-child(n+5),.lb-row>*:nth-child(n+5){display:none;}
   .stat-strip{grid-template-columns:1fr 1fr;}
   .ss-item:nth-child(2){border-right:none;}
@@ -153,6 +152,10 @@
     <div>
       <div class="page-eyebrow">// global ranking</div>
       <div class="page-title">Лидерборд</div>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);text-align:right">
+      ELO = base + уровень + XP + голос + монеты<br>
+      <span style="color:var(--green)">⬆ Упасть очень тяжело</span>
     </div>
   </div>
 
@@ -187,10 +190,11 @@
           <span class="si">🔍</span>
           <input class="si-inp" id="searchInp" type="text" placeholder="Поиск игрока..." oninput="LB.search()">
         </div>
-        <button class="sort-btn active" data-sort="composite" onclick="LB.setSort('composite',this)">🏆 ELO</button>
+        <button class="sort-btn active" data-sort="composite" onclick="LB.setSort('composite',this)">🏆 ELO ↓</button>
         <button class="sort-btn" data-sort="level" onclick="LB.setSort('level',this)">⚡ Уровень</button>
         <button class="sort-btn" data-sort="totalVoiceMinutes" onclick="LB.setSort('totalVoiceMinutes',this)">🎙️ Голос</button>
         <button class="sort-btn" data-sort="currency" onclick="LB.setSort('currency',this)">💰 Монеты</button>
+        <button class="sort-btn" data-sort="elo" onclick="LB.setSort('elo',this)">⚔️ base_elo</button>
       </div>
 
       <!-- Table -->
@@ -264,22 +268,25 @@
 
 <script>
 const LB = (() => {
-  let _all    = [];
-  let _sorted = [];
-  let _weights = null;
+  let _all    = [];         // raw users from Firestore
+  let _sorted = [];         // sorted + scored users
+  let _weights = null;      // eloFormula from config
   let _sort   = 'composite';
   let _page   = 0;
   const PAGE  = 20;
   const myUser = GS_AUTH.getUser();
   const myId   = myUser?.discordId || myUser?.id;
 
+  // ─── Boot ───────────────────────────────────────────────
   async function init() {
+    // Load formula weights from Firestore config
     try {
       const cfg = await DB.getConfig();
       _weights = cfg.eloFormula || GS.eloFormula || null;
       updateFormulaHints();
     } catch(e) { _weights = GS.eloFormula || null; }
 
+    // Listen to users
     DB.listenUsers('elo', 500, users => {
       _all = users;
       recompute();
@@ -287,11 +294,13 @@ const LB = (() => {
     });
   }
 
+  // ─── Compute composite for each user ────────────────────
   function recompute() {
     _sorted = _all.map(u => ({
       ...u,
       _composite: computeCompositeElo(u, _weights),
     }));
+    // Precompute stats
     if (_sorted.length) {
       const scores = _sorted.map(u => u._composite);
       document.getElementById('totalPlayers').textContent = fmtNum(_sorted.length);
@@ -300,6 +309,7 @@ const LB = (() => {
     }
   }
 
+  // ─── Render everything ───────────────────────────────────
   function renderAll() {
     renderPodium();
     renderTable();
@@ -307,10 +317,12 @@ const LB = (() => {
     renderRanksList();
   }
 
+  // ─── Sort + filter ───────────────────────────────────────
   function getFiltered() {
     const q = (document.getElementById('searchInp')?.value || '').toLowerCase().trim();
     let list = [..._sorted];
     if (q) list = list.filter(u => (u.displayName || u.username || '').toLowerCase().includes(q));
+
     list.sort((a, b) => {
       if (_sort === 'composite') return b._composite - a._composite;
       return (b[_sort] || 0) - (a[_sort] || 0);
@@ -318,6 +330,7 @@ const LB = (() => {
     return list;
   }
 
+  // ─── Podium ─────────────────────────────────────────────
   function renderPodium() {
     const top3 = [..._sorted]
       .sort((a,b) => b._composite - a._composite)
@@ -350,6 +363,7 @@ const LB = (() => {
     el.innerHTML = pod(p2,'p2','🥈',2) + pod(p1,'p1','👑',1) + pod(p3,'p3','🥉',3);
   }
 
+  // ─── Main table ──────────────────────────────────────────
   function renderTable() {
     const list  = getFiltered();
     const total = list.length;
@@ -361,6 +375,7 @@ const LB = (() => {
     const el    = document.getElementById('lbBody');
     const medals = ['🥇','🥈','🥉'];
 
+    // Update my position
     const myPos = list.findIndex(u => (u.discordId||u.id) === myId);
     document.getElementById('myRankPos').textContent = myPos >= 0 ? `#${myPos+1}` : '—';
 
@@ -382,6 +397,7 @@ const LB = (() => {
 
       const rowCls = `lb-row${isMe?' me':''}${gi===0?' top1':gi===1?' top2':gi===2?' top3':''}`;
 
+      // Tooltip with breakdown
       const tooltip = `<div class="elo-tooltip">
         <div class="elo-tooltip-row"><span>⚔️ base_elo</span><span style="color:var(--red)">${fmtNum(bd.components[0].value)}</span></div>
         <div class="elo-tooltip-row"><span>⚡ Уровень</span><span style="color:var(--green)">+${fmtNum(bd.components[1].value)}</span></div>
@@ -426,6 +442,7 @@ const LB = (() => {
     renderPager(total);
   }
 
+  // ─── My card ─────────────────────────────────────────────
   function renderMyCard() {
     const card = document.getElementById('myRankCard');
     if (!myUser || !card) return;
@@ -445,6 +462,7 @@ const LB = (() => {
       ? `<img src="${me.avatarUrl}" style="width:100%;height:100%;object-fit:cover">`
       : (me.displayName||me.username||'?')[0].toUpperCase();
 
+    // Breakdown bars
     const maxComp = Math.max(..._sorted.map(u=>u._composite), 1);
     const bdBars  = bd.components.map(c => {
       const colors = {base_elo:'var(--red)',level:'var(--green)',xp:'#B9F2FF',voice:'var(--gold)',coins:'#ff9900'};
@@ -471,6 +489,7 @@ const LB = (() => {
         </div>
       </div>
 
+      <!-- Rank progress -->
       <div style="margin-bottom:.75rem">
         <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);margin-bottom:4px">
           <span style="color:${rank.color}">${rank.icon||''} ${rank.name}</span>
@@ -482,11 +501,13 @@ const LB = (() => {
         <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-align:right">${prog.pct}%</div>
       </div>
 
+      <!-- ELO breakdown bars -->
       <div style="border-top:1px solid rgba(255,255,255,.06);padding-top:.7rem">
         <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">Из чего складывается</div>
         ${bdBars}
       </div>
 
+      <!-- XP bar -->
       <div style="margin-top:.8rem;border-top:1px solid rgba(255,255,255,.06);padding-top:.7rem">
         <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim);margin-bottom:5px">
           <span>XP → Ур. ${xp.level+1}</span><span style="color:var(--red)">${xp.pct}%</span>
@@ -498,6 +519,7 @@ const LB = (() => {
     </div>`;
   }
 
+  // ─── Rank list sidebar ───────────────────────────────────
   function renderRanksList() {
     const el = document.getElementById('ranksList');
     if (!el) return;
@@ -505,6 +527,7 @@ const LB = (() => {
     const meScore = _sorted.find(u=>(u.discordId||u.id)===myId)?._composite || -1;
     const myTier  = meScore >= 0 ? getRankByComposite(meScore) : null;
 
+    // Count per tier
     const counts = {};
     _sorted.forEach(u => {
       const r = getRankByComposite(u._composite);
@@ -525,6 +548,7 @@ const LB = (() => {
     }).join('');
   }
 
+  // ─── Formula hints in sidebar ────────────────────────────
   function updateFormulaHints() {
     const w = _weights || GS.eloFormula || {};
     const set = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
@@ -535,6 +559,7 @@ const LB = (() => {
     set('fhCoin',  w.w_coin     ?? 1.5);
   }
 
+  // ─── Pager ───────────────────────────────────────────────
   function renderPager(total) {
     const pager = document.getElementById('pagination');
     const pages = Math.ceil(total / PAGE);
@@ -546,6 +571,7 @@ const LB = (() => {
     pager.innerHTML=html;
   }
 
+  // ─── Public ──────────────────────────────────────────────
   function setSort(field, btn) {
     _sort = field;
     _page = 0;
