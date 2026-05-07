@@ -25,23 +25,52 @@ const GS = {
   // Формат: https://us-central1-gray-squad-2e791.cloudfunctions.net/discordAuth
   authFunctionUrl: "https://us-central1-gray-squad-2e791.cloudfunctions.net/discordAuth",
 
+  // ── Пороги рангов (compositeScore из elo.js) ────────────────
   ranks: [
-    { id: 0,  name: "Неактивен",    color: "#6c757d", min: 0,    max: 500      },
-    { id: 1,  name: "Железо",       color: "#8B8B8B", min: 501,  max: 800      },
-    { id: 2,  name: "Бронза",       color: "#CD7F32", min: 501,  max: 800      },
-    { id: 3,  name: "Серебро",      color: "#C0C0C0", min: 801,  max: 1000     },
-    { id: 4,  name: "Золото",       color: "#FFD700", min: 1001, max: 1200     },
-    { id: 5,  name: "Платина",      color: "#E5E4E2", min: 1201, max: 1400     },
-    { id: 6,  name: "Алмаз",        color: "#B9F2FF", min: 1401, max: 1600     },
-    { id: 7,  name: "Мастер",       color: "#A335EE", min: 1601, max: 1800     },
-    { id: 8,  name: "Грандмастер",  color: "#FF8C00", min: 1801, max: 2000     },
-    { id: 9,  name: "Элитный",      color: "#FF4500", min: 2001, max: 2300     },
-    { id: 10, name: "Легенда",      color: "#FF0000", min: 2301, max: Infinity },
+    { id:0,  name:'Неактивен',   color:'#6c757d', icon:'💤', min:0,     max:499   },
+    { id:1,  name:'Железо',      color:'#8B8B8B', icon:'⚙️',  min:500,   max:899   },
+    { id:2,  name:'Бронза',      color:'#CD7F32', icon:'🥉',  min:900,   max:1499  },
+    { id:3,  name:'Серебро',     color:'#C0C0C0', icon:'🥈',  min:1500,  max:2299  },
+    { id:4,  name:'Золото',      color:'#FFD700', icon:'🥇',  min:2300,  max:3299  },
+    { id:5,  name:'Платина',     color:'#E5E4E2', icon:'💠',  min:3300,  max:4699  },
+    { id:6,  name:'Алмаз',       color:'#B9F2FF', icon:'💎',  min:4700,  max:6499  },
+    { id:7,  name:'Мастер',      color:'#A335EE', icon:'👑',  min:6500,  max:9199  },
+    { id:8,  name:'Грандмастер', color:'#FF8C00', icon:'🔥',  min:9200,  max:12999 },
+    { id:9,  name:'Элитный',     color:'#FF4500', icon:'⚡',  min:13000, max:18999 },
+    { id:10, name:'Легенда',     color:'#FF0000', icon:'🌟',  min:19000, max:Infinity },
   ],
+
+  // ── Веса формулы ELO (меняются через админку → config.eloFormula) ──
+  eloFormula: {
+    w_level:          25,   // очков ELO за каждый уровень
+    w_xp_div:        120,   // XP делим на это число
+    w_voice_div:       6,   // голосовые минуты делим на это
+    w_coin:          1.5,   // sqrt(монеты) × это число
+    elo_floor:       500,   // base_elo не падает ниже этого
+    eventEloBase:     80,   // базовые очки за участие в ивенте
+    eventEloWinMult: 3.5,   // множитель победителя
+    eventEloDecay:   0.65,  // затухание штрафа по местам
+    eventEloMaxLoss:  35,   // максимум потерь за один ивент
+  },
 };
 
-function gsRank(elo) {
-  return GS.ranks.find(r => elo >= r.min && elo <= r.max) || GS.ranks.at(-1);
+// ── Составной ELO-счёт пользователя ──────────────────────────
+function gsCompositeElo(user, weights) {
+  if (typeof computeCompositeElo !== 'undefined') {
+    return computeCompositeElo(user, weights || GS.eloFormula);
+  }
+  // Fallback: только base_elo
+  return user.elo || 500;
+}
+
+// ── Ранг по составному счёту ─────────────────────────────────
+// scoreOrUser — число (уже вычисленный score) или объект пользователя
+function gsRank(scoreOrUser, weights) {
+  const score = (scoreOrUser && typeof scoreOrUser === 'object')
+    ? gsCompositeElo(scoreOrUser, weights)
+    : (scoreOrUser || 0);
+  if (typeof getRankByComposite !== 'undefined') return getRankByComposite(score);
+  return GS.ranks.find(r => score >= r.min && score <= r.max) || GS.ranks[GS.ranks.length - 1];
 }
 function gsLevel(xp) { return Math.floor(Math.sqrt((xp || 0) / 100)); }
 function gsXpProgress(xp) {

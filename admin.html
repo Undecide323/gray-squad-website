@@ -272,6 +272,7 @@
       <div class="adm-nav-section">Настройки</div>
       <button class="adm-btn" onclick="ADM.setSection('settings',this)"><span class="adm-ico">⚙️</span>Бот и XP</button>
       <button class="adm-btn" onclick="ADM.setSection('economy',this)"><span class="adm-ico">💰</span>Экономика</button>
+      <button class="adm-btn" onclick="ADM.setSection('elo',this)"><span class="adm-ico">🏆</span>Формула ELO</button>
     </div>
 
     <!-- CONTENT AREA -->
@@ -690,6 +691,141 @@
         </div>
       </div>
 
+      <!-- ══════ ELO FORMULA ══════ -->
+      <div class="adm-section" id="sec-elo">
+
+        <!-- Live formula preview -->
+        <div class="adm-card">
+          <div class="adm-card-head"><div class="adm-card-head-left">🔢 Предпросмотр формулы</div></div>
+          <div class="adm-card-body">
+            <div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);line-height:2;padding:.75rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;margin-bottom:1rem">
+              <span style="color:var(--gold)">compositeELO</span> =
+              <span style="color:var(--red)">base_elo</span> +
+              <span style="color:var(--green)">level × <span id="prev_w_level">25</span></span> +
+              <span style="color:#B9F2FF">XP ÷ <span id="prev_w_xp_div">120</span></span> +
+              <span style="color:var(--gold)">voice ÷ <span id="prev_w_voice_div">6</span></span> +
+              <span style="color:#ff9900">√coins × <span id="prev_w_coin">1.5</span></span>
+            </div>
+            <!-- Симулятор -->
+            <div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);margin-bottom:.65rem;text-transform:uppercase;letter-spacing:.1em">Симулятор — введи параметры игрока</div>
+            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-bottom:.85rem">
+              <div class="eco-item"><div class="eco-lbl">base_elo</div><input class="eco-inp" id="sim_elo" type="number" value="700" oninput="ADM.runSim()"></div>
+              <div class="eco-item"><div class="eco-lbl">Уровень</div><input class="eco-inp" id="sim_level" type="number" value="15" oninput="ADM.runSim()"></div>
+              <div class="eco-item"><div class="eco-lbl">XP</div><input class="eco-inp" id="sim_xp" type="number" value="8000" oninput="ADM.runSim()"></div>
+              <div class="eco-item"><div class="eco-lbl">Голос (мин)</div><input class="eco-inp" id="sim_voice" type="number" value="300" oninput="ADM.runSim()"></div>
+              <div class="eco-item"><div class="eco-lbl">Монеты</div><input class="eco-inp" id="sim_coins" type="number" value="3000" oninput="ADM.runSim()"></div>
+            </div>
+            <!-- Result -->
+            <div id="simResult" style="display:flex;align-items:center;gap:1rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.85rem 1.1rem">
+              <div id="simRankIcon" style="font-size:2rem">🏆</div>
+              <div style="flex:1">
+                <div style="display:flex;align-items:baseline;gap:.6rem">
+                  <span id="simScore" style="font-family:var(--font-title);font-size:1.8rem;font-weight:700">—</span>
+                  <span id="simRankName" style="font-family:var(--font-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">—</span>
+                </div>
+                <div id="simBreakdown" style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-top:3px">—</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim)">До следующего ранга</div>
+                <div id="simNextRank" style="font-family:var(--font-title);font-size:1rem;font-weight:700;margin-top:2px">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formula weights editor -->
+        <div class="adm-card">
+          <div class="adm-card-head">
+            <div class="adm-card-head-left">⚙️ Веса формулы</div>
+            <button class="btn btn-red btn-sm" onclick="ADM.saveEloFormula()">💾 Сохранить</button>
+          </div>
+          <div class="adm-card-body" style="display:flex;flex-direction:column;gap:1.1rem">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem">
+              <div class="eco-item">
+                <div class="eco-lbl">Очков за уровень <span style="color:var(--green)">(w_level)</span></div>
+                <input class="eco-inp" id="ef_w_level" type="number" step="1" min="0" max="200" placeholder="25" oninput="ADM.updateFormulaPreview()">
+                <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">lvl 30 → +<span id="ef_hint_level">750</span> pts</div>
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Делитель XP <span style="color:#B9F2FF">(w_xp_div)</span></div>
+                <input class="eco-inp" id="ef_w_xp_div" type="number" step="5" min="10" max="1000" placeholder="120" oninput="ADM.updateFormulaPreview()">
+                <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">10k XP → +<span id="ef_hint_xp">83</span> pts</div>
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Делитель голоса <span style="color:var(--gold)">(w_voice_div)</span></div>
+                <input class="eco-inp" id="ef_w_voice_div" type="number" step="1" min="1" max="100" placeholder="6" oninput="ADM.updateFormulaPreview()">
+                <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">600 мин → +<span id="ef_hint_voice">100</span> pts</div>
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Множитель монет <span style="color:#ff9900">(w_coin)</span></div>
+                <input class="eco-inp" id="ef_w_coin" type="number" step="0.1" min="0" max="20" placeholder="1.5" oninput="ADM.updateFormulaPreview()">
+                <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">10k монет → +<span id="ef_hint_coin">150</span> pts</div>
+              </div>
+              <div class="eco-item">
+                <div class="eco-lbl">Пол base_elo <span style="color:var(--red)">(elo_floor)</span></div>
+                <input class="eco-inp" id="ef_elo_floor" type="number" step="50" min="0" max="2000" placeholder="500" oninput="ADM.updateFormulaPreview()">
+                <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">Нельзя упасть ниже</div>
+              </div>
+            </div>
+
+            <div style="border-top:1px solid var(--border);padding-top:1rem">
+              <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem">⚡ Ивенты — начисление base_elo</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.85rem">
+                <div class="eco-item">
+                  <div class="eco-lbl">База за участие</div>
+                  <input class="eco-inp" id="ef_eventEloBase" type="number" step="5" min="0" placeholder="80">
+                  <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">Минимум за явку</div>
+                </div>
+                <div class="eco-item">
+                  <div class="eco-lbl">Множитель победы</div>
+                  <input class="eco-inp" id="ef_eventEloWinMult" type="number" step="0.1" min="1" max="10" placeholder="3.5">
+                  <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">1е место × это</div>
+                </div>
+                <div class="eco-item">
+                  <div class="eco-lbl">Затухание штрафа</div>
+                  <input class="eco-inp" id="ef_eventEloDecay" type="number" step="0.05" min="0.1" max="2" placeholder="0.65">
+                  <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">&lt;1 = мягче для средних</div>
+                </div>
+                <div class="eco-item">
+                  <div class="eco-lbl">Макс. потери</div>
+                  <input class="eco-inp" id="ef_eventEloMaxLoss" type="number" step="5" min="0" max="200" placeholder="35">
+                  <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim);margin-top:4px">За одним ивент</div>
+                </div>
+              </div>
+
+              <!-- Event sim -->
+              <div style="margin-top:.85rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.85rem">
+                <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);margin-bottom:.6rem">Симулятор ивента — место / кол-во участников</div>
+                <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+                  <input class="eco-inp" id="evSim_place" type="number" min="1" placeholder="Место (1=победа)" style="width:150px" oninput="ADM.runEventSim()">
+                  <span style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-dim)">из</span>
+                  <input class="eco-inp" id="evSim_total" type="number" min="2" placeholder="Всего игроков" style="width:130px" oninput="ADM.runEventSim()">
+                  <div id="evSimResult" style="font-family:var(--font-mono);font-size:.78rem;flex:1;min-width:180px">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rank tiers table -->
+        <div class="adm-card">
+          <div class="adm-card-head"><div class="adm-card-head-left">🏅 Пороги рангов</div></div>
+          <div style="overflow-x:auto">
+            <table class="adm-table" id="rankTiersTable">
+              <thead><tr>
+                <th>Ранг</th>
+                <th>От</th>
+                <th>До</th>
+                <th>% пользователей</th>
+                <th>Кол-во</th>
+              </tr></thead>
+              <tbody id="rankTiersTbody"><tr><td colspan="5" class="adm-empty">Загрузка...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
     </div><!-- /admin-content -->
   </div><!-- /admin-wrap -->
 </div><!-- /page -->
@@ -920,6 +1056,7 @@
 <script src="assets/auth.js"></script>
 <script src="assets/db.js"></script>
 <script src="assets/nav.js"></script>
+<script src="assets/elo.js"></script>
 
 <script>
 // ══════════════════════════════════════════════
@@ -1072,6 +1209,7 @@ const ADM = (() => {
 
     // Lazy load per section
     const loaders = {
+      elo:           renderEloSection,
       events:        renderEvents,
       forum:         renderForum,
       shop:          loadShopSection,
@@ -1891,7 +2029,189 @@ const ADM = (() => {
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
   );
 
-  return {
+  // ─── ELO FORMULA SECTION ─────────────────────────────────────
+
+  function renderEloSection() {
+    loadEloFormula();
+    renderRankTiers();
+    ADM.runSim();
+  }
+
+  function loadEloFormula() {
+    const ef = _config.eloFormula || ELO_FORMULA_DEFAULTS || {};
+    const fields = {
+      ef_w_level: ef.w_level ?? 25,
+      ef_w_xp_div: ef.w_xp_div ?? 120,
+      ef_w_voice_div: ef.w_voice_div ?? 6,
+      ef_w_coin: ef.w_coin ?? 1.5,
+      ef_elo_floor: ef.elo_floor ?? 500,
+      ef_eventEloBase: ef.eventEloBase ?? 80,
+      ef_eventEloWinMult: ef.eventEloWinMult ?? 3.5,
+      ef_eventEloDecay: ef.eventEloDecay ?? 0.65,
+      ef_eventEloMaxLoss: ef.eventEloMaxLoss ?? 35,
+    };
+    Object.entries(fields).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+    updateFormulaPreview();
+  }
+
+  function getCurrentWeights() {
+    const g = id => parseFloat(document.getElementById(id)?.value) || 0;
+    return {
+      w_level:          g('ef_w_level'),
+      w_xp_div:         g('ef_w_xp_div')  || 1,
+      w_voice_div:      g('ef_w_voice_div') || 1,
+      w_coin:           g('ef_w_coin'),
+      elo_floor:        g('ef_elo_floor'),
+      eventEloBase:     g('ef_eventEloBase'),
+      eventEloWinMult:  g('ef_eventEloWinMult') || 1,
+      eventEloDecay:    g('ef_eventEloDecay')   || 0.1,
+      eventEloMaxLoss:  g('ef_eventEloMaxLoss'),
+    };
+  }
+
+  function updateFormulaPreview() {
+    const w = getCurrentWeights();
+    // Update inline spans
+    const setSpan = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setSpan('prev_w_level',     w.w_level);
+    setSpan('prev_w_xp_div',    w.w_xp_div);
+    setSpan('prev_w_voice_div', w.w_voice_div);
+    setSpan('prev_w_coin',      w.w_coin);
+    // Hints
+    setSpan('ef_hint_level', Math.round(30 * w.w_level));
+    setSpan('ef_hint_xp',    Math.floor(10000 / w.w_xp_div));
+    setSpan('ef_hint_voice', Math.floor(600 / w.w_voice_div));
+    setSpan('ef_hint_coin',  Math.floor(Math.sqrt(10000) * w.w_coin));
+    // Re-run simulator
+    runSim();
+    runEventSim();
+  }
+
+  function runSim() {
+    const w = getCurrentWeights();
+    const g = id => parseFloat(document.getElementById(id)?.value) || 0;
+    const user = {
+      elo: g('sim_elo'), level: g('sim_level'),
+      xp: g('sim_xp'), totalVoiceMinutes: g('sim_voice'),
+      currency: g('sim_coins'),
+    };
+
+    const baseElo    = Math.max(user.elo, w.elo_floor);
+    const levelBonus = Math.round(user.level * w.w_level);
+    const xpBonus    = Math.floor(user.xp / w.w_xp_div);
+    const voiceBonus = Math.floor(user.totalVoiceMinutes / w.w_voice_div);
+    const coinBonus  = Math.floor(Math.sqrt(user.currency) * w.w_coin);
+    const score      = baseElo + levelBonus + xpBonus + voiceBonus + coinBonus;
+
+    // Find rank
+    const TIERS = (typeof ELO_RANK_TIERS !== 'undefined') ? ELO_RANK_TIERS : GS.ranks;
+    const rank   = TIERS.find(r => score >= r.min && score <= (r.max === Infinity ? Infinity : r.max)) || TIERS[TIERS.length - 1];
+    const nextR  = TIERS.find(r => r.id === rank.id + 1);
+
+    const setEl = (id, val, style) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = val;
+      if (style) Object.assign(el.style, style);
+    };
+
+    setEl('simScore', score.toLocaleString('ru-RU'), { color: rank.color });
+    setEl('simRankIcon', rank.icon || '🏆');
+    setEl('simRankName', rank.name, { color: rank.color });
+    setEl('simBreakdown',
+      `ELO: ${baseElo}  +  Ур: +${levelBonus}  +  XP: +${xpBonus}  +  Голос: +${voiceBonus}  +  Монеты: +${coinBonus}`
+    );
+
+    if (nextR) {
+      const left = nextR.min - score;
+      setEl('simNextRank', left > 0 ? `+${left.toLocaleString('ru-RU')} до ${nextR.icon} ${nextR.name}` : rank.name);
+    } else {
+      setEl('simNextRank', '🌟 Максимум');
+    }
+  }
+
+  function runEventSim() {
+    const place = parseInt(document.getElementById('evSim_place')?.value) || 0;
+    const total = parseInt(document.getElementById('evSim_total')?.value) || 0;
+    const el    = document.getElementById('evSimResult');
+    if (!el || !place || !total || place > total) { if (el) el.textContent = '—'; return; }
+
+    const w = getCurrentWeights();
+    const base     = w.eventEloBase    || 80;
+    const winMult  = w.eventEloWinMult || 3.5;
+    const decay    = w.eventEloDecay   || 0.65;
+    const maxLoss  = w.eventEloMaxLoss || 35;
+
+    // Win delta
+    const normalized = total > 1 ? (total - place) / (total - 1) : 1;
+    const gain = Math.max(Math.round(base + base * (winMult - 1) * Math.pow(normalized, 1 / decay)), Math.round(base * 0.25));
+
+    // Loss
+    const lossNorm = total > 1 ? (place - 1) / (total - 1) : 0;
+    const loss = place === 1 ? 0 : Math.round(maxLoss * Math.pow(lossNorm, 1.5));
+
+    if (place === 1) {
+      el.innerHTML = `<span style="color:var(--gold)">🥇 Победа:</span> <span style="color:var(--green)">+${gain} base_elo</span>`;
+    } else {
+      el.innerHTML = `<span style="color:var(--text-dim)">Место ${place}/${total}:</span> <span style="color:var(--green)">+${gain} base_elo</span> · <span style="color:var(--red)">−${loss} base_elo</span> = <span style="font-weight:600;color:${gain-loss>=0?'var(--green)':'var(--red)'}">${gain-loss>=0?'+':''}${gain-loss}</span>`;
+    }
+  }
+
+  async function saveEloFormula() {
+    const w = getCurrentWeights();
+    try {
+      await DB.setConfig({ eloFormula: w });
+      _config.eloFormula = w;
+      showToast('💾','Формула сохранена','ELO-веса обновлены');
+      renderRankTiers();
+    } catch(e) { showToast('❌','Ошибка',e.message,true); }
+  }
+
+  function renderRankTiers() {
+    const tbody = document.getElementById('rankTiersTbody');
+    if (!tbody) return;
+    const TIERS = (typeof ELO_RANK_TIERS !== 'undefined') ? ELO_RANK_TIERS : GS.ranks;
+    const w = getCurrentWeights();
+
+    // Count users per tier using composite score
+    const tierCounts = new Array(TIERS.length).fill(0);
+    _allUsers.forEach(u => {
+      const baseElo    = Math.max(u.elo || 500, w.elo_floor);
+      const levelBonus = Math.round((u.level||0) * w.w_level);
+      const xpBonus    = Math.floor((u.xp||0) / (w.w_xp_div||1));
+      const voiceBonus = Math.floor((u.totalVoiceMinutes||0) / (w.w_voice_div||1));
+      const coinBonus  = Math.floor(Math.sqrt(u.currency||0) * w.w_coin);
+      const score      = baseElo + levelBonus + xpBonus + voiceBonus + coinBonus;
+      const tier = TIERS.findIndex(r => score >= r.min && score <= (r.max === Infinity ? Infinity : r.max));
+      if (tier >= 0) tierCounts[tier]++;
+    });
+
+    const total = _allUsers.length || 1;
+    tbody.innerHTML = TIERS.map((r, i) => {
+      const count = tierCounts[i];
+      const pct   = ((count / total) * 100).toFixed(1);
+      const maxStr = r.max === Infinity ? '∞' : r.max.toLocaleString('ru-RU');
+      return `<tr>
+        <td><span style="font-size:1.1rem">${r.icon||''}</span> <span style="color:${r.color};font-weight:600">${r.name}</span></td>
+        <td style="font-family:var(--font-mono)">${r.min.toLocaleString('ru-RU')}</td>
+        <td style="font-family:var(--font-mono)">${maxStr}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <div style="flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;max-width:120px">
+              <div style="width:${Math.min(parseFloat(pct),100)}%;height:100%;background:${r.color};border-radius:3px;transition:width .3s"></div>
+            </div>
+            <span style="font-family:var(--font-mono);font-size:.72rem">${pct}%</span>
+          </div>
+        </td>
+        <td style="font-family:var(--font-mono);color:${r.color}">${count}</td>
+      </tr>`;
+    }).join('');
+  }
+
+    return {
     init, refreshAll, setSection,
     searchUsers, goUserPage,
     openGive, confirmGive,
@@ -1907,6 +2227,7 @@ const ADM = (() => {
     filterLogs,
     setGlobalBoost, clearGlobalBoost, saveXpSettings, saveForbiddenWords, saveEconomy,
     toggleShop, renderAdminPerms, saveAdminPerms,
+    renderEloSection, runSim, runEventSim, updateFormulaPreview, saveEloFormula,
     toggleShop, saveAdminPerms, renderAdminPerms,
     openModal, closeModal, showToast,
   };
