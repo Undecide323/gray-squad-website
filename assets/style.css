@@ -28,6 +28,8 @@ body {
   font-family: var(--font-body);
   overflow-x: hidden;
   min-height: 100vh;
+  /* FIX: сдвигаем контент вниз на высоту фиксированного навбара */
+  padding-top: var(--nav-h);
 }
 
 body::before {

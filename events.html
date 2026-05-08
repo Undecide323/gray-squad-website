@@ -312,26 +312,30 @@
 
     // ── INIT ────────────────────────────────────────────────────
     function init() {
-      if (canCreate) {
-        document.getElementById('createBtn').style.display = 'inline-flex';
-      }
-
-      // Проверка на creator (роль создателя)
-      if (user && user.role === 'creator') {
-        isCreator = true;
-        const panel = document.getElementById('gameFiltersPanel');
-        if (panel) panel.style.display = '';
-        loadGamesManage();
-        document.getElementById('addGameBtn')?.addEventListener('click', () => addGame());
-      }
-
-      // Слушаем все ивенты в реальном времени
+      // ── ВАЖНО: DB.listenEvents должен быть ПЕРВЫМ —
+      // чтобы спиннер убрался даже если остальное крашнется
       DB.listenEvents(events => {
         allEvents = events;
         renderAll();
         updateSideStats();
         buildCalendar();
       });
+
+      if (canCreate) {
+        document.getElementById('createBtn').style.display = 'inline-flex';
+      }
+
+      // Проверка на creator (роль создателя)
+      // Обёрнуто в try-catch — ошибка здесь не должна ломать страницу
+      try {
+        if (user && user.role === 'creator') {
+          isCreator = true;
+          const panel = document.getElementById('gameFiltersPanel');
+          if (panel) panel.style.display = '';
+          loadGamesManage();
+          document.getElementById('addGameBtn')?.addEventListener('click', () => addGame());
+        }
+      } catch(e) { console.warn('Creator panel init failed:', e); }
 
       // Моя статистика (sidebar)
       if (user) {
@@ -340,8 +344,8 @@
         });
       }
 
-      // Загружаем динамические фильтры
-      loadGameFilters();
+      // Загружаем динамические фильтры — try-catch чтобы не крашить init
+      try { loadGameFilters(); } catch(e) { console.warn('Game filters failed:', e); }
 
       // Закрытие модалок
       document.getElementById('createModal')
@@ -353,7 +357,7 @@
 
     // ── ДИНАМИЧЕСКИЕ ФИЛЬТРЫ ────────────────────────────────────
     function loadGameFilters() {
-      DB.listenGameFilters(games => {
+      listenGameFilters(games => {
         const container = document.getElementById('filterTabs');
         if (!container) return;
 
@@ -378,7 +382,7 @@
 
     // ── УПРАВЛЕНИЕ ИГРАМИ (ТОЛЬКО CREATOR) ─────────────────────
     function loadGamesManage() {
-      DB.listenGameFilters(games => {
+      listenGameFilters(games => {
         const container = document.getElementById('gamesManageList');
         if (!container) return;
         if (!games.length) {
@@ -401,7 +405,7 @@
       const icon = document.getElementById('newGameIcon').value.trim() || '🎮';
       if (!name || !id) { showToast('❌', 'Заполните название и id', '', true); return; }
       id = id.replace(/\s+/g, '_');
-      await DB.addGameFilter({ id, name, icon, active: true });
+      await addGameFilter({ id, name, icon, active: true });
       document.getElementById('newGameName').value = '';
       document.getElementById('newGameId').value = '';
       document.getElementById('newGameIcon').value = '';
@@ -410,7 +414,7 @@
 
     async function removeGame(gameId) {
       if (confirm('Удалить игру из фильтров?')) {
-        await DB.removeGameFilter(gameId);
+        await removeGameFilter(gameId);
         showToast('🗑️', 'Игра удалена', '');
       }
     }

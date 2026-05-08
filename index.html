@@ -6,7 +6,7 @@
 <title>Gray Squad — Главная</title>
 <link rel="stylesheet" href="assets/style.css">
 <style>
-.hero{position:relative;z-index:1;padding:110px 2rem 0;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden;}
+.hero{position:relative;z-index:1;padding:2.5rem 2rem 0;display:flex;flex-direction:column;align-items:center;text-align:center;overflow:hidden;}
 .hero-glow{position:absolute;top:0;left:50%;transform:translate(-50%,-30%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(220,53,69,.1) 0%,transparent 70%);pointer-events:none;animation:glowPulse 5s ease-in-out infinite;}
 @keyframes glowPulse{0%,100%{opacity:.7;transform:translate(-50%,-30%) scale(1)}50%{opacity:1;transform:translate(-50%,-30%) scale(1.08)}}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;color:var(--red);text-transform:uppercase;background:rgba(220,53,69,.07);border:1px solid rgba(220,53,69,.22);padding:5px 14px;border-radius:4px;margin-bottom:1.4rem;animation:fadeUp .5s .1s ease both;}
@@ -75,7 +75,7 @@ main{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:2.5rem 2
 .tp-name{font-size:.86rem;font-weight:600;flex:1;}.tp-elo{font-family:var(--font-mono);font-size:.76rem;color:var(--gold);flex-shrink:0;}
 .tp-rank{font-family:var(--font-mono);font-size:.62rem;padding:2px 7px;border-radius:4px;flex-shrink:0;}
 @media(max-width:900px){.features{grid-template-columns:1fr;}main{grid-template-columns:1fr;}.col-r{order:-1;}}
-@media(max-width:600px){.hero{padding:95px 1.2rem 0;}.features{padding:2rem 1.2rem 0;}}
+@media(max-width:600px){.hero{padding:1.5rem 1.2rem 0;}.features{padding:2rem 1.2rem 0;}}
 </style>
 </head>
 <body>
@@ -150,7 +150,7 @@ main{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:2.5rem 2
 <script>firebase.initializeApp(GS.firebase);</script>
 
 <!-- ОСТАЛЬНЫЕ СКРИПТЫ -->
- <script src="assets/elo.js"></script>
+<script src="assets/elo.js"></script>
 <script src="assets/auth.js"></script>
 <script src="assets/db.js"></script>
 <script src="assets/nav.js"></script>
@@ -253,52 +253,35 @@ DB.listenTopics(null, topics => {
     </a>`).join('');
 });
 
-// ── TOP PLAYERS (композитный ELO, как в лидерборде) ──────────
-(async function initTopPlayers() {
-  // Получаем веса формулы один раз или из кеша
-  let weights = null;
-  try {
-    const cfg = await DB.getConfig();
-    weights = cfg.eloFormula || GS.eloFormula || null;
-  } catch (e) {
-    weights = GS.eloFormula || null;
+// ── TOP PLAYERS — composite ELO (совпадает с лидербордом) ──
+DB.listenUsers('elo', 100, users => {
+  // Вычислить composite ELO для каждого и отсортировать
+  const scored = users
+    .filter(u => (u.totalVoiceMinutes || 0) > 0 || (u.xp || 0) > 0 || (u.elo || 0) > 500)
+    .map(u => ({ ...u, _composite: computeCompositeElo(u, GS.eloFormula) }))
+    .sort((a, b) => b._composite - a._composite)
+    .slice(0, 5);
+
+  const el = document.getElementById('homeTop');
+  if (!scored.length) {
+    el.innerHTML = '<div class="empty-state">Нет активных игроков</div>';
+    return;
   }
-
-  DB.listenUsers('elo', 50, users => { // берём чуть больше для сортировки
-    // Фильтруем по голосовой активности
-    const activeUsers = users.filter(u => (u.totalVoiceMinutes || 0) > 0);
-
-    // Вычисляем композитный ELO и сортируем по убыванию
-    const scored = activeUsers.map(u => ({
-      ...u,
-      _composite: computeCompositeElo(u, weights)
-    })).sort((a, b) => b._composite - a._composite);
-
-    const top5 = scored.slice(0, 5);
-    const el = document.getElementById('homeTop');
-
-    if (!top5.length) {
-      el.innerHTML = '<div class="empty-state">Нет активных игроков</div>';
-      return;
-    }
-
-    const medals = ['🥇', '🥈', '🥉'];
-    el.innerHTML = top5.map((u, i) => {
-      const rank = getRankByComposite(u._composite); // вместо gsRank
-      const av = u.avatarUrl
-        ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
-        : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0].toUpperCase()}</div>`;
-
-      return `<a href="profile.html?id=${u.discordId || u.id}" class="tp-row">
-        <div class="tp-pos">${medals[i] || (i + 1)}</div>
-        ${av}
-        <div class="tp-name">${u.displayName || u.username}</div>
-        <div class="tp-elo">${fmtNum(u._composite)}</div>
-        <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.name}</div>
-      </a>`;
-    }).join('');
-  });
-})();
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = scored.map((u, i) => {
+    const rank = gsRank(u);  // composite rank
+    const av = u.avatarUrl
+      ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
+      : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>`;
+    return `<a href="profile.html?id=${u.discordId||u.id}" class="tp-row">
+      <div class="tp-pos">${medals[i] || (i+1)}</div>
+      ${av}
+      <div class="tp-name">${u.displayName || u.username}</div>
+      <div class="tp-elo" style="color:${rank.color}">${fmtNum(u._composite)}</div>
+      <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.icon||''} ${rank.name}</div>
+    </a>`;
+  }).join('');
+});
 </script>
 </body>
 </html>
