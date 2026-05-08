@@ -2,41 +2,198 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Авторизация Discord</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gray Squad — Авторизация</title>
+    <style>
+        :root {
+            --red: #dc3545;
+            --red-dim: #9b1e2a;
+            --bg: #0a0a0c;
+            --text: #e8e8f0;
+            --text-dim: #888899;
+            --font-title: 'Rajdhani', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+            --font-body: 'Exo 2', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* лёгкая сетка на фоне */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(220,53,69,.025) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(220,53,69,.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-container {
+            position: relative;
+            z-index: 1;
+            background: rgba(26, 26, 32, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 2rem 2.5rem;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-icon {
+            display: block;
+            margin: 0 auto 1rem;
+            height: 48px;
+        }
+
+        .logo-icon img {
+            height: 100%;
+            width: auto;
+            filter: drop-shadow(0 0 8px rgba(220,53,69,0.3));
+        }
+
+        h2 {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 em {
+            color: var(--red);
+            font-style: normal;
+        }
+
+        p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            border: 3px solid rgba(255,255,255,0.06);
+            border-top-color: var(--red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-box {
+            background: rgba(220,53,69,0.1);
+            border: 1px solid rgba(220,53,69,0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--red);
+        }
+
+        textarea {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.3rem;
+            background: var(--bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            border-radius: 4px;
+            resize: none;
+        }
+    </style>
 </head>
-<body style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
-    <div>Авторизация... Окно закроется автоматически.</div>
+<body>
+    <div class="auth-container" id="authContainer">
+        <div class="logo-icon">
+            <img src="assets/logo.svg" alt="Gray Squad">
+        </div>
+        <h2>Gray<em>Squad</em></h2>
+        <p id="statusMessage">Авторизация... Окно закроется автоматически.</p>
+        <div class="spinner"></div>
+    </div>
+
     <script>
         (function() {
+            const container = document.getElementById('authContainer');
+            const statusEl = document.getElementById('statusMessage');
+            const spinner = document.querySelector('.spinner');
+
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const state = urlParams.get('state');
 
+            function showError(message) {
+                statusEl.textContent = 'Ошибка';
+                spinner.style.display = 'none';
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-box';
+                errorDiv.textContent = message;
+                container.appendChild(errorDiv);
+            }
+
             if (!code) {
-                document.body.innerHTML = '<div style="color:red;">Ошибка: не передан код авторизации.</div>';
+                showError('Не передан код авторизации. Попробуйте войти ещё раз.');
                 return;
             }
 
-            // Проверяем, что окно открыто родителем (есть opener)
             if (window.opener) {
-                // Отправляем данные родительскому окну
                 window.opener.postMessage({
                     type: 'discord_auth',
                     code: code,
                     state: state
                 }, window.location.origin);
-
-                // Закрываем это окно
                 window.close();
             } else {
-                // Фоллбек: если окно открыли не поп-апом (напрямую), покажем код для отладки
-                document.body.innerHTML = `
-                    <div>
-                        <p>Код авторизации получен, но окно не было открыто как popup.</p>
-                        <p>Скопируйте код и закройте страницу:</p>
-                        <textarea rows="4" cols="50" readonly>${code}</textarea>
-                    </div>
-                `;
+                statusEl.textContent = 'Окно не было открыто как popup.';
+                spinner.style.display = 'none';
+                const msg = document.createElement('p');
+                msg.style.marginTop = '1rem';
+                msg.innerHTML = 'Скопируйте код и закройте страницу:';
+                container.appendChild(msg);
+                const ta = document.createElement('textarea');
+                ta.rows = 2;
+                ta.readOnly = true;
+                ta.value = code;
+                container.appendChild(ta);
+                if (state) {
+                    const stateMsg = document.createElement('p');
+                    stateMsg.style.fontSize = '0.7rem';
+                    stateMsg.style.marginTop = '0.5rem';
+                    stateMsg.textContent = 'State: ' + state;
+                    container.appendChild(stateMsg);
+                }
             }
         })();
     </script>
