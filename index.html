@@ -253,35 +253,55 @@ DB.listenTopics(null, topics => {
     </a>`).join('');
 });
 
-// ── TOP PLAYERS — composite ELO (совпадает с лидербордом) ──
-DB.listenUsers('elo', 100, users => {
-  // Вычислить composite ELO для каждого и отсортировать
-  const scored = users
-    .filter(u => (u.totalVoiceMinutes || 0) > 0 || (u.xp || 0) > 0 || (u.elo || 0) > 500)
-    .map(u => ({ ...u, _composite: computeCompositeElo(u, GS.eloFormula) }))
-    .sort((a, b) => b._composite - a._composite)
-    .slice(0, 5);
-
-  const el = document.getElementById('homeTop');
-  if (!scored.length) {
-    el.innerHTML = '<div class="empty-state">Нет активных игроков</div>';
-    return;
+// ── TOP PLAYERS — composite ELO (как в лидерборде) ──────────
+(async function initTopPlayers() {
+  // 1. Загружаем веса формулы из конфига
+  let weights = null;
+  try {
+    const cfg = await DB.getConfig();
+    weights = cfg.eloFormula || GS.eloFormula || null;
+  } catch (e) {
+    weights = GS.eloFormula || null;
   }
-  const medals = ['🥇','🥈','🥉'];
-  el.innerHTML = scored.map((u, i) => {
-    const rank = gsRank(u);  // composite rank
-    const av = u.avatarUrl
-      ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
-      : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName||u.username||'?')[0].toUpperCase()}</div>`;
-    return `<a href="profile.html?id=${u.discordId||u.id}" class="tp-row">
-      <div class="tp-pos">${medals[i] || (i+1)}</div>
-      ${av}
-      <div class="tp-name">${u.displayName || u.username}</div>
-      <div class="tp-elo" style="color:${rank.color}">${fmtNum(u._composite)}</div>
-      <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.icon||''} ${rank.name}</div>
-    </a>`;
-  }).join('');
-});
+
+  // 2. Слушаем пользователей
+  DB.listenUsers('elo', 50, users => {
+    // Фильтруем только тех, у кого есть голосовая активность
+    const activeUsers = users.filter(u => (u.totalVoiceMinutes || 0) > 0);
+
+    // Вычисляем композитный ELO для каждого
+    const scored = activeUsers
+      .map(u => ({
+        ...u,
+        _composite: computeCompositeElo(u, weights)
+      }))
+      .sort((a, b) => b._composite - a._composite);
+
+    const top5 = scored.slice(0, 5);
+    const el = document.getElementById('homeTop');
+
+    if (!top5.length) {
+      el.innerHTML = '<div class="empty-state">Нет активных игроков</div>';
+      return;
+    }
+
+    const medals = ['🥇', '🥈', '🥉'];
+    el.innerHTML = top5.map((u, i) => {
+      const rank = getRankByComposite(u._composite); // <-- единый ранг
+      const av = u.avatarUrl
+        ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
+        : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0].toUpperCase()}</div>`;
+
+      return `<a href="profile.html?id=${u.discordId || u.id}" class="tp-row">
+        <div class="tp-pos">${medals[i] || (i + 1)}</div>
+        ${av}
+        <div class="tp-name">${u.displayName || u.username}</div>
+        <div class="tp-elo" style="color:${rank.color}">${fmtNum(u._composite)}</div>
+        <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.icon||''} ${rank.name}</div>
+      </a>`;
+    }).join('');
+  });
+})();
 </script>
 </body>
 </html>
