@@ -453,47 +453,48 @@
         </a>`).join('');
     });
 
-    // ── TOP PLAYERS — composite ELO (top‑3, синхронизирован с лидербордом) ──
-    (async function initTopPlayers() {
-      let weights = null;
-      try {
-        const cfg = await DB.getConfig();
-        weights = cfg.eloFormula || GS.eloFormula || null;
-      } catch (e) {
-        weights = GS.eloFormula || null;
-      }
+    // ── TOP PLAYERS — composite ELO (синхронизирован с лидербордом, показываем всех) ──
+(async function initTopPlayers() {
+  // загружаем веса формулы из Firestore-конфига (как в лидерборде)
+  let weights = null;
+  try {
+    const cfg = await DB.getConfig();
+    weights = cfg.eloFormula || GS.eloFormula || null;
+  } catch (e) {
+    weights = GS.eloFormula || null;
+  }
 
-      DB.listenUsers('elo', 50, users => {
-        const activeUsers = users.filter(u => (u.totalVoiceMinutes || 0) > 0);
-        const scored = activeUsers
-          .map(u => ({ ...u, _composite: computeCompositeElo(u, weights) }))
-          .sort((a, b) => b._composite - a._composite);
+  DB.listenUsers('elo', 50, users => {
+    // без фильтрации – показываем всех пользователей
+    const scored = users
+      .map(u => ({ ...u, _composite: computeCompositeElo(u, weights) }))
+      .sort((a, b) => b._composite - a._composite);
 
-        const top3 = scored.slice(0, 3);
-        const el = document.getElementById('homeTop');
+    const top3 = scored.slice(0, 3);
+    const el = document.getElementById('homeTop');
 
-        if (!top3.length) {
-          el.innerHTML = '<div class="empty-state">Нет активных игроков</div>';
-          return;
-        }
+    if (!top3.length) {
+      el.innerHTML = '<div class="empty-state">Нет игроков</div>';
+      return;
+    }
 
-        const medals = ['🥇', '🥈', '🥉'];
-        el.innerHTML = top3.map((u, i) => {
-          const rank = getRankByComposite(u._composite);
-          const av = u.avatarUrl
-            ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
-            : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0].toUpperCase()}</div>`;
+    const medals = ['🥇', '🥈', '🥉'];
+    el.innerHTML = top3.map((u, i) => {
+      const rank = getRankByComposite(u._composite); // единый ранг (как в лидерборде)
+      const av = u.avatarUrl
+        ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
+        : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0].toUpperCase()}</div>`;
 
-          return `<a href="profile.html?id=${u.discordId || u.id}" class="tp-row">
-            <div class="tp-pos">${medals[i] || (i + 1)}</div>
-            ${av}
-            <div class="tp-name">${u.displayName || u.username}</div>
-            <div class="tp-elo" style="color:${rank.color}">${fmtNum(u._composite)}</div>
-            <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.icon||''} ${rank.name}</div>
-          </a>`;
-        }).join('');
-      });
-    })();
+      return `<a href="profile.html?id=${u.discordId || u.id}" class="tp-row">
+        <div class="tp-pos">${medals[i] || (i + 1)}</div>
+        ${av}
+        <div class="tp-name">${u.displayName || u.username}</div>
+        <div class="tp-elo" style="color:${rank.color}">${fmtNum(u._composite)}</div>
+        <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.icon||''} ${rank.name}</div>
+      </a>`;
+    }).join('');
+  });
+})();
   </script>
 </body>
 </html>
