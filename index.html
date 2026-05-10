@@ -7,91 +7,17 @@
   <title>Gray Squad — Главная</title>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .hero {
-      position: relative;
-      z-index: 1;
-      padding: 2.5rem 2rem 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      overflow: hidden;
-    }
-    .hero-glow {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translate(-50%, -30%);
-      width: 800px;
-      height: 500px;
-      background: radial-gradient(ellipse, rgba(220, 53, 69, 0.1) 0%, transparent 70%);
-      pointer-events: none;
-      animation: glowPulse 5s ease-in-out infinite;
-    }
-    @keyframes glowPulse {
-      0%, 100% { opacity: 0.7; transform: translate(-50%, -30%) scale(1); }
-      50%      { opacity: 1;   transform: translate(-50%, -30%) scale(1.08); }
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-mono);
-      font-size: .68rem;
-      letter-spacing: .15em;
-      color: var(--red);
-      text-transform: uppercase;
-      background: rgba(220, 53, 69, 0.07);
-      border: 1px solid rgba(220, 53, 69, 0.22);
-      padding: 5px 14px;
-      border-radius: 4px;
-      margin-bottom: 1.4rem;
-      animation: fadeUp .5s .1s ease both;
-    }
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--red);
-      animation: blink 1.4s infinite;
-    }
-    .hero h1 {
-      font-family: var(--font-title);
-      font-size: clamp(3.2rem, 7.5vw, 7rem);
-      font-weight: 700;
-      line-height: .9;
-      letter-spacing: -0.01em;
-      animation: fadeUp .5s .2s ease both;
-    }
+    .hero { position: relative; z-index: 1; padding: 2.5rem 2rem 0; display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
+    .hero-glow { position: absolute; top: 0; left: 50%; transform: translate(-50%, -30%); width: 800px; height: 500px; background: radial-gradient(ellipse, rgba(220, 53, 69, 0.1) 0%, transparent 70%); pointer-events: none; animation: glowPulse 5s ease-in-out infinite; }
+    @keyframes glowPulse { 0%, 100% { opacity: 0.7; transform: translate(-50%, -30%) scale(1); } 50% { opacity: 1; transform: translate(-50%, -30%) scale(1.08); } }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: .68rem; letter-spacing: .15em; color: var(--red); text-transform: uppercase; background: rgba(220, 53, 69, 0.07); border: 1px solid rgba(220, 53, 69, 0.22); padding: 5px 14px; border-radius: 4px; margin-bottom: 1.4rem; animation: fadeUp .5s .1s ease both; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: blink 1.4s infinite; }
+    .hero h1 { font-family: var(--font-title); font-size: clamp(3.2rem, 7.5vw, 7rem); font-weight: 700; line-height: .9; letter-spacing: -0.01em; animation: fadeUp .5s .2s ease both; }
     .hero h1 .wg { color: var(--gray); }
     .hero h1 .wr { color: var(--red); text-shadow: 0 0 50px var(--red-glow); }
-    .hero-sub {
-      margin-top: 1.2rem;
-      font-size: 1rem;
-      font-weight: 300;
-      color: var(--text-dim);
-      animation: fadeUp .5s .3s ease both;
-    }
-    .features {
-      position: relative;
-      z-index: 1;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 3rem 2rem 0;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      animation: fadeUp .6s .4s ease both;
-    }
-    .feat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      position: relative;
-      overflow: hidden;
-      transition: border-color .25s, transform .25s;
-    }
+    .hero-sub { margin-top: 1.2rem; font-size: 1rem; font-weight: 300; color: var(--text-dim); animation: fadeUp .5s .3s ease both; }
+    .features { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 3rem 2rem 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; animation: fadeUp .6s .4s ease both; }
+    .feat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden; transition: border-color .25s, transform .25s; }
     .feat-card:hover { border-color: rgba(220, 53, 69, 0.3); transform: translateY(-3px); }
     .feat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
     .feat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--red), transparent); }
@@ -103,73 +29,20 @@
     .feat-card:nth-child(2) .feat-title { color: var(--gold); }
     .feat-card:nth-child(3) .feat-title { color: var(--green); }
     .feat-desc { font-size: .88rem; color: var(--text-dim); line-height: 1.7; }
-    main {
-      position: relative;
-      z-index: 1;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2.5rem 2rem 6rem;
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 2rem;
-      align-items: start;
-    }
+    main { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 2.5rem 2rem 6rem; display: grid; grid-template-columns: 1fr 320px; gap: 2rem; align-items: start; }
     .col-l, .col-r { display: flex; flex-direction: column; gap: 1.75rem; }
-    /* Events */
     .ev-list { display: flex; flex-direction: column; gap: .6rem; }
-    .ev-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: .9rem 1.1rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      text-decoration: none;
-      color: inherit;
-      position: relative;
-      overflow: hidden;
-      transition: border-color .2s, background .2s;
-    }
+    .ev-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .9rem 1.1rem; display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit; position: relative; overflow: hidden; transition: border-color .2s, background .2s; }
     .ev-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
     .ev-card.cr::before { background: var(--red); }
     .ev-card.cg::before { background: var(--gold); }
     .ev-card.cn::before { background: var(--green); }
     .ev-card:hover { border-color: rgba(255, 255, 255, 0.11); background: rgba(255, 255, 255, 0.025); }
-    .ev-ico {
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-    }
+    .ev-ico { width: 42px; height: 42px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); }
     .ev-info { flex: 1; min-width: 0; }
-    .ev-name {
-      font-family: var(--font-title);
-      font-size: .97rem;
-      font-weight: 600;
-      letter-spacing: .03em;
-      margin-bottom: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .ev-name { font-family: var(--font-title); font-size: .97rem; font-weight: 600; letter-spacing: .03em; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ev-meta { display: flex; flex-wrap: wrap; gap: .6rem; font-family: var(--font-mono); font-size: .67rem; color: var(--text-dim); }
-    .ev-tag {
-      display: inline-block;
-      padding: 2px 7px;
-      border-radius: 4px;
-      margin-top: 5px;
-      font-family: var(--font-mono);
-      font-size: .6rem;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-    }
+    .ev-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; margin-top: 5px; font-family: var(--font-mono); font-size: .6rem; text-transform: uppercase; letter-spacing: .08em; }
     .tl { background: rgba(220, 53, 69, 0.12); color: var(--red); border: 1px solid rgba(220, 53, 69, 0.25); }
     .ts { background: rgba(255, 193, 7, 0.09); color: var(--gold); border: 1px solid rgba(255, 193, 7, 0.22); }
     .to { background: rgba(40, 167, 69, 0.09); color: var(--green); border: 1px solid rgba(40, 167, 69, 0.22); }
@@ -179,88 +52,30 @@
     .tvr { color: var(--red); }
     .tvg { color: var(--gold); }
     .tvn { color: var(--green); }
-    /* Forum */
     .forum-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .f-row {
-      display: flex;
-      align-items: center;
-      gap: .85rem;
-      padding: .8rem 1.1rem;
-      border-bottom: 1px solid var(--border);
-      text-decoration: none;
-      color: inherit;
-      transition: background .15s;
-      cursor: pointer;
-    }
+    .f-row { display: flex; align-items: center; gap: .85rem; padding: .8rem 1.1rem; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; transition: background .15s; cursor: pointer; }
     .f-row:last-child { border-bottom: none; }
     .f-row:hover { background: rgba(255, 255, 255, 0.03); }
-    .f-ico {
-      width: 33px;
-      height: 33px;
-      border-radius: 7px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .9rem;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-    }
+    .f-ico { width: 33px; height: 33px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .9rem; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); }
     .f-info { flex: 1; min-width: 0; }
     .f-title { font-weight: 600; font-size: .86rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .f-sub { font-size: .71rem; color: var(--text-dim); }
     .f-right { font-family: var(--font-mono); font-size: .67rem; color: var(--text-dim); text-align: right; flex-shrink: 0; }
-    .pindot {
-      display: inline-block;
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--red);
-      margin-right: 4px;
-      vertical-align: middle;
-    }
-    /* Voice */
-    .voice-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.1rem 1.2rem;
-      position: relative;
-      overflow: hidden;
-    }
+    .pindot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--red); margin-right: 4px; vertical-align: middle; }
+    .voice-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; position: relative; overflow: hidden; }
     .voice-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--green), transparent); }
     .v-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
     .v-live { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: .63rem; color: var(--green); text-transform: uppercase; letter-spacing: .1em; }
     .vdot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1.2s infinite; }
     .v-list { display: flex; flex-direction: column; gap: .45rem; }
-    .v-user {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 8px;
-      border-radius: 7px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border);
-      transition: border-color .15s;
-    }
+    .v-user { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 7px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); transition: border-color .15s; }
     .v-user:hover { border-color: rgba(255, 255, 255, 0.1); }
     .vav { width: 26px; height: 26px; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: .68rem; font-weight: 700; color: #fff; }
     .vname { font-size: .83rem; font-weight: 600; flex: 1; }
     .vchan { font-family: var(--font-mono); font-size: .6rem; color: var(--text-dim); }
     .vicons { font-size: .7rem; }
-    /* Top players */
     .top-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .tp-row {
-      display: flex;
-      align-items: center;
-      gap: .7rem;
-      padding: .62rem 1.1rem;
-      border-bottom: 1px solid var(--border);
-      transition: background .15s;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
-    }
+    .tp-row { display: flex; align-items: center; gap: .7rem; padding: .62rem 1.1rem; border-bottom: 1px solid var(--border); transition: background .15s; cursor: pointer; text-decoration: none; color: inherit; }
     .tp-row:last-child { border-bottom: none; }
     .tp-row:hover { background: rgba(255, 255, 255, 0.03); }
     .tp-pos { font-family: var(--font-mono); font-size: .73rem; color: var(--text-dim); width: 22px; text-align: center; flex-shrink: 0; }
@@ -268,15 +83,8 @@
     .tp-name { font-size: .86rem; font-weight: 600; flex: 1; }
     .tp-elo { font-family: var(--font-mono); font-size: .76rem; color: var(--gold); flex-shrink: 0; }
     .tp-rank { font-family: var(--font-mono); font-size: .62rem; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; }
-    @media (max-width: 900px) {
-      .features { grid-template-columns: 1fr; }
-      main { grid-template-columns: 1fr; }
-      .col-r { order: -1; }
-    }
-    @media (max-width: 600px) {
-      .hero { padding: 1.5rem 1.2rem 0; }
-      .features { padding: 2rem 1.2rem 0; }
-    }
+    @media (max-width: 900px) { .features { grid-template-columns: 1fr; } main { grid-template-columns: 1fr; } .col-r { order: -1; } }
+    @media (max-width: 600px) { .hero { padding: 1.5rem 1.2rem 0; } .features { padding: 2rem 1.2rem 0; } }
   </style>
 </head>
 <body>
@@ -298,10 +106,10 @@
 
   <main>
     <div class="col-l">
-      <!-- EVENTS -->
+      <!-- EVENTS (последние) -->
       <div>
         <div class="sec-hd">
-          <div class="sec-label" style="margin-bottom:0">Активные ивенты</div>
+          <div class="sec-label" style="margin-bottom:0">Последние ивенты</div>
           <a href="events.html" class="sec-link">Все ивенты →</a>
         </div>
         <div class="ev-list" id="homeEvents"><div class="spinner"></div></div>
@@ -350,7 +158,7 @@
   <script src="assets/config.js"></script>
   <script>firebase.initializeApp(GS.firebase);</script>
 
-  <!-- ОСТАЛЬНЫЕ СКРИПТЫ – порядок важен -->
+  <!-- ОСТАЛЬНЫЕ СКРИПТЫ -->
   <script src="assets/elo.js"></script>
   <script src="assets/auth.js"></script>
   <script src="assets/db.js"></script>
@@ -377,42 +185,61 @@
         </div>`).join('');
     });
 
-    // ── EVENTS ─────────────────────────────────────────────────
+    // ── EVENTS (последние, включают завершённые) ─────────────
     DB.listenEvents(events => {
       const el = document.getElementById('homeEvents');
       const now = new Date();
-      const active = events.filter(e => {
-        const start = e.startDate?.toDate?.() || new Date(e.startDate);
-        const end   = e.endDate?.toDate?.()   || (e.endDate ? new Date(e.endDate) : null);
-        return e.status !== 'finished' && start <= now || (start > now && (!end || end > now));
-      }).slice(0,3);
 
-      if (!active.length) {
-        el.innerHTML = '<div class="empty-state"><span class="empty-icon">📅</span>Нет активных ивентов</div>';
+      // Сортируем от новых к старым
+      const sorted = [...events].sort((a, b) => {
+        const aStart = a.startDate?.toDate?.() || new Date(a.startDate);
+        const bStart = b.startDate?.toDate?.() || new Date(b.startDate);
+        return bStart - aStart;
+      });
+
+      // Сначала активные/предстоящие, потом завершённые
+      const activeOrUpcoming = sorted.filter(e => e.status !== 'finished');
+      const completed = sorted.filter(e => e.status === 'finished');
+      const selected = [...activeOrUpcoming, ...completed].slice(0, 3);
+
+      if (!selected.length) {
+        el.innerHTML = '<div class="empty-state"><span class="empty-icon">📅</span>Нет ивентов</div>';
         return;
       }
-      el.innerHTML = active.map(ev => {
+
+      el.innerHTML = selected.map(ev => {
         const start = ev.startDate?.toDate?.() || new Date(ev.startDate);
-        const isLive = start <= now && ev.status !== 'finished';
-        const isSoon = start > now;
-        const tagCls = isLive ? 'tl' : isSoon ? 'ts' : 'to';
-        const tagTxt = isLive ? '🔴 LIVE' : isSoon ? '⏳ СКОРО' : '✅ ОТКРЫТ';
-        const accent = isLive ? 'cr' : 'cg';
-        const parts  = (ev.participants||[]).length;
+        const end = ev.endDate ? (ev.endDate.toDate?.() || new Date(ev.endDate)) : null;
+        const isLive = ev.status !== 'finished' && start <= now && (end ? end >= now : true);
+        const isSoon = ev.status !== 'finished' && start > now;
+        const isFinished = ev.status === 'finished';
+
+        let tagCls, tagTxt, accent;
+        if (isLive) {
+          tagCls = 'tl'; tagTxt = '🔴 LIVE'; accent = 'cr';
+        } else if (isSoon) {
+          tagCls = 'ts'; tagTxt = '⏳ СКОРО'; accent = 'cg';
+        } else {
+          tagCls = 'to'; tagTxt = '✅ Завершён'; accent = 'cn';
+        }
+
+        const parts = (ev.participants || []).length;
         return `<a href="events.html" class="ev-card ${accent}">
           <div class="ev-ico">${ev.gameIcon||'🎮'}</div>
           <div class="ev-info">
             <div class="ev-name">${ev.title}</div>
             <div class="ev-meta">
               <span>👥 ${parts}/${ev.maxPlayers||'∞'}</span>
-              ${ev.prizes?.elo?`<span>🏆 +${ev.prizes.elo} ELO</span>`:''}
-              ${ev.prizes?.currency?`<span>💰 ${fmtNum(ev.prizes.currency)} монет</span>`:''}
+              ${ev.prizes?.elo ? `<span>🏆 +${ev.prizes.elo} ELO</span>` : ''}
+              ${ev.prizes?.currency ? `<span>💰 ${fmtNum(ev.prizes.currency)} монет</span>` : ''}
             </div>
             <span class="ev-tag ${tagCls}">${tagTxt}</span>
           </div>
           <div class="ev-tmr">
-            <div class="tmr-l">${isLive?'Осталось':'Начало'}</div>
-            <span class="tmr-v tvg" data-ts="${start.getTime()}" data-live="${isLive}">—</span>
+            <div class="tmr-l">${isLive ? 'Осталось' : isSoon ? 'Начало' : 'Дата'}</div>
+            <span class="tmr-v ${isLive ? 'tvr' : isSoon ? 'tvg' : 'tvn'}" data-ts="${isFinished ? '' : start.getTime()}" data-live="${isLive}">
+              ${isFinished ? formatDate(start) : '—'}
+            </span>
           </div>
         </a>`;
       }).join('');
@@ -423,6 +250,7 @@
       document.querySelectorAll('[data-ts]').forEach(el => {
         const target = parseInt(el.dataset.ts);
         const isLive = el.dataset.live === 'true';
+        if (!target) return;
         function tick() {
           const diff = isLive ? (target + 4*3600000) - Date.now() : target - Date.now();
           if (diff <= 0) { el.textContent = isLive ? 'Завершается' : 'СЕЙЧАС'; return; }
@@ -431,6 +259,10 @@
         }
         tick(); setInterval(tick, 1000);
       });
+    }
+
+    function formatDate(d) {
+      return d.toLocaleDateString('ru-RU', { day:'2-digit', month:'short' });
     }
 
     // ── FORUM TOPICS ───────────────────────────────────────────
@@ -453,47 +285,46 @@
         </a>`).join('');
     });
 
-    // ── TOP PLAYERS — composite ELO (top‑3, синхронизирован с лидербордом) ──
-(async function initTopPlayers() {
-  let weights = null;
-  try {
-    const cfg = await DB.getConfig();
-    weights = cfg.eloFormula || GS.eloFormula || null;
-  } catch (e) {
-    weights = GS.eloFormula || null;
-  }
+    // ── TOP PLAYERS — composite ELO (top‑3) ────────────────────
+    (async function initTopPlayers() {
+      let weights = null;
+      try {
+        const cfg = await DB.getConfig();
+        weights = cfg.eloFormula || GS.eloFormula || null;
+      } catch (e) {
+        weights = GS.eloFormula || null;
+      }
 
-  DB.listenUsers('elo', 500, users => {   // <-- теперь 500
-    // без фильтрации – показываем всех, как в лидерборде
-    const scored = users
-      .map(u => ({ ...u, _composite: computeCompositeElo(u, weights) }))
-      .sort((a, b) => b._composite - a._composite);
+      DB.listenUsers('elo', 500, users => {
+        const scored = users
+          .map(u => ({ ...u, _composite: computeCompositeElo(u, weights) }))
+          .sort((a, b) => b._composite - a._composite);
 
-    const top3 = scored.slice(0, 3);
-    const el = document.getElementById('homeTop');
+        const top3 = scored.slice(0, 3);
+        const el = document.getElementById('homeTop');
 
-    if (!top3.length) {
-      el.innerHTML = '<div class="empty-state">Нет игроков</div>';
-      return;
-    }
+        if (!top3.length) {
+          el.innerHTML = '<div class="empty-state">Нет игроков</div>';
+          return;
+        }
 
-    const medals = ['🥇', '🥈', '🥉'];
-    el.innerHTML = top3.map((u, i) => {
-      const rank = getRankByComposite(u._composite); // единый ранг
-      const av = u.avatarUrl
-        ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
-        : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0].toUpperCase()}</div>`;
+        const medals = ['🥇', '🥈', '🥉'];
+        el.innerHTML = top3.map((u, i) => {
+          const rank = getRankByComposite(u._composite);
+          const av = u.avatarUrl
+            ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
+            : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0].toUpperCase()}</div>`;
 
-      return `<a href="profile.html?id=${u.discordId || u.id}" class="tp-row">
-        <div class="tp-pos">${medals[i] || (i + 1)}</div>
-        ${av}
-        <div class="tp-name">${u.displayName || u.username}</div>
-        <div class="tp-elo" style="color:${rank.color}">${fmtNum(u._composite)}</div>
-        <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.icon||''} ${rank.name}</div>
-      </a>`;
-    }).join('');
-  });
-})();
+          return `<a href="profile.html?id=${u.discordId || u.id}" class="tp-row">
+            <div class="tp-pos">${medals[i] || (i + 1)}</div>
+            ${av}
+            <div class="tp-name">${u.displayName || u.username}</div>
+            <div class="tp-elo" style="color:${rank.color}">${fmtNum(u._composite)}</div>
+            <div class="tp-rank" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}44">${rank.icon||''} ${rank.name}</div>
+          </a>`;
+        }).join('');
+      });
+    })();
   </script>
 </body>
 </html>
