@@ -239,7 +239,6 @@ function renderProfile(user) {
               <div>
                 <div class="elo-lbl">Составной ELO</div>
                 <div class="elo-val" style="color:${rank.color}">${fmtNum(compositeElo)}</div>
-                <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text-dim)">base_elo: ${fmtNum(user.elo||500)}</div>
               </div>
               <div class="rank-pill">
                 <div style="font-size:1.6rem">${rank.icon||'🏆'}</div>

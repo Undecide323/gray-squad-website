@@ -74,12 +74,11 @@
 .lb-title-tag{font-family:var(--font-mono);font-size:.6rem;color:var(--gold);}
 .lb-cell{font-family:var(--font-mono);font-size:.82rem;text-align:center;}
 
-/* ELO cell with breakdown on hover */
+/* ELO cell without hover breakdown */
 .elo-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;}
 .elo-score{font-family:var(--font-title);font-size:.92rem;font-weight:700;}
 .elo-base{font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);}
 .elo-tooltip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--bg3,#141418);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.65rem .85rem;white-space:nowrap;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:200px;}
-.lb-row:hover .elo-tooltip,.elo-wrap:hover .elo-tooltip{display:block;}
 .elo-tooltip-row{display:flex;justify-content:space-between;gap:1rem;font-family:var(--font-mono);font-size:.63rem;padding:2px 0;}
 .elo-tooltip-row span:first-child{color:var(--text-dim);}
 .elo-tooltip-row span:last-child{font-weight:700;}
@@ -303,7 +302,6 @@ const LB = (() => {
       return `<a href="profile.html?id=${u.discordId||u.id}" class="pod ${cls}">
         <div class="pod-crown">${crown}</div>
         <div class="pod-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${av}
-          <div class="pod-pos">${pos}</div>
         </div>
         <div class="pod-name">${u.displayName||u.username}</div>
         <div class="pod-score" style="color:${rank.color}">${fmtNum(u._composite)}</div>
