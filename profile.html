@@ -205,7 +205,7 @@ function renderProfile(user) {
               return bd.components.map(comp => {
                 const colors = {base_elo:'var(--red)',level:'var(--green)',xp:'#B9F2FF',voice:'var(--gold)',coins:'#ff9900'};
                 const pct = Math.min(Math.round((comp.value/max)*100), 100);
-                return `<div style="display:flex;align-items:center;gap:.5rem;margin-top:2px">
+                return \`<div style="display:flex;align-items:center;gap:.5rem;margin-top:2px">
                   <span style="font-family:var(--font-mono);font-size:.58rem;color:var(--text-dim);width:85px;flex-shrink:0">\${comp.icon} \${comp.label}</span>
                   <div style="flex:1;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden">
                     <div style="width:\${pct}%;height:100%;background:\${colors[comp.key]||'var(--red)'};border-radius:2px"></div>
