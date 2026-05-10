@@ -168,6 +168,9 @@ const user = GS_AUTH.getUser();
 const isCreator = GS_AUTH.hasRole('creator');
 const isMember  = GS_AUTH.hasRole('member');
 
+let _unsubComments = null;
+let _loadTimeout = null;
+
 // Show create button for members+
 if (isMember) document.getElementById('forumActions').style.display = 'block';
 // Show system post toggle for creator
@@ -269,13 +272,14 @@ function setCategory(cat, btn) {
 }
 function filterTopics() { renderTopics(); }
 
-// ── OPEN TOPIC ───────────────────────────────────────────────
-let _unsubComments = null;
+// ── OPEN TOPIC (с защитой от бесконечной загрузки) ──────────────────
 function openTopic(topicId) {
-  const topic = allTopics.find(t=>t.id===topicId);
+  const topic = allTopics.find(t => t.id === topicId);
   if (!topic) return;
+
   document.getElementById('topicModalHead').innerHTML =
     `<span>${topic.title}</span> <button class="modal-close" onclick="closeTopic()">✕</button>`;
+
   document.getElementById('topicModalBody').innerHTML = `
     <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1.25rem;font-size:.9rem;line-height:1.7;color:var(--text-dim);">${topic.body||''}</div>
     ${user && !topic.readOnly ? `
@@ -292,34 +296,58 @@ function openTopic(topicId) {
       <button class="btn btn-red btn-sm" onclick="postReply('${topicId}')">Ответить</button>
     </div>` : ''}
   `;
+
   document.getElementById('topicModal').classList.add('open');
 
+  // Очищаем предыдущий таймаут и подписку
   if (_unsubComments) _unsubComments();
-  _unsubComments = DB.listenComments(topicId, comments => {
+  if (_loadTimeout) clearTimeout(_loadTimeout);
+
+  // Устанавливаем таймаут на 5 секунд – если комментарии не загрузились, показываем ошибку
+  _loadTimeout = setTimeout(() => {
     const el = document.getElementById('topicComments');
-    if (!el) return;
-    if (!comments.length) { el.innerHTML = '<div style="text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);padding:1rem 0">Нет комментариев</div>'; return; }
-    el.innerHTML = comments.map(c=>{
-      const av = c.authorAvatar
-        ? `<img src="${c.authorAvatar}" style="width:30px;height:30px;border-radius:6px;object-fit:cover;flex-shrink:0">`
-        : `<div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--red-dim),var(--red));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0">${(c.authorName||'?')[0]}</div>`;
-      return `<div style="display:flex;gap:.8rem;padding:.75rem 0;border-bottom:1px solid var(--border);">
-        ${av}
-        <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:4px;flex-wrap:wrap;">
-            <b style="font-size:.85rem">${c.authorName}</b>
-            <span style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim)">${timeAgo(c.createdAt)}</span>
+    if (el && el.querySelector('.spinner')) {
+      el.innerHTML = '<div style="text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);padding:1rem 0">⚠️ Не удалось загрузить комментарии</div>';
+    }
+  }, 5000);
+
+  // Подписываемся на комментарии
+  if (typeof DB !== 'undefined' && DB.listenComments) {
+    _unsubComments = DB.listenComments(topicId, comments => {
+      clearTimeout(_loadTimeout);
+      const el = document.getElementById('topicComments');
+      if (!el) return;
+      if (!comments.length) {
+        el.innerHTML = '<div style="text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);padding:1rem 0">Нет комментариев</div>';
+        return;
+      }
+      el.innerHTML = comments.map(c => {
+        const av = c.authorAvatar
+          ? `<img src="${c.authorAvatar}" style="width:30px;height:30px;border-radius:6px;object-fit:cover;flex-shrink:0">`
+          : `<div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--red-dim),var(--red));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0">${(c.authorName||'?')[0]}</div>`;
+        return `<div style="display:flex;gap:.8rem;padding:.75rem 0;border-bottom:1px solid var(--border);">
+          ${av}
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:4px;flex-wrap:wrap;">
+              <b style="font-size:.85rem">${c.authorName}</b>
+              <span style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim)">${timeAgo(c.createdAt)}</span>
+            </div>
+            <div style="font-size:.85rem;color:var(--text-dim);line-height:1.6">${c.body}</div>
           </div>
-          <div style="font-size:.85rem;color:var(--text-dim);line-height:1.6">${c.body}</div>
-        </div>
-      </div>`;
-    }).join('');
-  });
+        </div>`;
+      }).join('');
+    });
+  } else {
+    clearTimeout(_loadTimeout);
+    const commentsEl = document.getElementById('topicComments');
+    if (commentsEl) commentsEl.innerHTML = '<div style="text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--red);padding:1rem 0">Ошибка: модуль комментариев не загружен</div>';
+  }
 }
 
 function closeTopic() {
   document.getElementById('topicModal').classList.remove('open');
   if (_unsubComments) { _unsubComments(); _unsubComments = null; }
+  if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
 }
 document.getElementById('topicModal').addEventListener('click', e=>{ if(e.target.id==='topicModal') closeTopic(); });
 

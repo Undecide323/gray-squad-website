@@ -453,9 +453,8 @@
         </a>`).join('');
     });
 
-    // ── TOP PLAYERS — composite ELO (синхронизирован с лидербордом, показываем всех) ──
+    // ── TOP PLAYERS — composite ELO (top‑3, синхронизирован с лидербордом) ──
 (async function initTopPlayers() {
-  // загружаем веса формулы из Firestore-конфига (как в лидерборде)
   let weights = null;
   try {
     const cfg = await DB.getConfig();
@@ -464,8 +463,8 @@
     weights = GS.eloFormula || null;
   }
 
-  DB.listenUsers('elo', 50, users => {
-    // без фильтрации – показываем всех пользователей
+  DB.listenUsers('elo', 500, users => {   // <-- теперь 500
+    // без фильтрации – показываем всех, как в лидерборде
     const scored = users
       .map(u => ({ ...u, _composite: computeCompositeElo(u, weights) }))
       .sort((a, b) => b._composite - a._composite);
@@ -480,7 +479,7 @@
 
     const medals = ['🥇', '🥈', '🥉'];
     el.innerHTML = top3.map((u, i) => {
-      const rank = getRankByComposite(u._composite); // единый ранг (как в лидерборде)
+      const rank = getRankByComposite(u._composite); // единый ранг
       const av = u.avatarUrl
         ? `<img src="${u.avatarUrl}" style="width:27px;height:27px;border-radius:6px;object-fit:cover">`
         : `<div class="tp-av" style="background:linear-gradient(135deg,var(--red-dim),var(--red))">${(u.displayName || u.username || '?')[0].toUpperCase()}</div>`;
