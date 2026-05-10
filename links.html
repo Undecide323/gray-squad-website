@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gray Squad — Полезные ссылки</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* вертикальные ссылки — единый стиль с форумом/ивентами */
+    .links-header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .links-header .page-eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .links-header .page-title {
+      font-family: var(--font-title);
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    /* вертикальный контейнер — как список тем */
+    .links-vertical {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .link-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      cursor: pointer;
+    }
+    .link-card.disabled-card {
+      opacity: 0.55;
+      filter: grayscale(0.2);
+      pointer-events: none;
+      cursor: default;
+      border-color: var(--border);
+    }
+    .link-card.disabled-card .link-title {
+      color: var(--text-dim);
+    }
+    .link-card:hover:not(.disabled-card) {
+      border-color: rgba(220, 53, 69, 0.4);
+      background: rgba(255, 255, 255, 0.02);
+      transform: translateX(3px);
+    }
+    .link-icon {
+      font-size: 1.8rem;
+      width: 48px;
+      height: 48px;
+      background: rgba(220, 53, 69, 0.08);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: 0.2s;
+    }
+    .link-card:hover .link-icon {
+      background: rgba(220, 53, 69, 0.16);
+    }
+    .link-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .link-title {
+      font-family: var(--font-title);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .link-url {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      word-break: break-all;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .link-badge {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--green);
+      background: rgba(40, 167, 69, 0.12);
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .link-status {
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--green);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .link-status.off {
+      background: rgba(108, 117, 125, 0.15);
+      color: var(--gray);
+    }
+    .admin-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+    .admin-btn-icon {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s;
+      color: var(--text-dim);
+    }
+    .admin-btn-icon:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border-color: rgba(220, 53, 69, 0.5);
+    }
+    .toggle-switch {
+      width: 38px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle-switch.on {
+      background: var(--red);
+      border-color: var(--red);
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle-switch.on::after {
+      transform: translateX(18px);
+    }
+    .edit-mode-banner {
+      background: rgba(220, 53, 69, 0.1);
+      border: 1px dashed rgba(220, 53, 69, 0.4);
+      border-radius: 12px;
+      padding: 0.6rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .empty-links {
+      text-align: center;
+      padding: 2rem;
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+    .link-footer-right {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-shrink: 0;
+    }
+    @media (max-width: 700px) {
+      .link-card {
+        flex-wrap: wrap;
+        padding: 0.9rem;
+      }
+      .admin-controls {
+        margin-left: auto;
+        margin-top: 0.5rem;
+        width: 100%;
+        justify-content: flex-end;
+      }
+      .link-footer-right {
+        margin-left: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-root"></div>
+  <div id="tabs-root"></div>
+
+  <div class="page">
+    <div class="links-header">
+      <div class="page-eyebrow">// community resources</div>
+      <div class="page-title">Полезные ссылки</div>
+      <p style="color: var(--text-dim); max-width: 600px; margin: 0.75rem auto 0; font-size: 0.9rem;">
+        Наши официальные площадки — всегда будь в курсе событий и общайся с сообществом.
+      </p>
+    </div>
+
+    <div id="links-admin-panel" style="display: none;">
+      <div class="edit-mode-banner">
+        <span>⚙️ Режим создателя — вы можете включать/отключать ссылки и редактировать URL</span>
+        <button class="btn-red btn-sm" id="resetLinksBtn" style="padding: 0.2rem 0.9rem;">Сбросить умолчания</button>
+      </div>
+    </div>
+
+    <div class="links-vertical" id="linksContainer">
+      <div class="empty-links">
+        <span>📡 Загрузка ссылок...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка редактирования ссылки -->
+  <div class="modal-overlay" id="editLinkModal">
+    <div class="modal" style="width: 500px;">
+      <div class="modal-head">
+        <span>✏️ Редактировать ссылку — <span id="editLinkLabel"></span></span>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="f-group">
+          <div class="f-label">URL (полный адрес)</div>
+          <input type="text" class="f-input" id="editLinkUrl" placeholder="https://discord.gg/...">
+          <div class="f-label" style="margin-top: 0.75rem;">Название (как будет отображаться)</div>
+          <input type="text" class="f-input" id="editLinkName" placeholder="Discord">
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem;">
+          <div class="toggle-switch on" id="editToggleEnabled" onclick="this.classList.toggle('on')"></div>
+          <span style="font-size: 0.85rem;">Ссылка активна (видна пользователям)</span>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" onclick="closeEditModal()">Отмена</button>
+        <button class="btn-confirm" id="saveLinkChangesBtn">💾 Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- toasts -->
+  <div class="toast hidden" id="toast"><div class="toast-icon" id="toastIcon">✅</div><div><div class="toast-title" id="toastTitle"></div><div class="toast-sub" id="toastSub"></div></div></div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="assets/config.js"></script>
+  <script>firebase.initializeApp(GS.firebase);</script>
+  <script src="assets/auth.js"></script>
+  <script src="assets/db.js"></script>
+  <script src="assets/nav.js"></script>
+
+  <script>
+    // Схема ссылок по умолчанию
+    const DEFAULT_LINKS = {
+      discord: {
+        id: 'discord',
+        label: 'Discord',
+        icon: '💬',
+        url: 'https://discord.gg/gray-squad',
+        enabled: true,
+      },
+      steam: {
+        id: 'steam',
+        label: 'Steam группа',
+        icon: '🎮',
+        url: 'https://steamcommunity.com/groups/graysquad',
+        enabled: true,
+      },
+      telegram_channel: {
+        id: 'telegram_channel',
+        label: 'Telegram канал',
+        icon: '📢',
+        url: 'https://t.me/graysquad',
+        enabled: true,
+      },
+      telegram_chat: {
+        id: 'telegram_chat',
+        label: 'Telegram беседа',
+        icon: '💬',
+        url: 'https://t.me/graysquad_chat',
+        enabled: true,
+      },
+      tiktok: {
+        id: 'tiktok',
+        label: 'TikTok',
+        icon: '🎵',
+        url: 'https://tiktok.com/@graysquad',
+        enabled: true,
+      },
+      youtube: {
+        id: 'youtube',
+        label: 'YouTube',
+        icon: '▶️',
+        url: 'https://youtube.com/c/graysquad',
+        enabled: true,
+      }
+    };
+
+    let currentLinks = { ...DEFAULT_LINKS };
+    let editingId = null;
+    let isCreator = false;
+
+    function showToast(icon, title, sub, err = false) {
+      const t = document.getElementById('toast');
+      t.className = 'toast' + (err ? ' err' : '');
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastTitle').style.color = err ? 'var(--red)' : 'var(--green)';
+      document.getElementById('toastSub').textContent = sub;
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => t.classList.add('hidden'), 3200);
+      t.classList.remove('hidden');
+    }
+
+    async function loadLinksConfig() {
+      try {
+        const docRef = firebase.firestore().collection('config').doc('links_config');
+        const docSnap = await docRef.get();
+        if (docSnap.exists) {
+          const stored = docSnap.data();
+          for (const [key, storedLink] of Object.entries(stored)) {
+            if (currentLinks[key]) {
+              currentLinks[key].url = storedLink.url || currentLinks[key].url;
+              currentLinks[key].enabled = storedLink.enabled !== undefined ? storedLink.enabled : currentLinks[key].enabled;
+              currentLinks[key].label = storedLink.label || currentLinks[key].label;
+            }
+          }
+        } else {
+          const defaultData = {};
+          for (const [key, val] of Object.entries(DEFAULT_LINKS)) {
+            defaultData[key] = { url: val.url, enabled: val.enabled, label: val.label };
+          }
+          await docRef.set(defaultData);
+        }
+        renderLinks();
+      } catch (e) {
+        console.warn('Ошибка загрузки ссылок', e);
+        renderLinks();
+      }
+    }
+
+    async function saveLinkToFirebase(id, updatedData) {
+      try {
+        const docRef = firebase.firestore().collection('config').doc('links_config');
+        const update = {};
+        update[`${id}.url`] = updatedData.url;
+        update[`${id}.enabled`] = updatedData.enabled;
+        update[`${id}.label`] = updatedData.label;
+        await docRef.update(update);
+        if (currentLinks[id]) {
+          currentLinks[id].url = updatedData.url;
+          currentLinks[id].enabled = updatedData.enabled;
+          currentLinks[id].label = updatedData.label;
+        }
+        renderLinks();
+        showToast('✅', 'Ссылка обновлена', `${updatedData.label} сохранена`);
+      } catch (err) {
+        console.error(err);
+        showToast('❌', 'Ошибка', err.message, true);
+      }
+    }
+
+    async function resetToDefaults() {
+      if (!isCreator) return;
+      if (!confirm('Сбросить все ссылки к значениям по умолчанию?')) return;
+      try {
+        const defaultData = {};
+        for (const [key, val] of Object.entries(DEFAULT_LINKS)) {
+          defaultData[key] = { url: val.url, enabled: val.enabled, label: val.label };
+          currentLinks[key].url = val.url;
+          currentLinks[key].enabled = val.enabled;
+          currentLinks[key].label = val.label;
+        }
+        await firebase.firestore().collection('config').doc('links_config').set(defaultData);
+        renderLinks();
+        showToast('🔄', 'Сброшено', 'Ссылки восстановлены по умолчанию');
+      } catch (e) {
+        showToast('❌', 'Ошибка сброса', e.message, true);
+      }
+    }
+
+    function renderLinks() {
+      const container = document.getElementById('linksContainer');
+      if (!container) return;
+
+      const enabledLinks = Object.values(currentLinks).filter(link => link.enabled === true);
+      const disabledLinks = Object.values(currentLinks).filter(link => link.enabled !== true);
+
+      let itemsToShow = [...enabledLinks];
+      if (isCreator) {
+        itemsToShow = [...enabledLinks, ...disabledLinks];
+      }
+
+      if (itemsToShow.length === 0) {
+        container.innerHTML = '<div class="empty-links"><span>📡 Пока нет доступных ссылок</span></div>';
+        return;
+      }
+
+      container.innerHTML = itemsToShow.map(link => {
+        const isActive = link.enabled === true;
+        const cardClass = isActive ? 'link-card' : 'link-card disabled-card';
+        const statusBadge = isActive 
+          ? '<span class="link-status">🟢 Активна</span>' 
+          : '<span class="link-status off">⛔ Отключена</span>';
+        
+        let adminHtml = '';
+        if (isCreator) {
+          adminHtml = `
+            <div class="admin-controls">
+              <button class="admin-btn-icon" data-action="edit" data-id="${link.id}">
+                ✏️ Редактировать
+              </button>
+              <div class="toggle-switch ${isActive ? 'on' : ''}" data-toggle="${link.id}"></div>
+            </div>
+          `;
+        }
+        
+        return `
+          <div class="${cardClass}" data-link-id="${link.id}">
+            <div class="link-icon">${link.icon || '🔗'}</div>
+            <div class="link-info">
+              <div class="link-title">${escapeHtml(link.label)}</div>
+              ${isActive ? `<div class="link-url">${escapeHtml(link.url)}</div>` : ''}
+            </div>
+            <div class="link-footer-right">
+              ${statusBadge}
+              ${isActive ? '<div class="link-badge">➡️ Перейти</div>' : (isCreator ? '<div class="link-badge" style="background:transparent;">🔒 скрыто</div>' : '')}
+            </div>
+            ${adminHtml}
+          </div>
+        `;
+      }).join('');
+
+      if (isCreator) {
+        document.querySelectorAll('[data-action="edit"]').forEach(btn => {
+          btn.removeEventListener('click', handleEditClick);
+          btn.addEventListener('click', handleEditClick);
+        });
+        document.querySelectorAll('[data-toggle]').forEach(toggle => {
+          toggle.removeEventListener('click', handleToggle);
+          toggle.addEventListener('click', handleToggle);
+        });
+      }
+
+      // Клик по активной карточке
+      document.querySelectorAll('.link-card:not(.disabled-card)').forEach(card => {
+        const linkId = card.getAttribute('data-link-id');
+        const link = currentLinks[linkId];
+        if (link && link.enabled && link.url) {
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('.admin-controls')) return;
+            window.open(link.url, '_blank', 'noopener noreferrer');
+          });
+        }
+      });
+    }
+
+    function handleEditClick(e) {
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      const linkId = btn.getAttribute('data-id');
+      if (!linkId) return;
+      const link = currentLinks[linkId];
+      if (!link) return;
+      editingId = linkId;
+      document.getElementById('editLinkLabel').innerText = link.label;
+      document.getElementById('editLinkUrl').value = link.url;
+      document.getElementById('editLinkName').value = link.label;
+      const toggleEl = document.getElementById('editToggleEnabled');
+      if (toggleEl) {
+        if (link.enabled) toggleEl.classList.add('on');
+        else toggleEl.classList.remove('on');
+      }
+      document.getElementById('editLinkModal').classList.add('open');
+    }
+
+    async function handleToggle(e) {
+      e.stopPropagation();
+      const toggleDiv = e.currentTarget;
+      const linkId = toggleDiv.getAttribute('data-toggle');
+      if (!linkId) return;
+      const link = currentLinks[linkId];
+      if (!link) return;
+      const newEnabledState = !toggleDiv.classList.contains('on');
+      await saveLinkToFirebase(linkId, {
+        url: link.url,
+        enabled: newEnabledState,
+        label: link.label
+      });
+    }
+
+    async function saveCurrentEdit() {
+      if (!editingId) return;
+      const newUrl = document.getElementById('editLinkUrl').value.trim();
+      const newLabel = document.getElementById('editLinkName').value.trim();
+      const toggleEl = document.getElementById('editToggleEnabled');
+      const newEnabled = toggleEl.classList.contains('on');
+      if (!newUrl) {
+        showToast('❌', 'Ошибка', 'URL не может быть пустым', true);
+        return;
+      }
+      if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
+        showToast('⚠️', 'Неверный формат', 'URL должен начинаться с http:// или https://', true);
+        return;
+      }
+      if (!newLabel) {
+        showToast('❌', 'Ошибка', 'Введите название ссылки', true);
+        return;
+      }
+      const link = currentLinks[editingId];
+      if (link) {
+        await saveLinkToFirebase(editingId, { url: newUrl, enabled: newEnabled, label: newLabel });
+      }
+      closeEditModal();
+    }
+
+    function closeEditModal() {
+      document.getElementById('editLinkModal').classList.remove('open');
+      editingId = null;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    function initAdminMode() {
+      const user = GS_AUTH.getUser();
+      if (user && user.role === 'creator') {
+        isCreator = true;
+        document.getElementById('links-admin-panel').style.display = 'block';
+      } else {
+        isCreator = false;
+        document.getElementById('links-admin-panel').style.display = 'none';
+      }
+      renderLinks();
+    }
+
+    function watchAuthChanges() {
+      firebase.auth().onAuthStateChanged(async (fbUser) => {
+        if (fbUser) {
+          const userData = await DB.getUser(fbUser.uid);
+          if (userData) GS_AUTH.setUser(userData);
+          else GS_AUTH.setUser({ discordId: fbUser.uid, username: fbUser.displayName || fbUser.email, role: 'user' });
+        } else {
+          GS_AUTH.setUser(null);
+        }
+        initAdminMode();
+      });
+    }
+
+    let linksUnsub = null;
+    function subscribeLinks() {
+      if (linksUnsub) linksUnsub();
+      const docRef = firebase.firestore().collection('config').doc('links_config');
+      linksUnsub = docRef.onSnapshot(doc => {
+        if (doc.exists) {
+          const stored = doc.data();
+          for (const [key, storedLink] of Object.entries(stored)) {
+            if (currentLinks[key]) {
+              currentLinks[key].url = storedLink.url || currentLinks[key].url;
+              currentLinks[key].enabled = storedLink.enabled !== undefined ? storedLink.enabled : currentLinks[key].enabled;
+              currentLinks[key].label = storedLink.label || currentLinks[key].label;
+            }
+          }
+        } else {
+          const defaultData = {};
+          for (const [key, val] of Object.entries(DEFAULT_LINKS)) {
+            defaultData[key] = { url: val.url, enabled: val.enabled, label: val.label };
+          }
+          docRef.set(defaultData);
+        }
+        renderLinks();
+      }, err => {
+        console.warn('Ошибка слушателя ссылок', err);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      setTimeout(async () => {
+        await loadLinksConfig();
+        subscribeLinks();
+        watchAuthChanges();
+        const resetBtn = document.getElementById('resetLinksBtn');
+        if (resetBtn) resetBtn.addEventListener('click', resetToDefaults);
+        const saveBtn = document.getElementById('saveLinkChangesBtn');
+        if (saveBtn) saveBtn.addEventListener('click', saveCurrentEdit);
+        const modalOverlay = document.getElementById('editLinkModal');
+        modalOverlay.addEventListener('click', (e) => {
+          if (e.target === modalOverlay) closeEditModal();
+        });
+      }, 100);
+    });
+  </script>
+</body>
+</html>
