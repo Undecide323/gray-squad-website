@@ -272,7 +272,7 @@ function setCategory(cat, btn) {
 }
 function filterTopics() { renderTopics(); }
 
-// ── OPEN TOPIC (с защитой от бесконечной загрузки) ──────────────────
+// ── OPEN TOPIC (с защитой от бесконечной загрузки и удалением комментариев) ──
 function openTopic(topicId) {
   const topic = allTopics.find(t => t.id === topicId);
   if (!topic) return;
@@ -299,11 +299,9 @@ function openTopic(topicId) {
 
   document.getElementById('topicModal').classList.add('open');
 
-  // Очищаем предыдущий таймаут и подписку
   if (_unsubComments) _unsubComments();
   if (_loadTimeout) clearTimeout(_loadTimeout);
 
-  // Устанавливаем таймаут на 5 секунд – если комментарии не загрузились, показываем ошибку
   _loadTimeout = setTimeout(() => {
     const el = document.getElementById('topicComments');
     if (el && el.querySelector('.spinner')) {
@@ -311,7 +309,6 @@ function openTopic(topicId) {
     }
   }, 5000);
 
-  // Подписываемся на комментарии
   if (typeof DB !== 'undefined' && DB.listenComments) {
     _unsubComments = DB.listenComments(topicId, comments => {
       clearTimeout(_loadTimeout);
@@ -321,16 +318,18 @@ function openTopic(topicId) {
         el.innerHTML = '<div style="text-align:center;font-family:var(--font-mono);font-size:.75rem;color:var(--text-dim);padding:1rem 0">Нет комментариев</div>';
         return;
       }
+      const canDelete = (user && (GS_AUTH.hasRole('admin') || GS_AUTH.hasRole('creator')));
       el.innerHTML = comments.map(c => {
         const av = c.authorAvatar
           ? `<img src="${c.authorAvatar}" style="width:30px;height:30px;border-radius:6px;object-fit:cover;flex-shrink:0">`
           : `<div style="width:30px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--red-dim),var(--red));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0">${(c.authorName||'?')[0]}</div>`;
-        return `<div style="display:flex;gap:.8rem;padding:.75rem 0;border-bottom:1px solid var(--border);">
+        return `<div style="display:flex;gap:.8rem;padding:.75rem 0;border-bottom:1px solid var(--border);" id="comment-${c.id}">
           ${av}
           <div style="flex:1;">
             <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:4px;flex-wrap:wrap;">
               <b style="font-size:.85rem">${c.authorName}</b>
               <span style="font-family:var(--font-mono);font-size:.62rem;color:var(--text-dim)">${timeAgo(c.createdAt)}</span>
+              ${canDelete ? `<button onclick="deleteComment('${c.id}', '${topicId}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.75rem;padding:0;line-height:1;" title="Удалить комментарий">🗑️</button>` : ''}
             </div>
             <div style="font-size:.85rem;color:var(--text-dim);line-height:1.6">${c.body}</div>
           </div>
@@ -350,6 +349,24 @@ function closeTopic() {
   if (_loadTimeout) { clearTimeout(_loadTimeout); _loadTimeout = null; }
 }
 document.getElementById('topicModal').addEventListener('click', e=>{ if(e.target.id==='topicModal') closeTopic(); });
+
+async function deleteComment(commentId, topicId) {
+  if (!confirm('Удалить комментарий?')) return;
+  if (!user) return;
+  if (!GS_AUTH.hasRole('admin') && !GS_AUTH.hasRole('creator')) {
+    showToast('❌', 'Нет прав', '', true);
+    return;
+  }
+  try {
+    await firebase.firestore().collection('forum_comments').doc(commentId).delete();
+    await firebase.firestore().collection('forum_topics').doc(topicId).update({
+      commentCount: firebase.firestore.FieldValue.increment(-1)
+    });
+    showToast('🗑️', 'Комментарий удалён', '');
+  } catch (e) {
+    showToast('❌', 'Ошибка удаления', e.message, true);
+  }
+}
 
 async function postReply(topicId) {
   if (!user) return;
