@@ -305,7 +305,6 @@ const LB = (() => {
         </div>
         <div class="pod-name">${u.displayName||u.username}</div>
         <div class="pod-score" style="color:${rank.color}">${fmtNum(u._composite)}</div>
-        <div class="pod-base">base: ${fmtNum(Math.max(u.elo||500, (_weights?.elo_floor||500)))}</div>
         <div class="pod-rank-badge" style="background:${rank.color}18;color:${rank.color};border:1px solid ${rank.color}35">
           ${rank.icon||''} ${rank.name}
         </div>
