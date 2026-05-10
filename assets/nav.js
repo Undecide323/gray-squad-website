@@ -59,7 +59,7 @@ const GS_NAV = (() => {
 
   // ── Строим навигацию ─────────────────────────────────────────
   function buildNav(user, active) {
-    const isAdmin = user && (user.role === 'admin' || user.role === 'creator');
+    const isAdmin = user && (user.role === 'creator');
     const name    = user ? (user.displayName || user.username) : '';
 
     function navLink(href, page, emoji, label) {
