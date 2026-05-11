@@ -129,7 +129,7 @@ exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
     // 5. Генерируем Firebase custom token
     const firebaseToken = await admin.auth().createCustomToken(discordUser.id);
 
-    return res.json({ ok: true, firebaseToken, gsUser });
+    return res.json({ ok: true, user: gsUser });
 
   } catch (err) {
     console.error("discordAuth error:", err);
