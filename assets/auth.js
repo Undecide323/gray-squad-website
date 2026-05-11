@@ -40,7 +40,7 @@ const GS_AUTH = (() => {
     if (state !== savedState) return { ok: false, error: 'Ошибка безопасности' };
 
     try {
-      const response = await fetch(`${GS.botUrl}/auth/token`, {
+      const response = await fetch(GS.authFunctionUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, redirect_uri: GS.discord.redirectUri }),
