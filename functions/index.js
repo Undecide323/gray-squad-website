@@ -12,15 +12,18 @@ exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { code, redirectUri } = req.body;
+  const { code } = req.body;
+  // FIX: принимаем и camelCase и snake_case
+  const redirectUri = req.body.redirectUri || req.body.redirect_uri;
+
   if (!code || !redirectUri) {
     return res.status(400).json({ error: "Missing code or redirectUri" });
   }
 
-  const CLIENT_ID     = process.env.DISCORD_CLIENT_ID;
-  const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-  const BOT_TOKEN     = process.env.DISCORD_BOT_TOKEN;
-  const GUILD_ID      = process.env.DISCORD_GUILD_ID;
+  const CLIENT_ID      = process.env.DISCORD_CLIENT_ID;
+  const CLIENT_SECRET  = process.env.DISCORD_CLIENT_SECRET;
+  const BOT_TOKEN      = process.env.DISCORD_BOT_TOKEN;
+  const GUILD_ID       = process.env.DISCORD_GUILD_ID;
   const MEMBER_ROLE_ID = process.env.DISCORD_MEMBER_ROLE_ID;
 
   try {
@@ -29,11 +32,11 @@ exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        client_id: CLIENT_ID,
+        client_id:     CLIENT_ID,
         client_secret: CLIENT_SECRET,
-        grant_type: "authorization_code",
+        grant_type:    "authorization_code",
         code,
-        redirect_uri: redirectUri,
+        redirect_uri:  redirectUri,
       }),
     });
     const tokenData = await tokenRes.json();
@@ -42,16 +45,16 @@ exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
     }
     const accessToken = tokenData.access_token;
 
-    // 2. Профиль пользователя
+    // 2. Профиль пользователя Discord
     const userRes = await fetch(`${DISCORD_API}/users/@me`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const discordUser = await userRes.json();
 
     // 3. Данные участника гильдии
-    let displayName = discordUser.global_name || discordUser.username;
+    let displayName  = discordUser.global_name || discordUser.username;
     let discordRoles = [];
-    let isMember = false;
+    let isMember     = false;
 
     try {
       const memberRes = await fetch(`${DISCORD_API}/users/@me/guilds/${GUILD_ID}/member`, {
@@ -69,7 +72,13 @@ exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
           discordRoles = (memberData.roles || []).map(roleId => {
             const role = allRoles.find(r => r.id === roleId);
             return role
-              ? { id: role.id, name: role.name, color: role.color ? `#${role.color.toString(16).padStart(6, "0")}` : "#99AAB5" }
+              ? {
+                  id:    role.id,
+                  name:  role.name,
+                  color: role.color
+                    ? `#${role.color.toString(16).padStart(6, "0")}`
+                    : "#99AAB5",
+                }
               : null;
           }).filter(Boolean);
           isMember = (memberData.roles || []).includes(MEMBER_ROLE_ID);
@@ -82,54 +91,46 @@ exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
       : null;
 
     // 4. Создаём/обновляем пользователя в Firestore
-    const db = admin.firestore();
+    const db      = admin.firestore();
     const userRef = db.collection("users").doc(discordUser.id);
     const userSnap = await userRef.get();
 
     if (!userSnap.exists) {
       await userRef.set({
-        discordId:              discordUser.id,
-        username:               discordUser.username,
+        discordId:             discordUser.id,
+        username:              discordUser.username,
         displayName,
         avatarUrl,
-        role:                   isMember ? "member" : "user",
-        elo:                    500,
-        rank:                   0,
-        rankName:               "Калибровка",
-        rankColor:              "#6c757d",
-        currency:               0,
-        level:                  0,
-        xp:                     0,
-        gamesPlayed:            0,
-        totalVoiceMinutes:      0,
-        xpMultiplier:           1,
-        xpMultiplierExpiresAt:  null,
-        achievements:           [],
-        warnings:               [],
-        forumBanExpiresAt:      null,
-        canCreateEvents:        false,
-        customColor:            null,
-        title:                  null,
+        role:                  isMember ? "member" : "user",
+        elo:                   500,
+        currency:              0,
+        level:                 0,
+        xp:                    0,
+        gamesPlayed:           0,
+        totalVoiceMinutes:     0,
+        xpMultiplier:          1,
+        xpMultiplierExpiresAt: null,
+        achievements:          [],
+        warnings:              [],
+        forumBanExpiresAt:     null,
+        canCreateEvents:       false,
+        customColor:           null,
+        title:                 null,
         discordRoles,
-        createdAt:              admin.firestore.FieldValue.serverTimestamp(),
+        createdAt:             admin.firestore.FieldValue.serverTimestamp(),
       });
     } else {
-      const updates = {
-        username:     discordUser.username,
-        displayName,
-        avatarUrl,
-        discordRoles,
-      };
+      const updates = { username: discordUser.username, displayName, avatarUrl, discordRoles };
       if (userSnap.data().role === "user" && isMember) updates.role = "member";
       await userRef.update(updates);
     }
 
     const gsUser = (await userRef.get()).data();
 
-    // 5. Генерируем Firebase custom token
+    // 5. FIX: Генерируем И ВОЗВРАЩАЕМ Firebase custom token
     const firebaseToken = await admin.auth().createCustomToken(discordUser.id);
 
-    return res.json({ ok: true, user: gsUser });
+    return res.json({ ok: true, user: gsUser, firebaseToken });
 
   } catch (err) {
     console.error("discordAuth error:", err);
