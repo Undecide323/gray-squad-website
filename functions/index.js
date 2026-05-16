@@ -7,7 +7,16 @@ setGlobalOptions({ maxInstances: 10 });
 
 const DISCORD_API = "https://discord.com/api/v10";
 
-exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
+exports.discordAuth = onRequest(async (req, res) => {
+  // Ручной CORS — надёжнее чем cors:true для preflight OPTIONS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send('');
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -137,3 +146,8 @@ exports.discordAuth = onRequest({ cors: true }, async (req, res) => {
     return res.status(500).json({ error: "Internal server error", message: err.message });
   }
 });
+
+// Выставляем функции глобально для onclick-атрибутов в HTML
+window.joinEvent    = (id) => EV.joinEvent(id);
+window.leaveEvent   = (id) => EV.leaveEvent(id);
+window.openFinish   = (id) => EV.openFinish(id);
